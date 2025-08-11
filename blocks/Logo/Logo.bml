@@ -2,7 +2,8 @@ Beast
 .decl('logo', {
     expand: function() {
         this.append(
-			'ARK'
+			
+			<image></image>
         );
     },
     

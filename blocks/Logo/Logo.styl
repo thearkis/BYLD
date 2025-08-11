@@ -2,41 +2,64 @@
 
 .Logo
 	font-size 32vw
-	margin-top -28vw
+	margin-top 10vh
 	microgramma()
+	position relative
+	overflow visible
 	@media $screen-phone
 		margin-top -7vw
 	
-	&_image
-		size = 7vw
-		height 2.2vw
-		mask-size size
+	&__image
+		margin-left -3vw
+		size = 106vw
+		height 30vw
+		background-size size
 		width size
-		mask-position center center
-		mask-image url('./i/logo.svg')
-		mask-repeat no-repeat
-		background-color white
+		background-position center center
+		background-image url('./i/logo.svg')
+		background-repeat no-repeat
+		
+		position relative
+		z-index 5
+		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+		animation analog-shimmer 8s linear infinite
 
-		@media $screen-phone
-			position absolute
-			top 24px
-			mask-size 100px !important
-			width 100px !important
-			height 30px !important
-
-		&_state
-			&_fixed
-				position absolute
-				top 0
-
-				@media $screen-phone
-					position relative
-					margin 0 auto !important
-					top 13px !important
-				
-
-
-
-
-
-
+@keyframes analog-shimmer
+	0%
+		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+		transform translateX(0px) translateY(0px)
+	12%
+		filter drop-shadow(0 0 6px #0015FF) drop-shadow(0 0 18px #0015FF)
+		transform translateX(-0.3px) translateY(0.1px)
+	12.5%
+		filter drop-shadow(0 0 9px #0015FF) drop-shadow(0 0 22px #0015FF)
+		transform translateX(-0.2px) translateY(-0.1px)
+	25%
+		filter drop-shadow(0 0 7px #0015FF) drop-shadow(0 0 19px #0015FF)
+		transform translateX(0.4px) translateY(0px)
+	37%
+		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 21px #0015FF)
+		transform translateX(0.1px) translateY(0.2px)
+	37.2%
+		filter drop-shadow(0 0 6px #0015FF) drop-shadow(0 0 17px #0015FF)
+		transform translateX(0px) translateY(0.1px)
+	50%
+		filter drop-shadow(0 0 9px #0015FF) drop-shadow(0 0 23px #0015FF)
+		transform translateX(-0.1px) translateY(-0.1px)
+	63%
+		filter drop-shadow(0 0 7px #0015FF) drop-shadow(0 0 18px #0015FF)
+		transform translateX(0.2px) translateY(0px)
+	75%
+		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+		transform translateX(-0.1px) translateY(0.1px)
+	87%
+		filter drop-shadow(0 0 6px #0015FF) drop-shadow(0 0 16px #0015FF)
+		transform translateX(0.3px) translateY(-0.1px)
+	87.5%
+		filter drop-shadow(0 0 10px #0015FF) drop-shadow(0 0 24px #0015FF)
+		transform translateX(0.1px) translateY(0px)
+	100%
+		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+		transform translateX(0px) translateY(0px)
+	
+	
