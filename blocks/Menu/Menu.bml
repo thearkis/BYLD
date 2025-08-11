@@ -11,17 +11,15 @@ Beast.decl({
 
         expand: function () {
             this.append(
-                this.get('item')
+                this.get('menu-item')
             )
         },
             
     },
-    Menu__item: {
+    'Menu__menu-item': {
         expand: function () {
             this.append(
-                <Link href="{this.param('href')}">
-                    <Button Type="Blur">{this.text()}</Button>
-                </Link>
+                this.text()
             )
         }
     },

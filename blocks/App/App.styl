@@ -1,3 +1,96 @@
+
+
+.Misc
+	
+    size = 100vw
+    height 4vw
+    background-size size
+    width size
+    background-position center center
+    background-image url('/assets/misc.svg')
+    background-repeat no-repeat
+
+.Glyph
+    margin-top 5vw
+    margin-bottom 1vw
+    size = 2vw
+    margin-left 30px
+    height 4vw
+    background-size size
+    width size
+    background-position center center
+    background-repeat no-repeat
+    &_One
+        background-image url('/assets/glyph-01.svg')
+
+.Action
+    position absolute
+    right 30px
+    top 30px
+    border 1px solid red
+    padding 1vw 2vw
+    color red
+    font-family 'Ticketing'
+    font-size 1vw
+
+.Text
+    margin 0 30px
+    padding-top 1vw
+    border-top 1px solid #303030
+    position relative
+    font-family 'Ticketing'
+    font-size 1.3vw
+    line-height 1.5vw
+    &__s
+        color red
+        display inline
+    &__item
+        max-width 40vw
+        position absolute
+        &_left 
+            left 0
+        &_right
+            right 0
+            top 8vw
+
+
+.Data
+    height 4.7vw
+    margin 2vw 30px 0 30px
+    position relative
+    font-family 'Ticketing'
+    border-bottom 1px solid blue
+    vertical-align bottom
+    &__left, &__mid, &__right
+        position absolute
+    &__jp, &__ch
+        color red
+        display inline
+        font-size 3vw
+        font-weight bold
+        font-family Arial
+        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
+        animation text-glow 4s ease-in-out infinite alternate
+    &__jp
+        letter-spacing -.6vw
+        margin-right 20px
+        &_Hide
+            opacity 0
+    &__text
+        display inline-block
+        color blue
+    &__right
+        right 0
+    &__mid
+        right 20vw
+        color blue
+
+
+
+    
+    
+
+
 .noise::before{
     position: fixed;
     top: 0;
@@ -11,273 +104,6 @@
     pointer-events: none;
     background: url(/assets/noise.gif) ;
 }
-
-
-.PathOfAwakening
-    margin-top 20vw
-    position relative
-    padding 0 4vw
-    color white
-    &__word
-        display inline
-        
-        &_one, &_two, &_three, &_four
-            opacity 0
-            transform translateY(20px)
-            // No transitions - instant response to scroll
-            
-        &_one_visible, &_two_visible, &_three_visible, &_four_visible
-            opacity 1
-            transform translateY(0px)
-            
-        &_one_blurred, &_two_blurred, &_three_blurred, &_four_blurred
-            filter blur(8px)
-            opacity 0.6
-    &__p
-        & + &
-            margin-top 2vw
-    &__headline
-        font-family "times-new-roman"
-        color #B54A0D
-        position relative
-        
-        text-align center
-        z-index 99
-        
-        font-size 8vw
-        line-height 8.2vw
-        letter-spacing -.1vw
-        
-        // Initial state: blurred and transparent
-        filter blur(25px)
-        opacity 0
-        
-        // Smooth transitions for blur, opacity, and transform
-        transition filter 1.5s ease-out, opacity 1.5s ease-out, transform 1.5s ease-out
-        
-        // Fire-like flickering effect
-        animation fire-flicker 3s infinite ease-in-out
-        
-        // Loaded state: clear and visible with continued flicker
-        &_loaded
-            filter blur(0px)
-            opacity 1
-            animation fire-flicker 3s infinite ease-in-out
-    
-    &__line
-        &_Top
-            font-size 12.5vw
-            letter-spacing .1vw
-    &__text
-        font-family 'univers-next-pro'
-        font-weight 500
-        font-size 1.5vw
-        line-height 1.8vw
-        letter-spacing -0.04vw
-        color #B4551C
-        text-transform none
-
-        
-        max-width 50%
-        text-align left
-        margin 20vw auto 20vw auto
-        
-    &__cast
-        font-family 'SF Movie Poster Condensed'
-        color #B54A0D
-        font-size 4.5vw
-        line-height 3.8vw
-        margin 0 auto
-        width 100%
-        text-align center
-        
-        // Initial slight blur with subtle transition for smooth scroll blur
-        filter blur(3px)
-        transition filter 0.15s ease-out
-    &__s
-        display inline
-        font-size 2.8vw
-        &_M
-            margin-left -.3vw
-        &_F
-            margin-right -.3vw
-
-
-.LogoLine
-    size = 7vw
-    height .8vw
-    mask-size size
-    width size
-    mask-position center center
-    mask-image url('/assets/outline-logo.svg')
-    mask-repeat no-repeat
-    background-color #f00d0d
-    display inline-block
-    @media $screen-phone
-        height 13px
-        mask-size 111px
-        width 111px
-
-
-.Sleipnir
-    size = 100%
-    height 10vw
-    mask-size size
-    width size
-    background-position center center
-    background-image url('/assets/live/july21.jpg') 
-    background-repeat no-repeat
-    background-size cover
-    background-color none
-    @media $screen-phone
-        height 260px 
-
-
-.AE
-    font-family 'Plaex'
-    display inline
-    margin-right -.2vw
-
-.Workcase
-    padding-top 1vw
-    padding-bottom 4vw
-    background #d10000
-    padding-left 4vw
-    margin-top 4vw
-
-    &__line
-        max-width 80%
-        & + &
-            margin .3vw 0
-
-    &__title
-        font-size 6vw
-        padding-bottom 3vw
-        margin-top 1vw
-        text-transform uppercase
-        letter-spacing -.1vw
-        //color #646464
-        color #828282
-        font-family Microgramma D
-        @media $screen-phone
-            font-size 46px
-            line-height 48px
-            padding 26px 0
-
-    &__info
-        width 50vw
-
-    &__info, &__gallery
-        display inline-block
-    &__item
-        display flex
-        & + &
-            margin-top 6vw
-
-    &__text
-        & + &
-            margin-top 2vw
-    
-    &__gallery
-        width 77vw
-        height 33vw
-        &-item
-            background-size cover
-            width 100%
-            height 100%
-            background-repeat no-repeat
-
-
-.Hero
-    size = 54vw
-    height size
-    background-color black
-    overflow hidden
-    position relative
-    color white
-    position relative
-    overflow hidden
-    transform scale(1.02)
-    margin-top -11vw
-
-    &__meta
-        position absolute
-        bottom 2vw
-        padding 2vw 4vw 3vw 4vw
-
-    &__name
-        font-size 5vw
-        line-height 5.2vw
-        letter-spacing -.4vw
-        font-family 'ASM'
-        text-transform uppercase
-        margin-bottom 5vw
-        position relative
-        padding 0 .4vw
-        background #d6d6d6
-        color black
-        display inline
-    &__line
-        & + &
-            margin-top .2vw
-    &__role
-        background #d6d6d6
-        color black
-        display inline
-        font-size 1.7vw
-        line-height 2vw
-        letter-spacing -.1vw
-        padding 0 .2vw
-        
-
-    @media $screen-phone
-        height 90vh
-        margin-left -24vw
-
-    &__title
-        display none
-        show-mobile()
-        background-repeat no-repeat
-        position absolute
-        bottom calc(3vw + 3vh)
-        z-index 100
-        left 0
-        right 0
-        margin 0 auto
-        
-    &__image
-        background-position center
-        background-size cover
-        background-repeat no-repeat
-        width 100%
-        height 100%
-        will-change transform
-        transition transform 0.1s linear
-        
-    .Meta
-        position absolute
-        top 50%
-        right 100px
-        transform translate(0px, -50%)
-
-
-
-.Ya
-    size = 55vw
-    height size
-    mask-size size
-    width size
-    margin 0 auto
-    background-position center center
-    background-image url('/assets/ya.svg')
-    background-repeat no-repeat
-    background-size cover
-    background-color none
-    @media $screen-phone
-        size = 350px
-        height size
-        width size
-
 
 
 
@@ -737,7 +563,8 @@ html
         background-size 100px 100px
         transform perspective(400px) rotateX(-60deg)
         transform-origin center top
-        animation grid-float-top 40s ease-in-out infinite
+        will-change transform
+        backface-visibility hidden
     
     &::after
         content ''
@@ -751,29 +578,14 @@ html
         background-size 100px 100px
         transform perspective(400px) rotateX(60deg)
         transform-origin center bottom
-        animation grid-float 40s ease-in-out infinite
+        will-change transform
+        backface-visibility hidden
 
-@keyframes grid-float
+@keyframes text-glow
     0%
-        transform perspective(400px) rotateX(60deg) translateY(0%)
-        opacity 0.92
-    50%
-        transform perspective(400px) rotateX(63deg) translateY(-3%)
-        opacity 0.94
+        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
     100%
-        transform perspective(400px) rotateX(60deg) translateY(0%)
-        opacity 0.92
-
-@keyframes grid-float-top
-    0%
-        transform perspective(400px) rotateX(-60deg) translateY(0%)
-        opacity 0.92
-    50%
-        transform perspective(400px) rotateX(-63deg) translateY(3%)
-        opacity 0.94
-    100%
-        transform perspective(400px) rotateX(-60deg) translateY(0%)
-        opacity 0.92
+        text-shadow 0 0 15px #FF3050, 0 0 30px #FF2040, 0 0 50px #FF1030, 0 0 70px rgba(255, 48, 80, 0.3)
 
     &_PathOfAwakening
         background #000 !important
