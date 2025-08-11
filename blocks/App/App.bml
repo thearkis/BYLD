@@ -363,6 +363,52 @@ Beast.decl({
                 })
             })
 
+            // Data__jp letter-by-letter rolling animation on page load
+            const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
+            
+            dataJpElements.forEach(element => {
+                const originalText = element.textContent
+                const randomChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'
+                
+                // Split text into individual letters
+                element.innerHTML = ''
+                const letterSpans = []
+                
+                for (let i = 0; i < originalText.length; i++) {
+                    const span = document.createElement('span')
+                    span.textContent = originalText[i]
+                    span.style.display = 'inline-block'
+                    element.appendChild(span)
+                    letterSpans.push(span)
+                }
+                
+                // Animate each letter with delay
+                letterSpans.forEach((span, index) => {
+                    const targetLetter = originalText[index]
+                    let rollCount = 0
+                    const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                    
+                    setTimeout(() => {
+                        span.classList.add('rolling-animation')
+                        
+                        const letterInterval = setInterval(() => {
+                            if (rollCount < maxRolls) {
+                                // Show random character
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                span.textContent = randomChar
+                                rollCount++
+                            } else {
+                                // Show final character
+                                span.textContent = targetLetter
+                                span.classList.remove('rolling-animation')
+                                clearInterval(letterInterval)
+                            }
+                        }, 80) // 80ms per roll
+                        
+                    }, index * 100) // 100ms delay between each letter
+                })
+            })
+
             // PathOfAwakening scroll-based blur system for headline, text, and cast
             const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
             const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
