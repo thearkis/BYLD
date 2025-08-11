@@ -4987,6 +4987,73 @@ Beast.decl({
                  }, 20)
              }
 
+            // Menu text hover animation - same rolling effect but text doesn't change
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                element.isAnimating = false
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = 20  // Longer animation
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    // Ensure enough width to prevent line wrapping
+                    const originalWidth = element.offsetWidth
+                    const extraWidth = Math.max(20, originalWidth * 0.2) // Add 20% or minimum 20px
+                    element.style.width = (originalWidth + extraWidth) + 'px'
+                    element.style.display = 'inline-block'
+                    element.style.whiteSpace = 'nowrap'
+                    
+                    element.animationInterval = setInterval(() => {
+                        let currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                            element.style.width = ''
+                            element.style.display = ''
+                            element.style.whiteSpace = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
             // PathOfAwakening scroll-based blur system for headline, text, and cast
             const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
             const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
@@ -5293,33 +5360,6 @@ Beast.decl({
     
 })
 Beast.decl({
-    Card: {
-        expand: function () {
-            
-            this.append(
-                this.get('image'),
-                Beast.node("content",{__context:this},"\n                    ",this.get('tag', 'title', 'text', 'subtitle', 'minor', 'date'),"\n                ")
-            )
-
-            
-        },
-            
-    },
-    Card__image: {
-        expand: function () {
-            this.append(
-                Beast.node("Thumb",{__context:this,"":true,"width":"100%","height":"100%","Ratio":"1x1","Fit":"cover"},this.text())
-            )
-        }
-    },
-
-
-    
-     
-})
-
-
-Beast.decl({
     Button: {
         expand: function () {
 
@@ -5355,22 +5395,130 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Footer: {
+    Card: {
         expand: function () {
             
             this.append(
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("Link",{"href":"https://cdn.sanity.io/files/7wbnm9gp/production/c7a90cddfbaf867a7fda0319540c1353709b1b12.pdf"}," ",Beast.node("item",undefined,"Whitepaper")," "),"\n                    ",Beast.node("Link",{"href":"/newsroom"}," ",Beast.node("item",undefined,"Newsroom")," "),"\n                    ",Beast.node("Link",{"href":"/careers"}," ",Beast.node("item",undefined,"Careers")," "),"\n                    ",Beast.node("Link",{"href":"/people"}," ",Beast.node("item",undefined,"People")," "),"\n                    ",Beast.node("Link",{"href":"/contact"}," ",Beast.node("item",undefined,"Contact")," "),"\n                    ",Beast.node("Link",{"New":true,"href":"https://www.linkedin.com/company/zenno-astronautics/"}," ",Beast.node("item",undefined,"Linkedin")," "),"\n                "),
-                
-                Beast.node("copy",{__context:this},"Zenno 2024")
+                this.get('image'),
+                Beast.node("content",{__context:this},"\n                    ",this.get('tag', 'title', 'text', 'subtitle', 'minor', 'date'),"\n                ")
             )
 
             
         },
             
-    }   
+    },
+    Card__image: {
+        expand: function () {
+            this.append(
+                Beast.node("Thumb",{__context:this,"":true,"width":"100%","height":"100%","Ratio":"1x1","Fit":"cover"},this.text())
+            )
+        }
+    },
+
+
+    
+     
 })
 
+
+Beast.decl({
+    Contact: {
+        state: function () {
+            return {
+                items: [],
+                files: []
+            }
+        },
+        requestApi: function (path, data) {
+            var self = this
+            var query = `
+                *[_type == 'contacts'] {
+                    email,
+                    phone,
+                    'code':code.asset->url,
+                    'codeRu':codeRu.asset->url
+                }`
+            Ajax({
+                url: api + '[' + query + ']',
+                data: data,
+                success: function (data) {
+                    var data = JSON.parse(data)
+                    
+                    self.state(
+                        'items',
+                        data.result.map(function (item) {
+                            
+                            return {
+                                email: item[0].email,
+                                phone: item[0].phone,
+                                code: item[0].code,
+                                codeRu: item[0].codeRu
+                            }
+                        })
+                    )
+                }
+            })
+        },
+
+        requestPdf: function (path, data) {
+            var self = this
+            var query = `
+                *[_type == 'pdf'] {
+                  description,
+                  "manuscriptURL": asset->url
+                }`
+            Ajax({
+                url: api + '[' + query + ']',
+                data: data,
+                success: function (data) {
+                    var data = JSON.parse(data)
+                    self.state(
+                        'files',
+                        data.result.map(function (item) {
+                            return {
+                                file: item[0].manuscriptURL,
+                                fileRu: item[1].manuscriptURL
+                            }
+                        })
+                    )
+                }
+            })
+        },
+
+        expand: function() {
+            const itemsLength = this.state('items').length;
+            const filesLength = this.state('files').length;
+            const lang = this.param('lang');
+
+            if (itemsLength === 0) {
+                this.requestApi();
+            } else if (filesLength === 0) {
+                this.requestPdf();
+            } else {
+                const items = this.state('items')[0];
+                const files = this.state('files')[0];
+                const file = lang === 'ru' ? files.fileRu : files.file;
+                const code = lang === 'ru' ? items.codeRu : items.code;
+
+                this.append(
+                    Beast.node("item",{__context:this},items.phone),
+                    Beast.node("item",{__context:this},items.email),
+                    Beast.node("item",{__context:this,"QR":true},"\n                        ",Beast.node("qr",{"src":code}),"\n                        ",Beast.node("Link",{"href":file},Beast.node("action",undefined,"CV")),"\n                    ")
+                )
+            }
+        }
+    },
+
+    Contact__qr: {
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        }
+    },
+
+    Contact__action: { tag: 'span' }
+})
 Beast.decl({
     FeaturedData: {
         requestApiV2: function (path, data) {
@@ -5474,6 +5622,23 @@ Beast.decl({
         },
     },    
 }) 
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("Link",{"href":"https://cdn.sanity.io/files/7wbnm9gp/production/c7a90cddfbaf867a7fda0319540c1353709b1b12.pdf"}," ",Beast.node("item",undefined,"Whitepaper")," "),"\n                    ",Beast.node("Link",{"href":"/newsroom"}," ",Beast.node("item",undefined,"Newsroom")," "),"\n                    ",Beast.node("Link",{"href":"/careers"}," ",Beast.node("item",undefined,"Careers")," "),"\n                    ",Beast.node("Link",{"href":"/people"}," ",Beast.node("item",undefined,"People")," "),"\n                    ",Beast.node("Link",{"href":"/contact"}," ",Beast.node("item",undefined,"Contact")," "),"\n                    ",Beast.node("Link",{"New":true,"href":"https://www.linkedin.com/company/zenno-astronautics/"}," ",Beast.node("item",undefined,"Linkedin")," "),"\n                "),
+                
+                Beast.node("copy",{__context:this},"Zenno 2024")
+            )
+
+            
+        },
+            
+    }   
+})
+
 Beast.decl({
     Form: {
         expand: function () {
@@ -5815,104 +5980,6 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Contact: {
-        state: function () {
-            return {
-                items: [],
-                files: []
-            }
-        },
-        requestApi: function (path, data) {
-            var self = this
-            var query = `
-                *[_type == 'contacts'] {
-                    email,
-                    phone,
-                    'code':code.asset->url,
-                    'codeRu':codeRu.asset->url
-                }`
-            Ajax({
-                url: api + '[' + query + ']',
-                data: data,
-                success: function (data) {
-                    var data = JSON.parse(data)
-                    
-                    self.state(
-                        'items',
-                        data.result.map(function (item) {
-                            
-                            return {
-                                email: item[0].email,
-                                phone: item[0].phone,
-                                code: item[0].code,
-                                codeRu: item[0].codeRu
-                            }
-                        })
-                    )
-                }
-            })
-        },
-
-        requestPdf: function (path, data) {
-            var self = this
-            var query = `
-                *[_type == 'pdf'] {
-                  description,
-                  "manuscriptURL": asset->url
-                }`
-            Ajax({
-                url: api + '[' + query + ']',
-                data: data,
-                success: function (data) {
-                    var data = JSON.parse(data)
-                    self.state(
-                        'files',
-                        data.result.map(function (item) {
-                            return {
-                                file: item[0].manuscriptURL,
-                                fileRu: item[1].manuscriptURL
-                            }
-                        })
-                    )
-                }
-            })
-        },
-
-        expand: function() {
-            const itemsLength = this.state('items').length;
-            const filesLength = this.state('files').length;
-            const lang = this.param('lang');
-
-            if (itemsLength === 0) {
-                this.requestApi();
-            } else if (filesLength === 0) {
-                this.requestPdf();
-            } else {
-                const items = this.state('items')[0];
-                const files = this.state('files')[0];
-                const file = lang === 'ru' ? files.fileRu : files.file;
-                const code = lang === 'ru' ? items.codeRu : items.code;
-
-                this.append(
-                    Beast.node("item",{__context:this},items.phone),
-                    Beast.node("item",{__context:this},items.email),
-                    Beast.node("item",{__context:this,"QR":true},"\n                        ",Beast.node("qr",{"src":code}),"\n                        ",Beast.node("Link",{"href":file},Beast.node("action",undefined,"CV")),"\n                    ")
-                )
-            }
-        }
-    },
-
-    Contact__qr: {
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        }
-    },
-
-    Contact__action: { tag: 'span' }
-})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6498,6 +6565,24 @@ Beast.decl({
         },
     },    
 })
+Beast.decl({
+    Keyvalue: {
+        expand: function () {
+            
+            this.append(
+                
+                
+            )
+        },
+            
+    },
+
+
+    
+     
+})
+
+
 Beast
 .decl('link', {
     tag:'a',
@@ -6665,37 +6750,17 @@ Beast.decl({
            
     }
 })
-Beast.decl({
-    Keyvalue: {
-        expand: function () {
-            
-            this.append(
-                
-                
-            )
-        },
-            
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
     },
-
-
     
-     
-})
+});
 
-
-Beast.decl({
-    Nav: {
-        expand: function () {
-            
-            this.append(
-                
-            )
-
-            
-        },
-            
-    } 
-})
 Beast.decl({
     Menu: {
         state: function () {
@@ -6725,17 +6790,48 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Nav: {
+        expand: function () {
+            
+            this.append(
+                
+            )
 
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
+            
+        },
+            
+    } 
+})
+
+Beast.decl({
+    Plates: {
+        expand: function () {
+            this.append( 
+                Beast.node("items",{__context:this},"\n                    ",this.get('item', 'Link'),"\n                ")
+                
+            )
+            
+
+        }
     },
-    
-});
+
+
+    Plates__item: {
+        tag: 'a',
+        expand: function () {
+            var href = this.param('href')
+            this.domAttr('href', href)
+            this.domAttr('target', '_blank')
+            this.append('')
+            
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+
+        }
+    }  
+})
 
 Beast.decl({
     Showcase: {
@@ -6747,7 +6843,6 @@ Beast.decl({
         }   
     }
 })
-
 Beast.decl({
     Team: {
         inherits: 'Typo',
@@ -6783,32 +6878,19 @@ Beast.decl({
     }  
 })
 Beast.decl({
-    Plates: {
-        expand: function () {
-            this.append( 
-                Beast.node("items",{__context:this},"\n                    ",this.get('item', 'Link'),"\n                ")
-                
-            )
-            
-
-        }
+    Tech: {
+        
     },
-
-
-    Plates__item: {
-        tag: 'a',
+    Tech__image: {
         expand: function () {
-            var href = this.param('href')
-            this.domAttr('href', href)
-            this.domAttr('target', '_blank')
             this.append('')
-            
             this.css({
                 backgroundImage: 'url('+ this.text() +')'
             })
-
-        }
-    }  
+        },
+        
+    },
+    
 })
 Beast.decl({
     Textarea: {
@@ -6900,21 +6982,6 @@ Beast.decl({
     }
 })
 
-Beast.decl({
-    Tech: {
-        
-    },
-    Tech__image: {
-        expand: function () {
-            this.append('')
-            this.css({
-                backgroundImage: 'url('+ this.text() +')'
-            })
-        },
-        
-    },
-    
-})
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
@@ -7223,6 +7290,105 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 Beast.decl({
+    Video: {
+        state: function () {
+            return {
+                items: []
+            }
+        },
+        requestApi: function (path, data) {
+            
+        },
+        expand: function () {
+
+            if (this.mod("Auto")) {
+                this.append(
+                    Beast.node("video",{__context:this},this.text())
+                )
+                
+            } else {
+                this.append(
+                    Beast.node("title",{__context:this},this.param('title')),
+                    Beast.node("action",{__context:this},Beast.node("Button",{"hint":"00:00","icon":"Play"},"Watch ")),
+                    Beast.node("duration",{__context:this}),
+                    Beast.node("video",{__context:this,"poster":this.param('poster')},this.text())
+                )
+            }
+            
+        },
+        domInit: function fn() {
+            // Check if the video element has 'controls_hide' class
+            var videoContainer = this.domNode();
+            if (videoContainer.classList.contains('video_controls_hide')) {
+                // If 'controls_hide' class is present, do not execute the rest of the code
+                return;
+            }
+
+            var videoElement = videoContainer.querySelector('video');
+            videoElement.controls = false; // Initially hide controls
+
+            var actionElement = videoContainer.querySelector('.video__action');
+            var titleElement = videoContainer.querySelector('.video__title'); // Assuming your title class is 'video__title'
+            var durationElement = videoContainer.querySelector('.Video__duration');
+
+            // Action button click event
+            actionElement.addEventListener('click', function() {
+                videoElement.play();
+                videoElement.controls = true; // Show video controls when playing
+                actionElement.style.display = 'none'; // Hide the action element
+                titleElement.style.display = 'none'; // Hide the title element
+                durationElement.style.display = 'none'; // Hide the duration element
+            });
+
+            // Pause event - if you want to re-show the elements when video is paused
+            videoElement.addEventListener('pause', function() {
+                videoElement.controls = false; // Hide controls when paused
+                actionElement.style.display = 'block'; // Show action element
+                titleElement.style.display = 'block'; // Show title element
+                durationElement.style.display = 'block'; // Show the duration element
+            });
+
+            // Ended event - for when the video ends
+            videoElement.addEventListener('ended', function() {
+                videoElement.controls = false; // Hide controls when the video ends
+                actionElement.style.display = 'block'; // Show action element
+                titleElement.style.display = 'block'; // Show title element
+                durationElement.style.display = 'block'; // Show the duration element
+            });
+
+            // Loaded metadata event to get and display video duration
+            videoElement.addEventListener('loadedmetadata', function() {
+                var videoDuration = videoElement.duration;
+                var minutes = Math.floor(videoDuration / 60);
+                var seconds = Math.floor(videoDuration % 60);
+                var formattedDuration = minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+
+                durationElement.innerHTML = formattedDuration; // Set the formatted duration
+            });
+        }
+
+    },
+    
+    Video__video: {
+        tag:'video',
+        expand: function () {  
+            this.domAttr('id', 'video')
+            this.domAttr('controls', 'true')
+            this.domAttr('poster', this.param('poster'))
+            this.append(
+                Beast.node("source",{__context:this,"source":this.text()})
+            )
+        }
+    },
+    Video__source: {
+        tag:'source',
+        expand: function () {
+            this.domAttr('src', this.param('source'))
+            this.domAttr('type', 'video/mp4')      
+        }
+    } 
+})
+Beast.decl({
     WorkCard: {
         expand: function () {
             this.append(
@@ -7513,103 +7679,4 @@ Beast.decl({
     },
 
    
-})
-Beast.decl({
-    Video: {
-        state: function () {
-            return {
-                items: []
-            }
-        },
-        requestApi: function (path, data) {
-            
-        },
-        expand: function () {
-
-            if (this.mod("Auto")) {
-                this.append(
-                    Beast.node("video",{__context:this},this.text())
-                )
-                
-            } else {
-                this.append(
-                    Beast.node("title",{__context:this},this.param('title')),
-                    Beast.node("action",{__context:this},Beast.node("Button",{"hint":"00:00","icon":"Play"},"Watch ")),
-                    Beast.node("duration",{__context:this}),
-                    Beast.node("video",{__context:this,"poster":this.param('poster')},this.text())
-                )
-            }
-            
-        },
-        domInit: function fn() {
-            // Check if the video element has 'controls_hide' class
-            var videoContainer = this.domNode();
-            if (videoContainer.classList.contains('video_controls_hide')) {
-                // If 'controls_hide' class is present, do not execute the rest of the code
-                return;
-            }
-
-            var videoElement = videoContainer.querySelector('video');
-            videoElement.controls = false; // Initially hide controls
-
-            var actionElement = videoContainer.querySelector('.video__action');
-            var titleElement = videoContainer.querySelector('.video__title'); // Assuming your title class is 'video__title'
-            var durationElement = videoContainer.querySelector('.Video__duration');
-
-            // Action button click event
-            actionElement.addEventListener('click', function() {
-                videoElement.play();
-                videoElement.controls = true; // Show video controls when playing
-                actionElement.style.display = 'none'; // Hide the action element
-                titleElement.style.display = 'none'; // Hide the title element
-                durationElement.style.display = 'none'; // Hide the duration element
-            });
-
-            // Pause event - if you want to re-show the elements when video is paused
-            videoElement.addEventListener('pause', function() {
-                videoElement.controls = false; // Hide controls when paused
-                actionElement.style.display = 'block'; // Show action element
-                titleElement.style.display = 'block'; // Show title element
-                durationElement.style.display = 'block'; // Show the duration element
-            });
-
-            // Ended event - for when the video ends
-            videoElement.addEventListener('ended', function() {
-                videoElement.controls = false; // Hide controls when the video ends
-                actionElement.style.display = 'block'; // Show action element
-                titleElement.style.display = 'block'; // Show title element
-                durationElement.style.display = 'block'; // Show the duration element
-            });
-
-            // Loaded metadata event to get and display video duration
-            videoElement.addEventListener('loadedmetadata', function() {
-                var videoDuration = videoElement.duration;
-                var minutes = Math.floor(videoDuration / 60);
-                var seconds = Math.floor(videoDuration % 60);
-                var formattedDuration = minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
-
-                durationElement.innerHTML = formattedDuration; // Set the formatted duration
-            });
-        }
-
-    },
-    
-    Video__video: {
-        tag:'video',
-        expand: function () {  
-            this.domAttr('id', 'video')
-            this.domAttr('controls', 'true')
-            this.domAttr('poster', this.param('poster'))
-            this.append(
-                Beast.node("source",{__context:this,"source":this.text()})
-            )
-        }
-    },
-    Video__source: {
-        tag:'source',
-        expand: function () {
-            this.domAttr('src', this.param('source'))
-            this.domAttr('type', 'video/mp4')      
-        }
-    } 
 })

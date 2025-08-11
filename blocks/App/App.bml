@@ -296,6 +296,73 @@ Beast.decl({
                  }, 20)
              }
 
+            // Menu text hover animation - same rolling effect but text doesn't change
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                element.isAnimating = false
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = 20  // Longer animation
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    // Ensure enough width to prevent line wrapping
+                    const originalWidth = element.offsetWidth
+                    const extraWidth = Math.max(20, originalWidth * 0.2) // Add 20% or minimum 20px
+                    element.style.width = (originalWidth + extraWidth) + 'px'
+                    element.style.display = 'inline-block'
+                    element.style.whiteSpace = 'nowrap'
+                    
+                    element.animationInterval = setInterval(() => {
+                        let currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                            element.style.width = ''
+                            element.style.display = ''
+                            element.style.whiteSpace = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
             // PathOfAwakening scroll-based blur system for headline, text, and cast
             const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
             const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
