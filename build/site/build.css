@@ -1711,10 +1711,76 @@ html {
   background-repeat: no-repeat;
   position: relative;
   z-index: 5;
-  -webkit-filter: drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
-  filter: drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
-  -webkit-animation: analog-shimmer 8s linear infinite;
-  animation: analog-shimmer 8s linear infinite;
+  opacity: 0;
+  -webkit-filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+  filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+  -webkit-animation: logo-entrance 3s ease-out forwards, analog-shimmer 8s linear infinite 3s;
+  animation: logo-entrance 3s ease-out forwards, analog-shimmer 8s linear infinite 3s;
+}
+/* CUT THE FILE HERE */
+.Menu {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  font-family: 'Ticketing';
+  font-size: 1vw;
+}
+.Menu__digit,
+.Menu__text {
+  display: inline-block;
+  cursor: pointer;
+}
+.Menu__digit {
+  color: #00f;
+}
+.Menu_Type_Touch {
+  position: fixed;
+  z-index: 1000;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 96vw;
+  background: none;
+  text-align: center;
+  left: 50%;
+  -webkit-transform: translate(-50%, 120%);
+  transform: translate(-50%, 120%);
+  border-radius: 8px;
+  transition: -webkit-transform 0.4s;
+  transition: transform 0.4s;
+  transition: transform 0.4s, -webkit-transform 0.4s;
+}
+.Menu_Type_Touch .Menu__item {
+  display: block;
+  margin-top: 8px;
+}
+.Menu_Type_Touch .Menu__item:last-child {
+  margin-bottom: 8px;
+}
+.Menu_Type_Touch .Menu__item .Button {
+  padding: 32px 16px 32px 16px;
+  background: #fff;
+  color: #000;
+}
+.Menu_Type_Touch .Menu__item .Button__text {
+  font-size: 1vw;
+  line-height: 1vw;
+  font-family: 'Microgramma';
+}
+@media screen and (max-width: 767px) {
+  .Menu_Type_Touch .Menu__item .Button__text {
+    font-size: 12px;
+    line-height: 18px;
+  }
+}
+.Menu__item {
+  display: block;
+}
+.Menu__item_State_Active .Button {
+  background: #000;
+}
+.Menu__item + .Menu__item {
+  margin-top: 8px;
 }
 /* CUT THE FILE HERE */
 .Nav {
@@ -2845,71 +2911,6 @@ html {
 /*box-shadow 0 11px 8px -14px rgba(0,0,0,0.6)*/
   box-shadow: 0 3px 7px -5px rgba(0,0,0,0.6);
 }
-/* CUT THE FILE HERE */
-.Menu {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  font-family: 'Ticketing';
-  font-size: 1vw;
-}
-.Menu__digit,
-.Menu__text {
-  display: inline-block;
-  cursor: pointer;
-}
-.Menu__digit {
-  color: #00f;
-}
-.Menu_Type_Touch {
-  position: fixed;
-  z-index: 1000;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 96vw;
-  background: none;
-  text-align: center;
-  left: 50%;
-  -webkit-transform: translate(-50%, 120%);
-  transform: translate(-50%, 120%);
-  border-radius: 8px;
-  transition: -webkit-transform 0.4s;
-  transition: transform 0.4s;
-  transition: transform 0.4s, -webkit-transform 0.4s;
-}
-.Menu_Type_Touch .Menu__item {
-  display: block;
-  margin-top: 8px;
-}
-.Menu_Type_Touch .Menu__item:last-child {
-  margin-bottom: 8px;
-}
-.Menu_Type_Touch .Menu__item .Button {
-  padding: 32px 16px 32px 16px;
-  background: #fff;
-  color: #000;
-}
-.Menu_Type_Touch .Menu__item .Button__text {
-  font-size: 1vw;
-  line-height: 1vw;
-  font-family: 'Microgramma';
-}
-@media screen and (max-width: 767px) {
-  .Menu_Type_Touch .Menu__item .Button__text {
-    font-size: 12px;
-    line-height: 18px;
-  }
-}
-.Menu__item {
-  display: block;
-}
-.Menu__item_State_Active .Button {
-  background: #000;
-}
-.Menu__item + .Menu__item {
-  margin-top: 8px;
-}
 @-webkit-keyframes pulse {
   0% {
     opacity: 1;
@@ -3800,5 +3801,29 @@ html {
     filter: drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
     -webkit-transform: translateX(0px) translateY(0px);
     transform: translateX(0px) translateY(0px);
+  }
+}
+@-webkit-keyframes logo-entrance {
+  0% {
+    opacity: 0;
+    -webkit-filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+    filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+  }
+  100% {
+    opacity: 1;
+    -webkit-filter: blur(0px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+    filter: blur(0px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+  }
+}
+@keyframes logo-entrance {
+  0% {
+    opacity: 0;
+    -webkit-filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+    filter: blur(20px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+  }
+  100% {
+    opacity: 1;
+    -webkit-filter: blur(0px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
+    filter: blur(0px) drop-shadow(0 0 8px #0015ff) drop-shadow(0 0 20px #0015ff);
   }
 }

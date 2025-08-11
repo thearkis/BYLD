@@ -24,8 +24,9 @@
 		
 		position relative
 		z-index 5
-		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
-		animation analog-shimmer 8s linear infinite
+		opacity 0
+		filter blur(20px) drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+		animation logo-entrance 3s ease-out forwards, analog-shimmer 8s linear infinite 3s
 
 @keyframes analog-shimmer
 	0%
@@ -73,5 +74,13 @@
 	100%
 		filter drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
 		transform translateX(0px) translateY(0px)
+
+@keyframes logo-entrance
+	0%
+		opacity 0
+		filter blur(20px) drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
+	100%
+		opacity 1
+		filter blur(0px) drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
 	
 	
