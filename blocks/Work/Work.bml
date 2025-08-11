@@ -1,0 +1,315 @@
+Beast.decl({
+    WorkCard: {
+        expand: function () {
+            this.append(
+                this.get('dir', 'title'),
+                <header>
+
+                    <left>
+                        {this.get('meta')}
+                    </left>
+
+                    <middle>
+                        {this.get('text', 'link')}
+                    </middle>
+
+                    <right>
+                        {this.get('Cast')}
+                    </right>
+                </header>,
+                this.get('showcase', 'Next')
+    
+            )
+        },
+        domInit: function fn () {
+
+            const items = [
+                { element: document.querySelector('.pokras__item_nothing'), speed: -0.2 },
+                { element: document.querySelector('.pokras__item_nosense'), speed: -0.4 },
+                { element: document.querySelector('.pokras__item_scarf'), speed: -0.2 },
+                { element: document.querySelector('.pokras__item_kimono'), speed: -0.3 }
+            ];
+
+            const heroPl1 = document.querySelector('.screen_pk1');
+            const heroPl2 = document.querySelector('.screen_pk2'); // New element
+            const screenImage1 = document.querySelector('.screen_pk1 .screen__image'); 
+            const screenImage2 = document.querySelector('.screen_pk2 .screen__image'); // New screen image
+
+            window.addEventListener('scroll', () => {
+                const scrollOffset = window.pageYOffset;
+
+                // Calculate positions for .screen_pk1
+                const heroPlPosition1 = heroPl1.getBoundingClientRect().top + scrollOffset;
+                const fadeStartItems1 = heroPlPosition1 - window.innerHeight * 0.6;
+                const fadeEndItems1 = heroPlPosition1;
+                const fadeStartScreen1 = heroPlPosition1 - window.innerHeight * 2;
+                const fadeEndScreen1 = heroPlPosition1 - window.innerHeight * 0.1;
+
+                // Calculate positions for .screen_pk2 with delayed start and no fade
+                const heroPlPosition2 = heroPl2.getBoundingClientRect().top + scrollOffset;
+
+                const startScrollPk2 = heroPlPosition2 - window.innerHeight * 0.9; // Start scrolling much later
+
+                // Apply scroll effect to items
+                items.forEach(item => {
+                    const offset = scrollOffset * item.speed;
+                    item.element.style.transform = `translateY(${offset}px)`;
+
+                    let opacity = 1;
+                    if (scrollOffset >= fadeStartItems1 && scrollOffset <= fadeEndItems1) {
+                        opacity = 1 - (scrollOffset - fadeStartItems1) / (fadeEndItems1 - fadeStartItems1);
+                    } else if (scrollOffset > fadeEndItems1) {
+                        opacity = 0;
+                    }
+
+                    item.element.style.opacity = opacity;
+                });
+
+                // Adjust the top position of screen__image1 based on scroll
+                const imageOffset1 = scrollOffset * -0.3    ;
+                screenImage1.style.top = `${imageOffset1}px`;
+
+                // Adjust the top position of screen__image2 with a later scroll start
+                if (scrollOffset >= startScrollPk2) {
+                    const imageOffset2 = (scrollOffset - startScrollPk2) * -0.2;
+                    screenImage2.style.top = `${imageOffset2}px`;
+                }
+
+                // Fade-in effect for .screen_pk1
+                let heroOpacity1 = 0;
+                if (scrollOffset >= fadeStartScreen1 && scrollOffset <= fadeEndScreen1) {
+                    heroOpacity1 = (scrollOffset - fadeStartScreen1) / (fadeEndScreen1 - fadeStartScreen1);
+                } else if (scrollOffset > fadeEndScreen1) {
+                    heroOpacity1 = 1;
+                }
+                heroPl1.style.opacity = heroOpacity1;
+
+                // No fade effect for .screen_pk2, so opacity remains unchanged
+            });
+
+
+
+
+        }
+
+    },
+
+    WorkCard__link: {
+        expand: function () {
+            this.append(
+                <Link New href="{this.param('href')}">{this.text()}</Link>
+            )
+        }
+    },
+
+    Work__item: {
+        expand: function () {
+            this.css({
+                background: this.param('color'),
+            })
+            this.append(
+                <Thumb Ratio="{this.param('ratio')}" col="max">{this.text()}</Thumb>
+            )
+        }
+    },
+
+    Work__hero: {
+        expand: function () {
+            this.append(
+                <Thumb Ratio="{this.param('ratio')}" col="max">{this.text()}</Thumb>
+            )
+        }
+    },
+
+    Work__video: {
+        tag:'video',
+        expand: function () {
+            this.domAttr('muted', 'true')
+            this.domAttr('autoplay', 'true')
+            this.domAttr('playsinline', 'true')
+            this.domAttr('loop', 'true')
+            this.domAttr('id', 'video')
+            
+            this.append(
+                <source source="{this.text()}"></source>
+            )
+        }
+    },
+    Work__source: {
+        tag:'source',
+        expand: function () {
+            let src = this.param('source')
+            this.domAttr('src', src)
+            this.domAttr('type', 'video/mp4')      
+        },
+
+    },
+})
+
+
+
+Beast.decl({
+    Pokras: {
+        expand: function () {
+            this.append()
+        },
+        
+    },
+
+    Pokras__item: {
+        expand: function () {
+            this.css({
+                'background-image': 'url('+ this.param('src') +')',
+                'background-size': this.param('size')
+            })
+            this.empty()
+        }
+    }
+})
+
+
+
+
+
+Beast.decl({
+    Work: {
+        expand: function () {
+            this.append(
+                
+                <header>
+                    <left>
+                        {this.get('title', 'type')}
+                    </left>
+                    <right>
+                        {this.get('note')}
+                    </right>
+                </header>,
+                this.get('hero', 'items', 'video')
+    
+            )
+        },
+
+        domInit: function fn () {
+
+            
+
+            var films = document.querySelectorAll('video');
+            
+
+            var promise = new Promise(function(resolve) {
+                var loaded = 0;
+
+                films.forEach(function(v) {
+                    v.addEventListener('loadedmetadata', function() {
+                        loaded++;
+
+                    if (loaded === films.length) {
+                        resolve();
+                    }
+                    });
+                });
+            });
+
+            
+            promise.then(function() {
+              films.forEach(function(v) {
+                v.muted = true;
+                v.play();
+              });
+            });
+
+        }
+        
+    },
+
+    Work__item: {
+        expand: function () {
+            this.css({
+                background: this.param('color'),
+            })
+            this.append(
+                <Thumb Ratio="{this.param('ratio')}" col="max">{this.text()}</Thumb>
+            )
+        }
+    },
+
+    Work__hero: {
+        expand: function () {
+            this.append(
+                <Thumb Ratio="{this.param('ratio')}" col="max">{this.text()}</Thumb>
+            )
+        }
+    },
+
+    Work__video: {
+        tag:'video',
+        expand: function () {
+            this.css({
+                background: this.param('color'),
+            })
+            this.domAttr('muted', 'true')
+            this.domAttr('autoplay', 'true')
+            this.domAttr('playsinline', 'true')
+            this.domAttr('loop', 'true')
+            this.domAttr('id', 'video')
+            
+            this.append(
+                <source source="{this.text()}"></source>
+            )
+        }
+    },
+    Work__source: {
+        tag:'source',
+        expand: function () {
+            let src = this.param('source')
+            this.domAttr('src', src)
+            this.domAttr('type', 'video/mp4')      
+        },
+
+    },
+})
+
+
+
+Beast.decl({
+    Screen: {
+        expand: function () {
+            this.append(
+                this.get('container', 'image')
+    
+            )
+        },
+
+        domInit: function fn () {
+
+            
+
+        
+    },
+
+   },
+
+    Screen__container: {
+        expand: function () {
+            this.css({
+                background: this.param('color'),
+            })
+            this.append(
+                <wrap>
+                    <Thumb Ratio="{this.param('ratio')}" col="max">{this.param('src')}</Thumb>
+                    {this.get('image')}
+                </wrap>
+            )
+        }
+    },
+
+    Screen__image: {
+        expand: function () {
+            this.append(
+                <Thumb Ratio="{this.param('ratio')}" col="max">{this.text()}</Thumb>
+            )
+        }
+    },
+
+   
+})

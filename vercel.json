@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "^/$",
+      "dest": "/projects/site/pages/main.html"
+    },
+    {
+      "src": "^/company/about",
+      "dest": "/projects/site/pages/company.html"
+    },
+    {
+      "src": "^/nailya",
+      "dest": "/projects/site/pages/nailya.html"
+    },
+    {
+      "src": "^/wizren",
+      "dest": "/projects/site/pages/wizren.html"
+    },
+    {
+      "src": "^/oleg",
+      "dest": "/projects/site/pages/oleg.html"
+    },
+    {
+      "src": "^/misha",
+      "dest": "/projects/site/pages/misha.html"
+    },
+    
+    {
+      "src": "^/nik",
+      "dest": "/projects/site/pages/nik.html"
+    },
+    
+    { "src": "^/assets/(.*)", "dest": "/assets/$1" }, 
+    { "src": "^/build/site/(.*)", "dest": "/build/site/$1" },
+    {
+      "src": "^/work/pokras-lampas/?$",
+      "dest": "/projects/site/pages/plstorage.html"
+    },
+    
+    {
+      "src": "^/work/glebkroh/?$",
+      "status": 302,
+      "dest": "/"
+    },
+    {
+      "src": "^/work/zenno-website-3/?$",
+      "status": 302,
+      "dest": "/"
+    },
+    {
+      "src": "^/work/artpiter/?$",
+      "status": 302,
+      "dest": "/"
+    },
+    {
+      "src": "^/(.*)",
+      "dest": "/projects/site/pages/$1.html"
+    },
+    {
+      "src": "^/(.+)/$",
+      "status": 307,
+      "dest": "/$1",
+      "continue": true
+    }
+  ]
+}

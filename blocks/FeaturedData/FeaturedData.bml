@@ -1,0 +1,109 @@
+Beast.decl({
+    FeaturedData: {
+        requestApiV2: function (path, data) {
+            var self = this;
+
+            // Sanity API configuration for ark-sanity project
+            var projectId = '6a7q31lm';
+            var dataset = 'production';
+            var apiVersion = 'v2022-03-07';
+            
+            // Query to fetch featured items with their related project and client data
+            var query = encodeURIComponent(`
+                *[_type == "featured"] {
+                    _id,
+                    "media": media[] {
+                        _type,
+                        "asset": {
+                            "url": asset->url
+                        }
+                    },
+                    "project": {
+                        "projectName": project->projectName,
+                        "startDate": project->startDate,
+                        "endDate": project->endDate
+                    },
+                    "client": {
+                        "name": client->name,
+                        "description": client->description,
+                        "contactEmail": client->contactEmail,
+                        "contactPhone": client->contactPhone,
+                        "field": client->field->name
+                    }
+                }
+            `);
+
+            var jsonUrl = `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}?query=${query}`;
+
+            Ajax({
+                url: jsonUrl,
+                data: data,
+
+                success: function (data) {
+                    var json = JSON.parse(data);
+
+                    console.log(json)
+
+                    // Fisher-Yates shuffle algorithm to randomize array
+                    function shuffleArray(array) {
+                        var shuffled = array.slice(); // Create a copy to avoid mutating original
+                        for (var i = shuffled.length - 1; i > 0; i--) {
+                            var j = Math.floor(Math.random() * (i + 1));
+                            var temp = shuffled[i];
+                            shuffled[i] = shuffled[j];
+                            shuffled[j] = temp;
+                        }
+                        return shuffled;
+                    }
+
+                    // Randomize the order of featured items on each page load
+                    var randomizedItems = shuffleArray(json.result);
+                    
+                    // Log the randomized order for verification
+                    console.log('Original order:', json.result.map(item => item.project.projectName));
+                    console.log('Randomized order:', randomizedItems.map(item => item.project.projectName));
+
+                    self.empty().append(
+
+                        <Intro Type="Brand">
+                            {randomizedItems.map(function(item, index) {
+                                console.log('Featured item (randomized):', item);
+                                
+                                // Get the first media item (video or image)
+                                var mediaItem = item.media && item.media[0];
+                                
+                                if (mediaItem) {
+                                    if (mediaItem._type === 'image') {
+                                        return <image>{mediaItem.asset.url}</image>
+                                    } else if (mediaItem._type === 'file') {
+                                        return <video>{mediaItem.asset.url}</video>
+                                    }
+                                }
+                            })}
+                            
+                            {randomizedItems.map(function(item, index) {
+                                return (
+                                    <title>{item.project.projectName} / {item.client.name}</title>
+                                )
+                            })}
+                        </Intro>
+                        
+                    )
+                },
+
+                error: function (xhr, status, error) {
+                    console.error('Error fetching featured data:', error);
+                    self.empty().append(
+                        <item>
+                            <title>Error loading featured content</title>
+                        </item>
+                    )
+                }
+            })
+        },
+
+        domInit: function () {
+            this.requestApiV2()
+        },
+    },    
+}) 

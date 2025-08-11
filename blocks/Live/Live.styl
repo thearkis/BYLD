@@ -1,0 +1,69 @@
+@keyframes pulse {
+    0% {opacity:1}
+    50% {opacity:0}
+    to {opacity:1}
+}
+
+
+
+.Live
+    
+    div
+        display inline-block
+    &__circle
+        margin-top 0.5vw
+        margin-left -1.2vw
+        position absolute
+        animation pulse 2s infinite
+        margin-right .4vw
+        background red
+        border-radius 100%
+        width .8vw
+        height .8vw
+        @media $screen-phone
+            width 12px
+            height 12px
+            margin-left 1px
+            margin-top 7px
+    &__text
+        color red
+        @media $screen-phone
+            margin-left 18px
+            
+        
+
+
+
+
+.Spotify
+
+    .Thumb
+        width 3vw
+        margin-top 0.6vw
+        filter grayscale(100%)
+
+
+    &__text
+
+        &_circle
+            animation pulse 2s infinite
+            margin-right .4vw
+            background red
+            border-radius 100%
+            width 1vw
+            height 1vw
+        
+                
+
+        &_minor
+            color hint
+
+.blink {
+    animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}

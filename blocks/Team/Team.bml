@@ -1,0 +1,36 @@
+Beast.decl({
+    Team: {
+        inherits: 'Typo',
+        expand: function () {
+            this.domAttr('id', 'team')
+            this.append(
+                <items>
+                    {this.get('item')}
+                </items>
+                
+            )
+
+        }
+    },
+    
+    Team__image: {
+
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+
+        }
+    },
+
+    Team__item: {
+        tag: 'a',
+        expand: function () {
+            var href = this.param('href')
+            this.domAttr('href', href)
+            this.domAttr('target', '_blank')
+
+        }
+    }  
+})

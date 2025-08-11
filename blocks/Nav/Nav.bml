@@ -1,0 +1,13 @@
+Beast.decl({
+    Nav: {
+        expand: function () {
+            
+            this.append(
+                
+            )
+
+            
+        },
+            
+    } 
+})

@@ -1,0 +1,607 @@
+const api = `https://o8a3bj9a.api.sanity.io/v2022-03-07/data/query/production?query=`
+
+
+Beast.decl({
+    'ae__show-item': {
+        expand: function () {
+            this.append(
+                this.get('video'),
+            )
+        },
+        domInit: function fn () {
+
+            
+
+            
+
+            var films = document.querySelectorAll('video');
+
+            var promise = new Promise(function(resolve) {
+                var loaded = 0;
+
+                films.forEach(function(v) {
+                    v.addEventListener('loadedmetadata', function() {
+                        loaded++;
+
+                    if (loaded === films.length) {
+                        resolve();
+                    }
+                    });
+                });
+            });
+
+            
+            promise.then(function() {
+              films.forEach(function(v) {
+                v.muted = true;
+                v.play();
+              });
+            });
+
+        }
+    },
+    
+    'AE__video': {
+        tag:'video',
+        expand: function () {
+            this.domAttr('muted', 'true')
+            this.domAttr('autoplay', 'true')
+            this.domAttr('playsinline', 'true')
+            this.domAttr('loop', 'true')
+            this.domAttr('id', 'video')
+            
+            this.append(
+                <source source="{this.text()}"></source>
+            )
+        }
+    },
+    'AE__source': {
+        tag:'source',
+        expand: function () {
+            let src = this.param('source')
+            this.domAttr('src', src)
+            this.domAttr('type', 'video/mp4')
+            
+        }
+    } 
+})
+
+Beast.decl({
+    Phone: {
+        expand: function () {
+            this.append(
+                this.get('video'),
+            )
+        },
+        domInit: function fn () {
+
+            var films = document.querySelectorAll('video');
+
+            var promise = new Promise(function(resolve) {
+                var loaded = 0;
+
+                films.forEach(function(v) {
+                    v.addEventListener('loadedmetadata', function() {
+                        loaded++;
+
+                    if (loaded === films.length) {
+                        resolve();
+                    }
+                    });
+                });
+            });
+
+            
+            promise.then(function() {
+              films.forEach(function(v) {
+                v.muted = true;
+                v.play();
+              });
+            });
+
+        }
+    },
+    
+    Phone__video: {
+        tag:'video',
+        expand: function () {
+            this.domAttr('muted', 'true')
+            this.domAttr('autoplay', 'true')
+            this.domAttr('playsinline', 'true')
+            this.domAttr('loop', 'true')
+            this.domAttr('id', 'video')
+            
+            this.append(
+                <source source="{this.text()}"></source>
+            )
+        }
+    },
+    Phone__source: {
+        tag:'source',
+        expand: function () {
+            let src = this.param('source')
+            this.domAttr('src', src)
+            this.domAttr('type', 'video/mp4')
+            
+        }
+    } 
+})
+
+
+
+
+Beast.decl({
+    AE__highres: {
+        
+        expand: function fn () {
+
+             this.append(
+                <image>{this.param('src')}</image>
+             )  
+
+
+            
+        },
+        domInit: function fn() {
+
+            
+
+        }
+    },
+    AE__image: {
+        
+        expand: function () {
+            this.tag('img')
+            this.domAttr('src', this.text(''))
+        }
+    },
+
+    AE__eye: {
+        
+        expand: function () {
+            this.tag('img')
+            this.domAttr('src', this.text(''))
+        }
+    },
+
+    ae__aeimg: {
+        
+        expand: function () {
+            this.tag('img')
+            this.domAttr('src', this.text(''))
+        }
+    },
+    
+})
+
+
+
+Beast.decl({
+    App: {
+        tag:'body',
+        mod: {
+            platform: '',
+            device: ''
+        },
+        expand: function fn () {
+
+            this.inherited(fn)
+
+            if (MissEvent.mobile) {
+                this.mix('mobile')
+            }
+
+            if (MissEvent.android) {
+                this.mix('android')
+            }
+
+            if (MissEvent.ios) {
+                this.mix('ios')
+            }
+
+
+
+            
+        },
+        domInit: function fn() {
+
+            // Text animation for phone, email, and X links
+            const linkElements = document.querySelectorAll('.cols__text_phone a, .cols__text_email a, .cols__text_x a')
+            console.log('linkElements', linkElements)
+            
+            linkElements.forEach(element => {
+                const originalText = element.textContent
+                let hoverText = ''
+                let originalHref = ''
+                
+                // Set hover text based on parent element class
+                const parentElement = element.closest('.cols__text_phone, .cols__text_email, .cols__text_x')
+                
+                if (parentElement.classList.contains('cols__text_phone')) {
+                    hoverText = '+1 833 359 6777'
+                    originalHref = 'tel:+1 833 359 6777'
+                } else if (parentElement.classList.contains('cols__text_email')) {
+                    hoverText = 'a@ark.studio'
+                    originalHref = 'mailto:a@ark.studio'
+                } else if (parentElement.classList.contains('cols__text_x')) {
+                    hoverText = '@ARKconclave'
+                    originalHref = 'http://x.com/arkconclave'
+                }
+                
+                // Each element gets its own animation state
+                element.isAnimating = false
+                element.animationInterval = null
+                
+                element.style.cursor = 'pointer'
+                
+                // Store original link
+                element.originalHref = element.href
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.animationInterval) {
+                        clearInterval(element.animationInterval)
+                    }
+                    element.isAnimating = true
+                    animatePhoneText(element, originalText, hoverText)
+                    
+                    // Update href
+                    element.href = originalHref
+                })
+                
+                element.addEventListener('mouseleave', () => {
+                    if (element.animationInterval) {
+                        clearInterval(element.animationInterval)
+                    }
+                    element.isAnimating = true
+                    animatePhoneText(element, element.textContent, originalText)
+                    
+                    // Restore original href
+                    element.href = element.originalHref
+                })
+            })
+            
+                         function animatePhoneText(element, originalText, finalText) {
+                 const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                 let swapsRemaining = 14
+                 const maxLength = Math.max(originalText.length, finalText.length)
+                 
+                 element.classList.add('rolling-animation')
+                 
+                 element.animationInterval = setInterval(() => {
+                     let currentDisplayText = ''
+                     
+                     for (let i = 0; i < maxLength; i++) {
+                         if (i < swapsRemaining) {
+                             const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                             currentDisplayText += randomChar
+                         } else if (i < finalText.length) {
+                             currentDisplayText += finalText[i]
+                         }
+                     }
+                     
+                     element.textContent = currentDisplayText
+                     swapsRemaining--
+                     
+                     if (swapsRemaining <= 0) {
+                         clearInterval(element.animationInterval)
+                         element.textContent = finalText
+                         element.classList.remove('rolling-animation')
+                         element.isAnimating = false
+                         
+                         // If we're returning to original text, reset cursor
+                         if (finalText === originalText) {
+                             element.style.cursor = 'pointer'
+                         }
+                     }
+                 }, 20)
+             }
+
+            // PathOfAwakening scroll-based blur system for headline, text, and cast
+            const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
+            const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
+            const pathOfAwakeningCast = document.querySelector('.PathOfAwakening__cast');
+            
+            if (pathOfAwakeningHeadline) {
+                // Fade in and un-blur on page load for headline
+                setTimeout(() => {
+                    pathOfAwakeningHeadline.classList.add('PathOfAwakening__headline_loaded');
+                }, 300); // Small delay for dramatic effect
+                
+                function updateScrollBlurEffects() {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    
+                    // Function to calculate blur based on element position
+                    function calculateElementBlur(element, initialBlur = 3, maxBlur = 25, focusZone = 200) {
+                        if (!element) return;
+                        
+                        const rect = element.getBoundingClientRect();
+                        const elementTop = rect.top;
+                        const elementHeight = rect.height;
+                        const elementCenter = elementTop + elementHeight / 2;
+                        
+                        // Distance from element center to screen center
+                        const screenCenter = windowHeight / 2;
+                        const distanceFromCenter = Math.abs(elementCenter - screenCenter);
+                        
+                        let blurAmount;
+                        
+                        if (distanceFromCenter <= focusZone) {
+                            // In focus zone - unblur (clear)
+                            blurAmount = 0;
+                        } else {
+                            // Out of focus zone - blur based on distance
+                            const blurProgress = Math.min(1, (distanceFromCenter - focusZone) / (windowHeight / 2));
+                            blurAmount = initialBlur + (blurProgress * (maxBlur - initialBlur));
+                        }
+                        
+                        element.style.filter = `blur(${blurAmount}px)`;
+                    }
+                    
+                    // Apply blur effects to headline and cast only
+                    if (pathOfAwakeningHeadline.classList.contains('PathOfAwakening__headline_loaded')) {
+                        calculateElementBlur(pathOfAwakeningHeadline, 3, 25, 150);
+                        pathOfAwakeningHeadline.style.opacity = '1'; // Keep visible
+                    }
+                    
+                    calculateElementBlur(pathOfAwakeningCast, 3, 20, 180);
+                }
+                
+                // Add scroll event listener
+                window.addEventListener('scroll', updateScrollBlurEffects);
+                
+                // Initial call to set blur states
+                updateScrollBlurEffects();
+                
+                // Sequential word appearance for PathOfAwakening text triggered by scroll
+                const wordOne = document.querySelector('.PathOfAwakening__word_one');
+                const wordTwo = document.querySelector('.PathOfAwakening__word_two');
+                const wordThree = document.querySelector('.PathOfAwakening__word_three');
+                const wordFour = document.querySelector('.PathOfAwakening__word_four');
+                
+                if (wordOne || wordTwo || wordThree || wordFour) {
+                    let wordOneShown = false;
+                    let wordTwoShown = false;
+                    let wordThreeShown = false;
+                    let wordFourShown = false;
+                    
+                    function checkWordAppearance() {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        
+                        // Word One: fade in from 200px to 300px
+                        if (wordOne) {
+                            if (scrollTop <= 200) {
+                                wordOne.style.opacity = '0';
+                                wordOne.style.transform = 'translateY(20px)';
+                                wordOneShown = false;
+                            } else if (scrollTop > 200 && scrollTop <= 300) {
+                                const progress = (scrollTop - 200) / 100; // 0 to 1
+                                wordOne.style.opacity = progress;
+                                wordOne.style.transform = `translateY(${20 - (progress * 20)}px)`;
+                                wordOneShown = true;
+                            } else if (scrollTop > 300) {
+                                wordOne.style.opacity = '1';
+                                wordOne.style.transform = 'translateY(0px)';
+                                wordOneShown = true;
+                            }
+                        }
+                        
+                        // Word Two: fade in from 500px to 600px (requires word one)
+                        if (wordTwo && wordOneShown) {
+                            if (scrollTop <= 500) {
+                                wordTwo.style.opacity = '0';
+                                wordTwo.style.transform = 'translateY(20px)';
+                                wordTwoShown = false;
+                            } else if (scrollTop > 500 && scrollTop <= 600) {
+                                const progress = (scrollTop - 500) / 100; // 0 to 1
+                                wordTwo.style.opacity = progress;
+                                wordTwo.style.transform = `translateY(${20 - (progress * 20)}px)`;
+                                wordTwoShown = true;
+                            } else if (scrollTop > 600) {
+                                wordTwo.style.opacity = '1';
+                                wordTwo.style.transform = 'translateY(0px)';
+                                wordTwoShown = true;
+                            }
+                        }
+                        
+                        // Word Three: fade in from 800px to 900px (requires word two)
+                        if (wordThree && wordTwoShown) {
+                            if (scrollTop <= 800) {
+                                wordThree.style.opacity = '0';
+                                wordThree.style.transform = 'translateY(20px)';
+                                wordThreeShown = false;
+                            } else if (scrollTop > 800 && scrollTop <= 900) {
+                                const progress = (scrollTop - 800) / 100; // 0 to 1
+                                wordThree.style.opacity = progress;
+                                wordThree.style.transform = `translateY(${20 - (progress * 20)}px)`;
+                                wordThreeShown = true;
+                            } else if (scrollTop > 900) {
+                                wordThree.style.opacity = '1';
+                                wordThree.style.transform = 'translateY(0px)';
+                                wordThreeShown = true;
+                            }
+                        }
+                        
+                        // Word Four: fade in from 1100px to 1200px (requires word three)
+                        if (wordFour && wordThreeShown) {
+                            if (scrollTop <= 1100) {
+                                wordFour.style.opacity = '0';
+                                wordFour.style.transform = 'translateY(20px)';
+                                wordFourShown = false;
+                            } else if (scrollTop > 1100 && scrollTop <= 1200) {
+                                const progress = (scrollTop - 1100) / 100; // 0 to 1
+                                wordFour.style.opacity = progress;
+                                wordFour.style.transform = `translateY(${20 - (progress * 20)}px)`;
+                                wordFourShown = true;
+                            } else if (scrollTop > 1200) {
+                                wordFour.style.opacity = '1';
+                                wordFour.style.transform = 'translateY(0px)';
+                                wordFourShown = true;
+                            }
+                        }
+                        
+                        // Words One and Two: blur from 1000px to 1100px
+                        if (wordOne && wordOneShown && wordTwo && wordTwoShown) {
+                            if (scrollTop <= 1000) {
+                                wordOne.style.filter = 'blur(0px)';
+                                wordTwo.style.filter = 'blur(0px)';
+                            } else if (scrollTop > 1000 && scrollTop <= 1100) {
+                                const blurProgress = (scrollTop - 1000) / 100; // 0 to 1
+                                const blurAmount = blurProgress * 8; // 0 to 8px
+                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
+                                wordOne.style.filter = `blur(${blurAmount}px)`;
+                                wordOne.style.opacity = opacityAmount;
+                                wordTwo.style.filter = `blur(${blurAmount}px)`;
+                                wordTwo.style.opacity = opacityAmount;
+                            } else if (scrollTop > 1100) {
+                                wordOne.style.filter = 'blur(8px)';
+                                wordOne.style.opacity = '0.6';
+                                wordTwo.style.filter = 'blur(8px)';
+                                wordTwo.style.opacity = '0.6';
+                            }
+                        }
+                        
+                        // Word Three: blur from 1200px to 1300px
+                        if (wordThree && wordThreeShown) {
+                            if (scrollTop <= 1200) {
+                                wordThree.style.filter = 'blur(0px)';
+                            } else if (scrollTop > 1200 && scrollTop <= 1300) {
+                                const blurProgress = (scrollTop - 1200) / 100; // 0 to 1
+                                const blurAmount = blurProgress * 8; // 0 to 8px
+                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
+                                wordThree.style.filter = `blur(${blurAmount}px)`;
+                                wordThree.style.opacity = opacityAmount;
+                            } else if (scrollTop > 1300) {
+                                wordThree.style.filter = 'blur(8px)';
+                                wordThree.style.opacity = '0.6';
+                            }
+                        }
+                        
+                        // Word Four: blur from 1400px to 1500px
+                        if (wordFour && wordFourShown) {
+                            if (scrollTop <= 1400) {
+                                wordFour.style.filter = 'blur(0px)';
+                            } else if (scrollTop > 1400 && scrollTop <= 1500) {
+                                const blurProgress = (scrollTop - 1400) / 100; // 0 to 1
+                                const blurAmount = blurProgress * 8; // 0 to 8px
+                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
+                                wordFour.style.filter = `blur(${blurAmount}px)`;
+                                wordFour.style.opacity = opacityAmount;
+                            } else if (scrollTop > 1500) {
+                                wordFour.style.filter = 'blur(8px)';
+                                wordFour.style.opacity = '0.6';
+                            }
+                        }
+                    }
+                    
+                    // Add to existing scroll listener
+                    const originalScrollHandler = window.onscroll;
+                    window.addEventListener('scroll', () => {
+                        checkWordAppearance();
+                    });
+                    
+                    // Initial check
+                    checkWordAppearance();
+                }
+            }
+
+        }
+    },
+    App__live: {
+        expand: function fn () {
+            this.append(
+                <Live>{this.get()}</Live>
+            )
+        },
+    },
+})
+
+
+Beast.decl({
+    R: {
+        
+        expand: function fn () {
+
+            this.append('®')      
+
+
+
+            
+        },
+        domInit: function fn() {
+
+            
+
+        }
+    },
+})
+
+
+Beast.decl({
+    Hero: {
+        expand: function () {
+            this.append(
+                this.get('title', 'image', 'meta'),
+                <Globe/>,
+                <map>
+                    <Link href="./world.html">  
+                        <Mini-globe/>
+                    </Link>
+                </map>
+            )
+        },
+    },
+    Hero__image: {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        }
+    },
+    Hero__layer: {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        }
+    },
+    Hero__layer2: {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        }
+    },
+    Hero__title: {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        }
+    }    
+})
+
+
+Beast.decl({
+    Workcase: {
+        expand: function () {
+            this.append(
+                
+            
+            )
+        },
+    },
+    'Workcase__gallery-item': {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        }
+    },
+    
+})

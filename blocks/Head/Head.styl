@@ -1,0 +1,110 @@
+
+.Hide
+    visibility hidden
+    display inline
+    position absolute
+
+.Marque
+    size = 2vw
+    height size
+    mask-size size
+    width size
+    @media $screen-phone
+        size = 4vw
+        height size
+        mask-size size
+        width size
+    mask-position center center
+    mask-image url('/assets/marque.svg')
+    mask-repeat no-repeat
+    background-color #FF0000
+
+    position relative
+    margin 0 auto
+    top 0
+    
+
+
+.HeadArtsy
+    size = 99vw
+    height 8.8vw
+    mask-size size
+    width size
+    mask-position center center
+    mask-image url('/assets/ARK.svg')
+    mask-repeat no-repeat
+    background-color #FF0000
+    &_black
+        background-color #000
+    position fixed
+    top -44px
+    @media $screen-phone
+        top 2px
+    z-index 9999
+    transition top 0.3s cubic-bezier(0.255, 0.03, 0.515, 0.955)
+    &:hover
+        top 0
+        cursor pointer
+        transition top 0.2s cubic-bezier(0.255, 0.03, 0.515, 0.955)
+
+    &_Person    
+        background-color #d6d6d6
+
+.Head
+    position absolute
+    right 0
+    left 0
+    top 0
+    
+    height 87px
+    transition transform .5s
+    /*&_black
+        &:before
+            background-image linear-gradient(180deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .2) 60%, rgba(0, 0, 0, .05) 80%, transparent) !important    
+    &:before
+        background-image linear-gradient(180deg, hsla(0, 0%, 92.2%, .9), hsla(0, 0%, 92.2%, 0))
+        
+        content ''
+        opacity 1
+        position absolute
+        z-index -1
+        top 0
+        left 0
+        width 120%
+        height 100%*/
+    @media $screen-phone
+        
+        .Icon
+            display none
+
+    &__content
+        position relative
+        margin 0 gapx
+        @media $screen-phone
+            margin 0 20px
+
+    .Icon
+        display none
+        @media $screen-phone
+            display none
+        position absolute
+        top gap*2.8
+        background-color white
+        right 0
+        z-index 999
+
+    &_hide
+        transform translateY(-120%)
+
+    &__logo
+        position relative
+        top 33px
+        @media $screen-phone
+            top -6px
+
+    &__menu
+        position absolute
+        right 0
+        top 44px
+        @media $screen-phone
+            display none

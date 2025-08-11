@@ -1,0 +1,30 @@
+Beast.decl({
+    Menu: {
+        state: function () {
+            return {
+                items: []
+            }
+        },
+        requestApi: function (path, data) {
+            
+        },
+
+        expand: function () {
+            this.append(
+                this.get('item')
+            )
+        },
+            
+    },
+    Menu__item: {
+        expand: function () {
+            this.append(
+                <Link href="{this.param('href')}">
+                    <Button Type="Blur">{this.text()}</Button>
+                </Link>
+            )
+        }
+    },
+     
+})
+

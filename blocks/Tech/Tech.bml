@@ -1,0 +1,15 @@
+Beast.decl({
+    Tech: {
+        
+    },
+    Tech__image: {
+        expand: function () {
+            this.append('')
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+        },
+        
+    },
+    
+})

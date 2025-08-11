@@ -1,0 +1,904 @@
+.noise::before{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    content: "";
+    /* you can control opacity of noise  */
+    opacity: .03;  
+    z-index: 1000;
+    pointer-events: none;
+    background: url(/assets/noise.gif) ;
+}
+
+
+.PathOfAwakening
+    margin-top 20vw
+    position relative
+    padding 0 4vw
+    color white
+    &__word
+        display inline
+        
+        &_one, &_two, &_three, &_four
+            opacity 0
+            transform translateY(20px)
+            // No transitions - instant response to scroll
+            
+        &_one_visible, &_two_visible, &_three_visible, &_four_visible
+            opacity 1
+            transform translateY(0px)
+            
+        &_one_blurred, &_two_blurred, &_three_blurred, &_four_blurred
+            filter blur(8px)
+            opacity 0.6
+    &__p
+        & + &
+            margin-top 2vw
+    &__headline
+        font-family "times-new-roman"
+        color #B54A0D
+        position relative
+        
+        text-align center
+        z-index 99
+        
+        font-size 8vw
+        line-height 8.2vw
+        letter-spacing -.1vw
+        
+        // Initial state: blurred and transparent
+        filter blur(25px)
+        opacity 0
+        
+        // Smooth transitions for blur, opacity, and transform
+        transition filter 1.5s ease-out, opacity 1.5s ease-out, transform 1.5s ease-out
+        
+        // Fire-like flickering effect
+        animation fire-flicker 3s infinite ease-in-out
+        
+        // Loaded state: clear and visible with continued flicker
+        &_loaded
+            filter blur(0px)
+            opacity 1
+            animation fire-flicker 3s infinite ease-in-out
+    
+    &__line
+        &_Top
+            font-size 12.5vw
+            letter-spacing .1vw
+    &__text
+        font-family 'univers-next-pro'
+        font-weight 500
+        font-size 1.5vw
+        line-height 1.8vw
+        letter-spacing -0.04vw
+        color #B4551C
+        text-transform none
+
+        
+        max-width 50%
+        text-align left
+        margin 20vw auto 20vw auto
+        
+    &__cast
+        font-family 'SF Movie Poster Condensed'
+        color #B54A0D
+        font-size 4.5vw
+        line-height 3.8vw
+        margin 0 auto
+        width 100%
+        text-align center
+        
+        // Initial slight blur with subtle transition for smooth scroll blur
+        filter blur(3px)
+        transition filter 0.15s ease-out
+    &__s
+        display inline
+        font-size 2.8vw
+        &_M
+            margin-left -.3vw
+        &_F
+            margin-right -.3vw
+
+
+.LogoLine
+    size = 7vw
+    height .8vw
+    mask-size size
+    width size
+    mask-position center center
+    mask-image url('/assets/outline-logo.svg')
+    mask-repeat no-repeat
+    background-color #f00d0d
+    display inline-block
+    @media $screen-phone
+        height 13px
+        mask-size 111px
+        width 111px
+
+
+.Sleipnir
+    size = 100%
+    height 10vw
+    mask-size size
+    width size
+    background-position center center
+    background-image url('/assets/live/july21.jpg') 
+    background-repeat no-repeat
+    background-size cover
+    background-color none
+    @media $screen-phone
+        height 260px 
+
+
+.AE
+    font-family 'Plaex'
+    display inline
+    margin-right -.2vw
+
+.Workcase
+    padding-top 1vw
+    padding-bottom 4vw
+    background #d10000
+    padding-left 4vw
+    margin-top 4vw
+
+    &__line
+        max-width 80%
+        & + &
+            margin .3vw 0
+
+    &__title
+        font-size 6vw
+        padding-bottom 3vw
+        margin-top 1vw
+        text-transform uppercase
+        letter-spacing -.1vw
+        //color #646464
+        color #828282
+        font-family Microgramma D
+        @media $screen-phone
+            font-size 46px
+            line-height 48px
+            padding 26px 0
+
+    &__info
+        width 50vw
+
+    &__info, &__gallery
+        display inline-block
+    &__item
+        display flex
+        & + &
+            margin-top 6vw
+
+    &__text
+        & + &
+            margin-top 2vw
+    
+    &__gallery
+        width 77vw
+        height 33vw
+        &-item
+            background-size cover
+            width 100%
+            height 100%
+            background-repeat no-repeat
+
+
+.Hero
+    size = 54vw
+    height size
+    background-color black
+    overflow hidden
+    position relative
+    color white
+    position relative
+    overflow hidden
+    transform scale(1.02)
+    margin-top -11vw
+
+    &__meta
+        position absolute
+        bottom 2vw
+        padding 2vw 4vw 3vw 4vw
+
+    &__name
+        font-size 5vw
+        line-height 5.2vw
+        letter-spacing -.4vw
+        font-family 'ASM'
+        text-transform uppercase
+        margin-bottom 5vw
+        position relative
+        padding 0 .4vw
+        background #d6d6d6
+        color black
+        display inline
+    &__line
+        & + &
+            margin-top .2vw
+    &__role
+        background #d6d6d6
+        color black
+        display inline
+        font-size 1.7vw
+        line-height 2vw
+        letter-spacing -.1vw
+        padding 0 .2vw
+        
+
+    @media $screen-phone
+        height 90vh
+        margin-left -24vw
+
+    &__title
+        display none
+        show-mobile()
+        background-repeat no-repeat
+        position absolute
+        bottom calc(3vw + 3vh)
+        z-index 100
+        left 0
+        right 0
+        margin 0 auto
+        
+    &__image
+        background-position center
+        background-size cover
+        background-repeat no-repeat
+        width 100%
+        height 100%
+        will-change transform
+        transition transform 0.1s linear
+        
+    .Meta
+        position absolute
+        top 50%
+        right 100px
+        transform translate(0px, -50%)
+
+
+
+.Ya
+    size = 55vw
+    height size
+    mask-size size
+    width size
+    margin 0 auto
+    background-position center center
+    background-image url('/assets/ya.svg')
+    background-repeat no-repeat
+    background-size cover
+    background-color none
+    @media $screen-phone
+        size = 350px
+        height size
+        width size
+
+
+
+
+@keyframes pulse {
+    0% {opacity:1}
+    50% {opacity:0}
+    to {opacity:1}
+}
+
+// Fire-like flickering effect - pure dimming like flame intensity
+@keyframes fire-flicker {
+    0% { 
+        opacity: 1;
+    }
+    5% { 
+        opacity: 0.90;
+    }
+    12% { 
+        opacity: 1;
+    }
+    18% { 
+        opacity: 0.82;
+    }
+    25% { 
+        opacity: 0.95;
+    }
+    32% { 
+        opacity: 0.78;
+    }
+    38% { 
+        opacity: 1;
+    }
+    45% { 
+        opacity: 0.85;
+    }
+    52% { 
+        opacity: 0.92;
+    }
+    58% { 
+        opacity: 0.80;
+    }
+    65% { 
+        opacity: 1;
+    }
+    72% { 
+        opacity: 0.87;
+    }
+    78% { 
+        opacity: 0.75;
+    }
+    85% { 
+        opacity: 0.96;
+    }
+    92% { 
+        opacity: 0.83;
+    }
+    100% { 
+        opacity: 1;
+    }
+}
+
+.Circle
+    @media $screen-phone
+        top initial
+        display inline-block
+        margin-right 10px
+        position relative
+        height 14px
+        width 14px
+    top .65vw
+    margin-left -1.2vw
+    position absolute
+    animation pulse 2s infinite
+    margin-right .4vw
+    background #8c8c8c
+    border-radius 100%
+    width .8vw
+    height .8vw
+
+    &_1
+        animation-delay 1s
+
+    &_2
+        animation-delay .9s
+
+    &_3
+        animation-delay .8s
+
+    &_4
+        animation-delay .7s
+    
+    &_5
+        animation-delay .6s
+    
+    &_6
+        animation-delay .5s
+    
+    &_7
+        animation-delay .4s
+    
+    &_8
+        animation-delay .3s
+    
+    &_9
+        animation-delay .2s
+
+    &_10
+        animation-delay .1s
+
+    &_11
+        animation-delay 0s
+
+.Workslist
+    font-family 'OCR'
+    font-size 1.14vw
+    @media $screen-phone
+        margin-top 50px
+
+    &__ae
+        display inline
+        font-family 'Plaex'
+
+    &__title
+        font-size 6vw
+        padding-bottom 2vw
+        margin-top 0
+        text-transform uppercase
+        letter-spacing -.1vw
+        //color #646464
+        color #828282
+        font-family Microgramma D
+        @media $screen-phone
+            font-size 46px
+            line-height 48px
+            padding 26px 0
+    &__item
+        display flex
+        line-height 2vw
+        border-top 2px solid #ffffff14
+        transition all .1s
+        background-color #d20000
+
+        // &:hover
+        //     @media $screen-phone
+        //         background-color #d20000
+        //         margin initial
+        // background-color #828282
+        // margin 0 -1vw
+        // padding 0 1vw
+        // color white
+        // transition all .1s
+
+        @media $screen-phone
+            font-size 19px
+            line-height 25px
+            padding 7px 0
+    &__cell
+        position relative
+        width 27%
+        @media $screen-phone
+            width 50%
+        &_Year
+            @media $screen-phone
+                text-align right
+        &_Wide
+            width 50%
+            @media $screen-phone
+                display none
+        &_Type
+            @media $screen-phone
+                display none
+        &_Ghost
+            opacity .6
+
+.App_Ae
+    background-color black !important
+    color #9A9A9A !important
+    font-family "ibm-plex-mono", sans-serif !important
+    font-weight 400 !important
+    font-style normal !important
+
+
+.AE
+    text-align center
+    margin-top 390px
+    &__aeimg
+        width 400px
+        margin 32px auto
+        @media $screen-phone
+            width 100%
+            margin-bottom 48px
+    @media $screen-phone
+        margin-top 160px
+    &__highres
+        @media $screen-phone
+            display none !important
+        &_mobile
+            display none !important
+            @media $screen-phone
+                display block !important
+        
+    &__eye
+        width 416px
+        margin-bottom 48px
+        @media $screen-phone
+            width 100%
+    &__items
+        display flex
+        @media $screen-phone
+            display block
+            width 100%
+        width 1200px
+        margin 120px auto
+        text-align center
+    &__video    
+        width 400px
+        @media $screen-phone
+            width 100%
+        border 1px solid #a4790f5e
+    &__title
+        margin 0 auto
+        
+        font-size 45px
+        color #FF9D00
+        margin-bottom 48px
+    &__text
+        width 710px
+        margin 0 auto
+        @media $screen-phone
+            width initial
+            padding 0 24px
+    &__p
+        font-size 24px
+        @media $screen-phone
+            font-size 16px
+        & + &
+            margin-top 32px
+    .Phone
+        margin 48px auto
+        &__video
+            width 662px
+            @media $screen-phone
+                width 100%
+
+
+.R
+    display inline-block
+    font-size 5vw
+    line-height 5vw
+    margin-left 0.5vw
+    position absolute
+    
+
+
+
+
+table
+    border-collapse collapse
+    border-spacing 0
+    border none
+
+td
+    padding 0
+    vertical-align baseline
+
+html
+    background transparent
+
+.no-scroll
+    overflow hidden !important
+    height 100%
+    width 100%
+
+.Fog
+    position fixed
+    z-index 11000
+    top 0
+    bottom 0
+    right 0
+    left 0
+    background black
+    opacity .8
+    display none
+
+.Zones
+    white-space nowrap
+    &__time
+        color #999
+        margin-right gap
+    &__item
+        display table
+    &__time, &__name
+        display inline-block
+
+.Spotify
+    @media $screen-phone
+        .Thumb
+            display none
+    &__text
+        white-space nowrap
+    
+.work__item_ratio_16x10 .thumb:after {
+    content: '';
+    display: block;
+    padding-bottom: 62.5%;
+}
+
+
+.HeadSmall
+    @media $screen-phone
+        position fixed
+        top 18px
+        z-index 8888
+    position relative
+    font-size 1.6vw
+    &__menu
+        position absolute
+        right 0
+        top 0
+        
+    &__item
+        display inline-block
+        & + &
+            margin-left 1vw
+    margin-top -8vw
+    &__logo
+        size = 6vw
+        height 1.5vw
+        mask-size size
+        width size
+        mask-position center center
+        mask-image url('/assets/ark-small.svg')
+        mask-repeat no-repeat
+        background-color #f00d0d
+
+        @media $screen-phone
+            position absolute
+            top 24px
+            mask-size 100px !important
+            width 100px !important
+            height 30px !important
+
+        
+.Cols
+    body()
+    display flex
+    &_Footer
+        font-family 'OCR'
+        text-transform uppercase
+    &__a
+        display inline
+        color white
+
+    @media $screen-phone
+        display block
+
+    &__text
+        &_minor
+            color hint
+
+    &__p
+        
+        
+        &_list
+            margin-left gap*3
+            margin-top .4vw !important
+        & + &
+            margin-top 2.1vw
+
+    &__item
+        &_ocr
+            font-family 'OCR'
+            text-transform uppercase !important
+        &_intro
+            font-family 'univers-next-pro'
+            // font-family 'ARKDiatypeMono'
+            font-weight 500
+        @media $screen-phone
+            width initial    
+        width 27%
+
+        & + &
+            margin-left 2vw
+        &_comms
+            width 18%
+        &_radio, &_times, &_comms, &_today, &_clients
+            font-family 'OCR'
+        
+
+        &_today
+            display block
+            .Sleipnir
+                margin-top .4vw
+        &_intro
+            color #999
+            text-transform none
+            font-size 1.25vw
+            line-height 1.6vw
+            letter-spacing -.06vw
+        &_wide
+            width 50%
+            text-transform none
+            
+            @media $screen-phone
+                width initial
+                font-size 20px
+                line-height 24px
+        & + &
+
+            @media $screen-phone
+                margin-left 0
+                margin-top gap*4
+
+
+.Next
+    background #FD3926
+    padding 1vw 4vw
+    margin-top 4vw
+    
+
+    &__hint
+        font-size 1.1vw
+        line-height 1.5vw
+
+    &__title
+        margin-top 7vw
+        font-size 6vw
+        line-height 6vw
+        letter-spacing -0.33vw
+
+.App
+    overflow-x hidden
+    overflow-y auto
+    background #4a4949
+    color #f0f0f0
+    text-transform uppercase
+    padding 0
+    margin 0
+    touch-highlight none
+    font-smoothing antialiased
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+    font-family 'univers-next-pro'
+    // font-family 'ARKDiatypeMono'
+    padding-top 11vw
+
+    &_PathOfAwakening
+        background #000 !important
+        .Intro
+            background #000 !important
+
+    &_Person
+        @media $screen-phone
+            .Workslist
+                margin-top 0 !important
+            .Hero
+                height 70vw
+                margin-left 0 !important
+                margin-top -61px !important
+                &__name
+                    font-size 30px
+                    line-height 32px
+                &__role
+                    font-size 16px
+                    line-height 18px
+        .App__item_list
+            margin-top 0 !important
+            margin-bottom 0 !important
+            padding 0vw 4vw .3vw 4vw !important
+
+    &_Yandex
+        background-color #FD3926
+        color #000
+        .Headartsy
+            background-color #000
+        .WorkCard__type, .Cast__title
+            color #7F1D13
+        @media $screen-phone
+            .Workcard__right .Cast
+                border-top 2px solid #000000
+
+    &_Work 
+        font-family 'ARKDiatypeMono'
+        background #F7F7F7
+        color #000
+
+        .Work + .Work
+            margin-top 6vw !important
+    @media $screen-phone
+        padding-top 14vw
+
+    &__side
+        position fixed
+        top 0
+        bottom 0
+        width 50vw
+
+    &__menu
+        visibility hidden
+        z-index 11000
+        position relative
+        &-close
+            .Button
+                position fixed
+                top gap*2
+                right gap*2
+                z-index 500
+
+    &__cols
+        display flex
+
+        @media $screen-phone
+            display block
+        .App__text
+            width 50%
+            @media $screen-phone
+                width 100%
+            display inline-block
+            &:first-child
+                margin-right gap*4
+                @media $screen-phone
+                    margin-right 0
+
+    .intro
+        margin-bottom 0
+        position fixed
+        top 0
+        bottom 0
+        left 0
+        right 0
+        margin-top 0
+        @media $screen-phone
+            margin-bottom 32px
+
+    &__live
+        margin-bottom gap
+
+    &__level
+        margin-top gap*3
+
+    &__item
+
+        &_A
+            @media $screen-phone
+                display none
+            position absolute
+            top 24vw
+            bottom 0
+            left 0
+            right 0
+
+        &_Zero
+            height 64vh
+
+        
+
+        &_Hits
+            margin 0 -4vw !important
+
+        &_List
+            background #d20000
+            padding 2vw 4vw 3vw 4vw
+            color #c1c1c1
+            margin-top 5vw !important
+            margin-bottom 5vw !important
+            
+
+        &_Main
+            .Work
+                + .Work
+                    margin-top 0
+                    .Thumb
+                        box-shadow none
+                &__video
+                    border 0
+                    border-radius 0
+                &__hero
+                    border 0
+        
+        position relative
+        
+        gridX()
+
+        &_Adjust
+            padding 0 calc(4vw - 4px)
+        & + &
+            margin-top 2.6vw
+            @media $screen-phone
+                margin-top 7vw
+
+    &__text
+        body()
+        max-width 60%
+        @media $screen-phone
+            max-width 100%
+        &_Size
+            &_L
+                superbody()
+
+    &__p
+        margin-top 2.2vw
+
+    &__topline
+        topline()
+
+    &__title
+        header()
+        microgramma()
+        margin-top -6px
+        max-width 50%
+        @media $screen-phone
+            max-width 100%
+
+    &__supertitle
+        header()
+        microma()
+        color red
+
+// Rolling animation styles
+.rolling-animation
+    font-family 'JetBrains Mono', monospace
+    font-weight 600
+    color #f00d0d !important
+    transition color 0.1s ease

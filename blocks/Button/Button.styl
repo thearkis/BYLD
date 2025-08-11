@@ -1,0 +1,54 @@
+.Button
+    caps()
+    background white
+    color black
+    padding 8px 16px 6px 16px
+    border-radius 3px
+    cursor pointer
+    display flex
+    align-items center
+
+    &_Inline
+        display inline-block
+
+    .icon
+        margin-right 6px
+        margin-left -6px
+
+    div
+        display inline-block
+
+    &__hint
+        color hint
+        margin-left gap
+
+    &_Type
+        &_Blur
+            buttonBlur()
+        &_Action
+            color white
+            background red
+            .icon
+                background-color white
+            
+
+    &_Size
+        &_XL
+            display flex
+            height 11vw
+            position relative
+            @media $screen-phone
+                height 110px
+            .icon
+                position absolute
+                bottom 24px
+                right 24px
+
+            .Button
+                &__text
+                    position absolute
+                    top 24px
+                    
+
+                    
+

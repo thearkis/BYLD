@@ -1,0 +1,23 @@
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                <items>
+                    <Link href="https://cdn.sanity.io/files/7wbnm9gp/production/c7a90cddfbaf867a7fda0319540c1353709b1b12.pdf"> <item>Whitepaper</item> </Link>
+                    <Link href="/newsroom"> <item>Newsroom</item> </Link>
+                    <Link href="/careers"> <item>Careers</item> </Link>
+                    <Link href="/people"> <item>People</item> </Link>
+                    <Link href="/contact"> <item>Contact</item> </Link>
+                    <Link New href="https://www.linkedin.com/company/zenno-astronautics/"> <item>Linkedin</item> </Link>
+                </items>,
+                
+                <copy>Zenno 2024</copy>
+            )
+
+            
+        },
+            
+    }   
+})

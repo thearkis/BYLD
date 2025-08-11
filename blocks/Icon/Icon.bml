@@ -1,0 +1,31 @@
+/**
+ * @block Icon Иконка
+ * @tag icon
+ */
+
+Beast.decl({
+    Icon: {
+        mod: {
+            Name: '',   // @mod Name {string} Имя глифа
+            Size: '24',  // @mod Size {S M! L} Размер
+            Color: '',  // @mod Color {string} Имя цвета
+        },
+        param: {
+            color: '', // @param Color {string} hex-код цвета иконки
+        },
+        expand: function () {
+            if (this.param('color')) {
+                this.setColor(this.param('color'))
+            }
+        },
+        setColor: function (color) {
+            if (color[0] === '#') {
+                this.css('background-color', color)
+            } else {
+                this.mod('color', color)
+            }
+        },
+    }
+})
+
+// @example <Icon Name="Attention"/>

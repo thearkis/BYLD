@@ -1,0 +1,20 @@
+Beast.decl({
+    Form: {
+        expand: function () {
+
+            this.append(
+                this.get('item')
+            )    
+        }
+    },
+    Form__action: {
+        expand: function () {
+
+            this.append(
+                <Button icon="arrow" Size="XL" Type="Action">{this.text()}</Button>
+            )    
+        }
+    },
+})
+
+

@@ -1,0 +1,86 @@
+@keyframes point
+    0%
+        margin-top 0.03em
+    50%
+        margin-top 0.2em
+    100%
+        margin-top 0.03em
+
+
+.Contact
+    background #989790
+    border-top 1px solid #86857b
+
+    &__qr
+        width 3.3em
+        height 3.3em
+        background-size cover
+        margin .5em 0
+        @media $screen-phone
+            display none
+    &__action
+        position absolute
+        right 40px
+        top 0
+        font-size 1.9vw
+        line-height 2.5vw
+        padding .4em 1.5em .4em .8em
+        border-radius 40px
+        background #CB4A2F
+        cursor pointer
+        overflow hidden
+        @media $screen-phone
+            right initial
+            padding 24px 47px 24px 19px
+            top 22px
+            font-size 28px
+        &:hover
+            &:after
+                animation point .8s infinite
+                @media $screen-phone
+                    animation none
+        &:after
+            transition all 250ms ease-out
+            content ''
+            height 1.2em
+            width 1.2em
+            background-size 1.2em
+            background-position center center
+            background-image url('/assets/download.svg')
+            background-repeat no-repeat
+            position absolute
+            margin-top 0.03em
+            @media $screen-phone
+                margin-top -10px
+                height 32px
+                width 32px
+                background-size 32px
+
+    
+    &__item
+        &_qr
+            position relative
+            height 3.6em
+            line-height initial
+            
+        font-size 4vw
+        padding 0 40px
+        line-height 32px
+        line-height 210px
+        height 210px
+        border-bottom 1px solid #86857b
+        letter-spacing -1px
+
+        
+
+        @media $screen-phone
+            font-size 28px
+            padding 0 20px
+            line-height 160px
+            height 160px
+            line-height 140px
+            height 140px
+
+
+            
+        

@@ -1,0 +1,100 @@
+Beast.decl({
+    Gallery: {
+        expand: function () {
+            this.append(
+                <items>
+                    {this.get('item')}
+                </items>
+            )
+        },
+
+        domInit: function() {
+            if (window.innerWidth > 767) {
+                const gallery = this.domNode(); // Ensure this is the scrollable container
+                const galleryContainer = gallery.querySelector('.gallery__items');
+                const images = gallery.querySelectorAll('img');
+
+                if (images.length > 0) {
+                    // Assuming all images have the same width and the same margin for simplicity
+                    const imageWidth = images[0].offsetWidth;
+                    const galleryWidth = gallery.offsetWidth; // Get the gallery's visible width
+                    const halfGalleryWidth = galleryWidth / 2; // Half of the gallery width to help center images
+
+                    gallery.style.overflowX = 'scroll';
+                    gallery.style.display = 'flex';
+                    gallery.style.flexWrap = 'nowrap';
+
+                    galleryContainer.addEventListener('mousemove', (event) => {
+                        const galleryRect = gallery.getBoundingClientRect();
+                        const clickX = event.clientX - galleryRect.left; // Relative X position within the gallery
+                        const isClickOnRightSide = clickX > galleryRect.width / 2;
+                        const scrollRightLimit = gallery.scrollWidth - galleryRect.width;
+                        const atStart = gallery.scrollLeft === 0;
+                        const atEnd = gallery.scrollLeft >= scrollRightLimit;
+
+                        // Decide cursor based on position and scroll availability
+                        gallery.style.cursor = ((isClickOnRightSide && atEnd) || (!isClickOnRightSide && atStart)) ? 'default' : 'pointer';
+                    });
+
+                    galleryContainer.addEventListener('click', (event) => {
+                        const galleryRect = gallery.getBoundingClientRect();
+                        const clickX = event.clientX - galleryRect.left; // Relative click X position within the gallery
+
+                        images.forEach((img, index) => {
+                            const imgRect = img.getBoundingClientRect();
+                            if (clickX >= imgRect.left - galleryRect.left && clickX < imgRect.right - galleryRect.left) {
+                                // Calculate the scroll position to center the clicked image
+                                let imgCenterPosition = img.offsetLeft + (imageWidth / 2); // Center position of the clicked image relative to the gallery's scroll area
+                                let newScrollPosition = imgCenterPosition - halfGalleryWidth; // Adjust scroll position to center the image
+                                
+                                // Apply boundary checks
+                                newScrollPosition = Math.max(newScrollPosition, 0); // Prevent scrolling beyond the start
+                                newScrollPosition = Math.min(newScrollPosition, gallery.scrollWidth - galleryWidth); // Prevent scrolling beyond the end
+
+                                gallery.scroll({
+                                    left: newScrollPosition,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        });
+                    });
+
+                    gallery.addEventListener('mouseenter', () => gallery.style.animationPlayState = 'paused');
+                    gallery.addEventListener('mouseleave', () => gallery.style.animationPlayState = 'running');
+                }
+            }
+
+        }
+
+
+
+
+
+        // domInit: function () {
+        //     const gallery = this.domNode(); // Assuming this method gets the gallery DOM node
+
+        //     // Apply animation to the gallery container
+        //     gallery.style.animation = 'slide 50s infinite linear';
+
+        //     // Pause animation on hover
+        //     gallery.addEventListener('mouseenter', () => {
+        //         gallery.style.animationPlayState = 'paused';
+        //     })
+        //     gallery.addEventListener('mouseleave', () => {
+        //         gallery.style.animationPlayState = 'running';
+        //     });
+        // }
+            
+    },
+
+    Gallery__item: {
+        expand: function () {
+            this.append(
+                <Thumb>{this.text()}</Thumb>
+            )
+        },
+            
+    }
+})
+
+

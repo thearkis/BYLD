@@ -1,0 +1,49 @@
+
+@keyframes slide {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+.Gallery
+    display flex
+    justify-content left
+    -ms-overflow-style none
+    scrollbar-width none
+    margin 0 -60px
+    &::-webkit-scrollbar
+        display none
+
+    @media $screen-phone
+        margin 0 -20px
+        overflow scroll
+        overflow-scrolling touch
+        &::-webkit-scrollbar
+        &::scrollbar
+            display none
+    
+    &__item
+        display inline-block
+        z-index 8888
+        width 48vw
+        
+        .thumb
+            width 48vw
+            
+        @media $screen-phone
+            width 352px
+            height 198px
+            .thumb
+                width 352px
+                height 198px
+        
+        & + &
+            margin-left gap * 2
+
+    &__items
+        display flex
+        flex-wrap nowrap
+        width max-content
+        padding 0 60px
+        @media $screen-phone
+            padding 0 20px
+        

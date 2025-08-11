@@ -1,0 +1,35 @@
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    <text>{this.text()}</text>
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(<Icon Name="{this.param('icon')}"/>)
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(<Icon Name="{this.param('icon')}"/>)
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    <text>{this.text()}</text>
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        <hint>{this.get('hint')}</hint>
+                    )
+                }
+            }   
+        }       
+    }   
+})

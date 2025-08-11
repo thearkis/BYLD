@@ -1,0 +1,43 @@
+.Menu
+    position relative
+
+    &_Type
+        &_Touch
+            position fixed
+            z-index 1000
+            bottom 0
+            left 0
+            right 0
+            width 96vw
+            background none
+            text-align center
+            left 50%
+            transform translate(-50%, 120%)
+            border-radius gap
+            transition transform .4s
+        
+            .Menu
+                
+                &__item
+                    display block
+                    margin-top gap
+                    
+                    &:last-child
+                        margin-bottom gap
+                    .Button
+                        padding 32px 16px 32px 16px
+                        background white
+                        color black
+                        &__text
+                            title()
+                            microma()
+                        
+    
+    &__item
+        display inline-block
+        &_State
+            &_Active
+                .Button
+                    background black
+        & + &
+            margin-left gap

@@ -1,0 +1,30 @@
+Beast.decl({
+    Plates: {
+        expand: function () {
+            this.append( 
+                <items>
+                    {this.get('item', 'Link')}
+                </items>
+                
+            )
+            
+
+        }
+    },
+
+
+    Plates__item: {
+        tag: 'a',
+        expand: function () {
+            var href = this.param('href')
+            this.domAttr('href', href)
+            this.domAttr('target', '_blank')
+            this.append('')
+            
+            this.css({
+                backgroundImage: 'url('+ this.text() +')'
+            })
+
+        }
+    }  
+})

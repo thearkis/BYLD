@@ -1,0 +1,149 @@
+Beast.decl({
+    Live: {
+        expand: function () {
+            this.append(
+                <circle/>,
+                <text>{this.text()}</text>
+            )
+        }   
+    }
+})
+
+Beast.decl({
+    Zones: {
+        
+        expand: function () {
+            
+            
+
+            this.append(
+
+                
+                <item>
+                    <time Iceland>16:36</time>
+                    <name>Reykjavík</name>
+                </item>,
+
+                <item>
+                    <time Amsterdam>19:36</time>
+                    <name>Amsterdam</name>
+                </item>,
+
+                <item >
+                    <time Moscow>19:36</time>
+                    <name>Moscow</name>
+                </item>,
+
+                
+
+
+
+
+
+                
+            )
+        },
+        domInit: function () {
+            function getTimeInTimezone(timezone) {
+                const now = new Date();
+                const formatter = new Intl.DateTimeFormat('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: timezone,
+                    hour12: false
+                });
+                return formatter.format(now);
+                
+            }
+
+            function updateTime(containerSelector, timezone) {
+                const time = getTimeInTimezone(timezone);
+                const [hours, minutes] = time.split(':');
+
+                const timeContainer = document.querySelector(containerSelector);
+                if (timeContainer) {
+                    const colon = document.createElement('span');
+                    colon.className = 'blink';
+                    colon.textContent = ':';
+                    timeContainer.innerHTML = ''; // Clear the previous content
+                    timeContainer.appendChild(document.createTextNode(hours));
+                    timeContainer.appendChild(colon);
+                    timeContainer.appendChild(document.createTextNode(minutes));
+                }
+            }
+
+           function time() {
+                const times = [
+                    { selector: '.zones__time_moscow', timezone: 'Europe/Moscow' },
+                    { selector: '.zones__time_iceland', timezone: 'Atlantic/Reykjavik' },
+                    { selector: '.zones__time_bulgaria', timezone: 'Europe/Sofia' },
+                    { selector: '.zones__time_amsterdam', timezone: 'Europe/Amsterdam' },
+                    { selector: '.zones__time_cusco', timezone: 'America/Lima' },
+                ];
+
+                times.forEach(time => {
+                    updateTime(time.selector, time.timezone);
+                    setInterval(() => updateTime(time.selector, time.timezone), 1000);
+                });
+            }
+
+            time()
+           
+        },  
+    }
+})
+
+Beast.decl({
+    Spotify: {
+        requestApiV2: function (path, data) {
+            var self = this;
+
+            Ajax({
+                url: 'https://arkradio.netlify.app/.netlify/functions/spotify-now-playing',
+                data: data,
+                success: function (data) {
+                    var json = JSON.parse(data);
+
+                    if (json.isPlaying) {
+                        self.empty().append(
+                            <text Minor>mood</text>,
+                            <Live><circle/> {json.artist} — {json.title}</Live>,
+                            <Thumb>{json.albumArt}</Thumb>
+                        );
+                    } else {
+                        // No track is playing, render "Burial — Wounder"
+                        self.empty().append(
+                            <text Minor>mood</text>,
+                            <Live><circle/> Burial — Wounder</Live>
+                        );
+                    }
+                },
+                error: function () {
+                    // In case of an error, also render "Burial — Wounder"
+                    self.empty().append(
+                        <text Minor>mood</text>,
+                        <Live><circle/> Burial — Wounder</Live>
+                    );
+                }
+            });
+        },
+        domInit: function () {
+            var self = this;
+
+            // Polling logic
+            function poll() {
+                self.requestApiV2();
+                setTimeout(poll, 30000); // Poll every 30 seconds
+            }
+
+            poll(); // Initial call to start polling
+        }
+    }
+});
+
+Beast.decl({
+    Live__circle: {
+        tag: 'span'
+           
+    }
+})

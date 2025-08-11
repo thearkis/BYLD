@@ -1,0 +1,12 @@
+Beast.decl({
+    Showcase: {
+        expand: function () {
+            
+            this.append(
+                <items>
+                    {this.get('item')}
+                </items>
+            )
+        }   
+    }
+})

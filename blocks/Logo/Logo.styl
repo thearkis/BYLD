@@ -1,0 +1,42 @@
+
+
+.Logo
+	font-size 32vw
+	margin-top -28vw
+	microgramma()
+	@media $screen-phone
+		margin-top -7vw
+	
+	&_image
+		size = 7vw
+		height 2.2vw
+		mask-size size
+		width size
+		mask-position center center
+		mask-image url('./i/logo.svg')
+		mask-repeat no-repeat
+		background-color white
+
+		@media $screen-phone
+			position absolute
+			top 24px
+			mask-size 100px !important
+			width 100px !important
+			height 30px !important
+
+		&_state
+			&_fixed
+				position absolute
+				top 0
+
+				@media $screen-phone
+					position relative
+					margin 0 auto !important
+					top 13px !important
+				
+
+
+
+
+
+
