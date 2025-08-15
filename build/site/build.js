@@ -6254,6 +6254,108 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
+Beast.decl({
+    HeadArtsy: {
+        expand: function () {
+            
+        },
+        domInit: function fn() {
+            const headartsy = document.querySelector('.headartsy');
+            let defaultTopPosition = -44; // Initial position in pixels (default for desktop)
+            let maxTopPosition = -95; // Maximum top position to stop movement (default for desktop)
+            let scrollMultiplier = 2; // Scroll multiplier (default for desktop)
+            let isHovered = false; // Track hover state
+
+            // Function to set offsets based on screen width
+            function updateOffsetsForScreenSize() {
+                if (window.innerWidth <= 768) { // Adjust for mobile devices
+                    defaultTopPosition = 2; // New initial position for mobile
+                    maxTopPosition = -13; // New max position for mobile
+                    scrollMultiplier = 1.5; // Slower scroll effect for mobile
+                } else { // Default for desktop
+                    defaultTopPosition = -44;
+                    maxTopPosition = -95;
+                    scrollMultiplier = 2;
+                }
+            }
+
+            // Set initial offsets based on screen size
+            updateOffsetsForScreenSize();
+
+            // Update offsets if window is resized
+            window.addEventListener('resize', updateOffsetsForScreenSize);
+
+            window.addEventListener('scroll', () => {
+                if (!isHovered) {
+                    updateTopPosition();
+                }
+            });
+
+            // Function to update the top position based on scroll
+            function updateTopPosition() {
+                const scrollOffset = window.pageYOffset;
+                let topOffset = defaultTopPosition - (scrollOffset * scrollMultiplier); // Adjust with multiplier
+
+                // Cap the movement to stop at maxTopPosition
+                if (topOffset < maxTopPosition) {
+                    topOffset = maxTopPosition;
+                }
+
+                headartsy.style.top = `${topOffset}px`;
+            }
+
+            // Listen for hover events to enable/disable JavaScript control
+            headartsy.addEventListener('mouseenter', () => {
+                isHovered = true; // Disable JS scroll effect on hover
+                headartsy.style.top = '0'; // Move to top 0 on hover
+            });
+
+            headartsy.addEventListener('mouseleave', () => {
+                isHovered = false; // Re-enable JS scroll effect after hover ends
+                updateTopPosition(); // Immediately apply scroll-based position on mouse leave
+            });
+        }       
+    }
+})
+
+
+
+Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+                Beast.node("content",{__context:this},"\n                    ",Beast.node("logo",undefined,"\n                        \n                            ",Beast.node("Logo"),"\n                        \n                    "),"\n                    ",Beast.node("menu",undefined,"\n                        ",this.get('Menu'),"\n                    "),"\n                    ",Beast.node("Icon",{"Name":"Menu"}),"\n                ")
+            )
+        },
+        // domInit: function fn() {
+        //     var lastScrollTop = 0; // This variable will hold the last scroll position
+        //     var head = document.querySelector('.head'); // Select the header element
+
+        //     window.addEventListener('scroll', function() {
+        //         // Check if 'App' div has the 'Mobile' class
+        //         var appDiv = document.querySelector('.App');
+        //         if (appDiv.classList.contains('mobile')) {
+        //             return; // Exit the function early if 'App' div has 'Mobile' class
+        //         }
+
+        //         var currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        //         if (currentScrollTop > lastScrollTop) {
+        //             // If the current scroll position is greater than the last scroll position, the user is scrolling down
+        //             head.classList.add('head_hide');
+        //         } else if (currentScrollTop < lastScrollTop) {
+        //             // If the current scroll position is less than the last scroll position, the user is scrolling up
+        //             head.classList.remove('head_hide');
+        //         }
+
+        //         lastScrollTop = currentScrollTop; // Update the last scroll position to the current position
+        //     });
+
+        // }       
+    }
+})
+
+
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6660,104 +6762,3 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-Beast.decl({
-    HeadArtsy: {
-        expand: function () {
-            
-        },
-        domInit: function fn() {
-            const headartsy = document.querySelector('.headartsy');
-            let defaultTopPosition = -44; // Initial position in pixels (default for desktop)
-            let maxTopPosition = -95; // Maximum top position to stop movement (default for desktop)
-            let scrollMultiplier = 2; // Scroll multiplier (default for desktop)
-            let isHovered = false; // Track hover state
-
-            // Function to set offsets based on screen width
-            function updateOffsetsForScreenSize() {
-                if (window.innerWidth <= 768) { // Adjust for mobile devices
-                    defaultTopPosition = 2; // New initial position for mobile
-                    maxTopPosition = -13; // New max position for mobile
-                    scrollMultiplier = 1.5; // Slower scroll effect for mobile
-                } else { // Default for desktop
-                    defaultTopPosition = -44;
-                    maxTopPosition = -95;
-                    scrollMultiplier = 2;
-                }
-            }
-
-            // Set initial offsets based on screen size
-            updateOffsetsForScreenSize();
-
-            // Update offsets if window is resized
-            window.addEventListener('resize', updateOffsetsForScreenSize);
-
-            window.addEventListener('scroll', () => {
-                if (!isHovered) {
-                    updateTopPosition();
-                }
-            });
-
-            // Function to update the top position based on scroll
-            function updateTopPosition() {
-                const scrollOffset = window.pageYOffset;
-                let topOffset = defaultTopPosition - (scrollOffset * scrollMultiplier); // Adjust with multiplier
-
-                // Cap the movement to stop at maxTopPosition
-                if (topOffset < maxTopPosition) {
-                    topOffset = maxTopPosition;
-                }
-
-                headartsy.style.top = `${topOffset}px`;
-            }
-
-            // Listen for hover events to enable/disable JavaScript control
-            headartsy.addEventListener('mouseenter', () => {
-                isHovered = true; // Disable JS scroll effect on hover
-                headartsy.style.top = '0'; // Move to top 0 on hover
-            });
-
-            headartsy.addEventListener('mouseleave', () => {
-                isHovered = false; // Re-enable JS scroll effect after hover ends
-                updateTopPosition(); // Immediately apply scroll-based position on mouse leave
-            });
-        }       
-    }
-})
-
-
-
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-                Beast.node("content",{__context:this},"\n                    ",Beast.node("logo",undefined,"\n                        \n                            ",Beast.node("Logo"),"\n                        \n                    "),"\n                    ",Beast.node("menu",undefined,"\n                        ",this.get('Menu'),"\n                    "),"\n                    ",Beast.node("Icon",{"Name":"Menu"}),"\n                ")
-            )
-        },
-        // domInit: function fn() {
-        //     var lastScrollTop = 0; // This variable will hold the last scroll position
-        //     var head = document.querySelector('.head'); // Select the header element
-
-        //     window.addEventListener('scroll', function() {
-        //         // Check if 'App' div has the 'Mobile' class
-        //         var appDiv = document.querySelector('.App');
-        //         if (appDiv.classList.contains('mobile')) {
-        //             return; // Exit the function early if 'App' div has 'Mobile' class
-        //         }
-
-        //         var currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        //         if (currentScrollTop > lastScrollTop) {
-        //             // If the current scroll position is greater than the last scroll position, the user is scrolling down
-        //             head.classList.add('head_hide');
-        //         } else if (currentScrollTop < lastScrollTop) {
-        //             // If the current scroll position is less than the last scroll position, the user is scrolling up
-        //             head.classList.remove('head_hide');
-        //         }
-
-        //         lastScrollTop = currentScrollTop; // Update the last scroll position to the current position
-        //     });
-
-        // }       
-    }
-})
-
