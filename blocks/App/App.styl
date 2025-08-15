@@ -1,7 +1,60 @@
 
 
+.Clients
+    font-size 1.3vw
+    line-height 1.5vw
+    display flex
+    gap .1vw
+    &__column
+        flex 1
+        display flex
+        flex-direction column
+        gap .1vw
+    
+
+.Glyph
+    size = 4vw
+    height size
+    background-size size
+    width size
+    background-position center center
+    background-repeat no-repeat
+
+    margin-bottom 1vw
+    &_About
+        background-image url('/assets/glyph-about.svg')
+    &_Services
+        background-image url('/assets/glyph-services.svg')
+    &_Clients
+        background-image url('/assets/glyph-clients.svg')
+
+
+.Services
+    font-size 1.3vw
+    line-height 1.5vw
+    display flex
+    gap 6vw
+    
+    &__item
+        flex 1
+        display flex
+        flex-direction column
+        &::before
+            content ' / '
+            display block
+            color blue
+
+.Section
+    margin 5vw 30px 0 30px
+    position relative
+    &_Services
+        margin-top 16vw
+    &__head
+        padding-top 1vw
+        margin-bottom 1vw
+        border-bottom 1px solid #303030
+
 .Misc
-	
     size = 100vw
     height 4vw
     background-size size
@@ -10,18 +63,7 @@
     background-image url('/assets/misc.svg')
     background-repeat no-repeat
 
-.Glyph
-    margin-top 5vw
-    margin-bottom 1vw
-    size = 2vw
-    margin-left 30px
-    height 4vw
-    background-size size
-    width size
-    background-position center center
-    background-repeat no-repeat
-    &_One
-        background-image url('/assets/glyph-01.svg')
+
 
 .Action
     position absolute
@@ -30,15 +72,10 @@
     border 1px solid red
     padding 1vw 2vw
     color red
-    font-family 'Ticketing'
     font-size 1vw
 
 .Text
-    margin 0 30px
-    padding-top 1vw
-    border-top 1px solid #303030
     position relative
-    font-family 'Ticketing'
     font-size 1.3vw
     line-height 1.5vw
     &__s
@@ -115,240 +152,8 @@
     to {opacity:1}
 }
 
-// Fire-like flickering effect - pure dimming like flame intensity
-@keyframes fire-flicker {
-    0% { 
-        opacity: 1;
-    }
-    5% { 
-        opacity: 0.90;
-    }
-    12% { 
-        opacity: 1;
-    }
-    18% { 
-        opacity: 0.82;
-    }
-    25% { 
-        opacity: 0.95;
-    }
-    32% { 
-        opacity: 0.78;
-    }
-    38% { 
-        opacity: 1;
-    }
-    45% { 
-        opacity: 0.85;
-    }
-    52% { 
-        opacity: 0.92;
-    }
-    58% { 
-        opacity: 0.80;
-    }
-    65% { 
-        opacity: 1;
-    }
-    72% { 
-        opacity: 0.87;
-    }
-    78% { 
-        opacity: 0.75;
-    }
-    85% { 
-        opacity: 0.96;
-    }
-    92% { 
-        opacity: 0.83;
-    }
-    100% { 
-        opacity: 1;
-    }
-}
-
-.Circle
-    @media $screen-phone
-        top initial
-        display inline-block
-        margin-right 10px
-        position relative
-        height 14px
-        width 14px
-    top .65vw
-    margin-left -1.2vw
-    position absolute
-    animation pulse 2s infinite
-    margin-right .4vw
-    background #8c8c8c
-    border-radius 100%
-    width .8vw
-    height .8vw
-
-    &_1
-        animation-delay 1s
-
-    &_2
-        animation-delay .9s
-
-    &_3
-        animation-delay .8s
-
-    &_4
-        animation-delay .7s
-    
-    &_5
-        animation-delay .6s
-    
-    &_6
-        animation-delay .5s
-    
-    &_7
-        animation-delay .4s
-    
-    &_8
-        animation-delay .3s
-    
-    &_9
-        animation-delay .2s
-
-    &_10
-        animation-delay .1s
-
-    &_11
-        animation-delay 0s
-
-.Workslist
-    font-family 'OCR'
-    font-size 1.14vw
-    @media $screen-phone
-        margin-top 50px
-
-    &__ae
-        display inline
-        font-family 'Plaex'
-
-    &__title
-        font-size 6vw
-        padding-bottom 2vw
-        margin-top 0
-        text-transform uppercase
-        letter-spacing -.1vw
-        //color #646464
-        color #828282
-        font-family Microgramma D
-        @media $screen-phone
-            font-size 46px
-            line-height 48px
-            padding 26px 0
-    &__item
-        display flex
-        line-height 2vw
-        border-top 2px solid #ffffff14
-        transition all .1s
-        background-color #d20000
-
-        // &:hover
-        //     @media $screen-phone
-        //         background-color #d20000
-        //         margin initial
-        // background-color #828282
-        // margin 0 -1vw
-        // padding 0 1vw
-        // color white
-        // transition all .1s
-
-        @media $screen-phone
-            font-size 19px
-            line-height 25px
-            padding 7px 0
-    &__cell
-        position relative
-        width 27%
-        @media $screen-phone
-            width 50%
-        &_Year
-            @media $screen-phone
-                text-align right
-        &_Wide
-            width 50%
-            @media $screen-phone
-                display none
-        &_Type
-            @media $screen-phone
-                display none
-        &_Ghost
-            opacity .6
-
-.App_Ae
-    background-color black !important
-    color #9A9A9A !important
-    font-family "ibm-plex-mono", sans-serif !important
-    font-weight 400 !important
-    font-style normal !important
 
 
-.AE
-    text-align center
-    margin-top 390px
-    &__aeimg
-        width 400px
-        margin 32px auto
-        @media $screen-phone
-            width 100%
-            margin-bottom 48px
-    @media $screen-phone
-        margin-top 160px
-    &__highres
-        @media $screen-phone
-            display none !important
-        &_mobile
-            display none !important
-            @media $screen-phone
-                display block !important
-        
-    &__eye
-        width 416px
-        margin-bottom 48px
-        @media $screen-phone
-            width 100%
-    &__items
-        display flex
-        @media $screen-phone
-            display block
-            width 100%
-        width 1200px
-        margin 120px auto
-        text-align center
-    &__video    
-        width 400px
-        @media $screen-phone
-            width 100%
-        border 1px solid #a4790f5e
-    &__title
-        margin 0 auto
-        
-        font-size 45px
-        color #FF9D00
-        margin-bottom 48px
-    &__text
-        width 710px
-        margin 0 auto
-        @media $screen-phone
-            width initial
-            padding 0 24px
-    &__p
-        font-size 24px
-        @media $screen-phone
-            font-size 16px
-        & + &
-            margin-top 32px
-    .Phone
-        margin 48px auto
-        &__video
-            width 662px
-            @media $screen-phone
-                width 100%
 
 
 .R
@@ -379,162 +184,7 @@ html
     height 100%
     width 100%
 
-.Fog
-    position fixed
-    z-index 11000
-    top 0
-    bottom 0
-    right 0
-    left 0
-    background black
-    opacity .8
-    display none
 
-.Zones
-    white-space nowrap
-    &__time
-        color #999
-        margin-right gap
-    &__item
-        display table
-    &__time, &__name
-        display inline-block
-
-.Spotify
-    @media $screen-phone
-        .Thumb
-            display none
-    &__text
-        white-space nowrap
-    
-.work__item_ratio_16x10 .thumb:after {
-    content: '';
-    display: block;
-    padding-bottom: 62.5%;
-}
-
-
-.HeadSmall
-    @media $screen-phone
-        position fixed
-        top 18px
-        z-index 8888
-    position relative
-    font-size 1.6vw
-    &__menu
-        position absolute
-        right 0
-        top 0
-        
-    &__item
-        display inline-block
-        & + &
-            margin-left 1vw
-    margin-top -8vw
-    &__logo
-        size = 6vw
-        height 1.5vw
-        mask-size size
-        width size
-        mask-position center center
-        mask-image url('/assets/ark-small.svg')
-        mask-repeat no-repeat
-        background-color #f00d0d
-
-        @media $screen-phone
-            position absolute
-            top 24px
-            mask-size 100px !important
-            width 100px !important
-            height 30px !important
-
-        
-.Cols
-    body()
-    display flex
-    &_Footer
-        font-family 'OCR'
-        text-transform uppercase
-    &__a
-        display inline
-        color white
-
-    @media $screen-phone
-        display block
-
-    &__text
-        &_minor
-            color hint
-
-    &__p
-        
-        
-        &_list
-            margin-left gap*3
-            margin-top .4vw !important
-        & + &
-            margin-top 2.1vw
-
-    &__item
-        &_ocr
-            font-family 'OCR'
-            text-transform uppercase !important
-        &_intro
-            font-family 'univers-next-pro'
-            // font-family 'ARKDiatypeMono'
-            font-weight 500
-        @media $screen-phone
-            width initial    
-        width 27%
-
-        & + &
-            margin-left 2vw
-        &_comms
-            width 18%
-        &_radio, &_times, &_comms, &_today, &_clients
-            font-family 'OCR'
-        
-
-        &_today
-            display block
-            .Sleipnir
-                margin-top .4vw
-        &_intro
-            color #999
-            text-transform none
-            font-size 1.25vw
-            line-height 1.6vw
-            letter-spacing -.06vw
-        &_wide
-            width 50%
-            text-transform none
-            
-            @media $screen-phone
-                width initial
-                font-size 20px
-                line-height 24px
-        & + &
-
-            @media $screen-phone
-                margin-left 0
-                margin-top gap*4
-
-
-.Next
-    background #FD3926
-    padding 1vw 4vw
-    margin-top 4vw
-    
-
-    &__hint
-        font-size 1.1vw
-        line-height 1.5vw
-
-    &__title
-        margin-top 7vw
-        font-size 6vw
-        line-height 6vw
-        letter-spacing -0.33vw
 
 .App
     overflow-x hidden
@@ -548,8 +198,7 @@ html
     font-smoothing antialiased
     -webkit-font-smoothing antialiased
     -moz-osx-font-smoothing grayscale
-    font-family 'univers-next-pro'
-    // font-family 'ARKDiatypeMono'
+    font-family 'Ticketing'
     padding-top 11vw
     position relative
     
@@ -589,181 +238,10 @@ html
     100%
         text-shadow 0 0 15px #FF3050, 0 0 30px #FF2040, 0 0 50px #FF1030, 0 0 70px rgba(255, 48, 80, 0.3)
 
-    &_PathOfAwakening
-        background #000 !important
-        .Intro
-            background #000 !important
-
-    &_Person
-        @media $screen-phone
-            .Workslist
-                margin-top 0 !important
-            .Hero
-                height 70vw
-                margin-left 0 !important
-                margin-top -61px !important
-                &__name
-                    font-size 30px
-                    line-height 32px
-                &__role
-                    font-size 16px
-                    line-height 18px
-        .App__item_list
-            margin-top 0 !important
-            margin-bottom 0 !important
-            padding 0vw 4vw .3vw 4vw !important
-
-    &_Yandex
-        background-color #FD3926
-        color #000
-        .Headartsy
-            background-color #000
-        .WorkCard__type, .Cast__title
-            color #7F1D13
-        @media $screen-phone
-            .Workcard__right .Cast
-                border-top 2px solid #000000
-
-    &_Work 
-        font-family 'ARKDiatypeMono'
-        background #F7F7F7
-        color #000
-
-        .Work + .Work
-            margin-top 6vw !important
-    @media $screen-phone
-        padding-top 14vw
-
-    &__side
-        position fixed
-        top 0
-        bottom 0
-        width 50vw
-
-    &__menu
-        visibility hidden
-        z-index 11000
-        position relative
-        &-close
-            .Button
-                position fixed
-                top gap*2
-                right gap*2
-                z-index 500
-
-    &__cols
-        display flex
-
-        @media $screen-phone
-            display block
-        .App__text
-            width 50%
-            @media $screen-phone
-                width 100%
-            display inline-block
-            &:first-child
-                margin-right gap*4
-                @media $screen-phone
-                    margin-right 0
-
-    .intro
-        margin-bottom 0
-        position fixed
-        top 0
-        bottom 0
-        left 0
-        right 0
-        margin-top 0
-        @media $screen-phone
-            margin-bottom 32px
-
-    &__live
-        margin-bottom gap
-
-    &__level
-        margin-top gap*3
-
-    &__item
-
-        &_A
-            @media $screen-phone
-                display none
-            position absolute
-            top 24vw
-            bottom 0
-            left 0
-            right 0
-
-        &_Zero
-            height 64vh
-
-        
-
-        &_Hits
-            margin 0 -4vw !important
-
-        &_List
-            background #d20000
-            padding 2vw 4vw 3vw 4vw
-            color #c1c1c1
-            margin-top 5vw !important
-            margin-bottom 5vw !important
-            
-
-        &_Main
-            .Work
-                + .Work
-                    margin-top 0
-                    .Thumb
-                        box-shadow none
-                &__video
-                    border 0
-                    border-radius 0
-                &__hero
-                    border 0
-        
-        position relative
-        
-        gridX()
-
-        &_Adjust
-            padding 0 calc(4vw - 4px)
-        & + &
-            margin-top 2.6vw
-            @media $screen-phone
-                margin-top 7vw
-
-    &__text
-        body()
-        max-width 60%
-        @media $screen-phone
-            max-width 100%
-        &_Size
-            &_L
-                superbody()
-
-    &__p
-        margin-top 2.2vw
-
-    &__topline
-        topline()
-
-    &__title
-        header()
-        microgramma()
-        margin-top -6px
-        max-width 50%
-        @media $screen-phone
-            max-width 100%
-
-    &__supertitle
-        header()
-        microma()
-        color red
+    
 
 // Rolling animation styles
 .rolling-animation
     font-family 'JetBrains Mono', monospace
     font-weight 600
-    color #FF4000 !important
     transition color 0.1s ease
