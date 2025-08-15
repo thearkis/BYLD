@@ -5248,22 +5248,61 @@ Beast.decl({
                 })
             })
 
-            // Parallax scrolling for .Data and .Logo elements
-            const parallaxElements = document.querySelectorAll('.Data, .Logo')
+            // Parallax scrolling for .Data and .Logo elements with different speeds
+            const dataElements = document.querySelectorAll('.Data')
+            const logoElements = document.querySelectorAll('.Logo')
             let ticking = false
             
             function updateParallax() {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+                const windowHeight = window.innerHeight
                 
-                parallaxElements.forEach(element => {
-                    // Move elements at 70% of normal scroll speed (slower)
-                    // This creates a lag effect in both directions (up and down)
-                    const parallaxSpeed = 0.8
+                // Data elements - slower parallax with blur
+                dataElements.forEach(element => {
+                    const parallaxSpeed = 0.7 // Slower - more lag effect
                     const yPos = -(scrollTop * (1 - parallaxSpeed))
                     
-                    // Apply transform with smooth rendering optimization
+                    // Calculate blur based on element position relative to viewport
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element is exiting the top of viewport
+                    if (elementTop < 0 && elementBottom > 0) {
+                        // Element is partially above viewport
+                        const exitProgress = Math.abs(elementTop) / elementRect.height
+                        blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur
+                    }
+                    
                     element.style.transform = `translate3d(0, ${yPos}px, 0)`
-                    element.style.willChange = 'transform'
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'transform, filter'
+                })
+                
+                // Logo elements - faster parallax with blur
+                logoElements.forEach(element => {
+                    const parallaxSpeed = 0.85 // Faster - less lag effect
+                    const yPos = -(scrollTop * (1 - parallaxSpeed))
+                    
+                    // Calculate blur based on element position relative to viewport
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element is exiting the top of viewport
+                    if (elementTop < 0 && elementBottom > 0) {
+                        // Element is partially above viewport
+                        const exitProgress = Math.abs(elementTop) / elementRect.height
+                        blurAmount = Math.min(exitProgress * 6, 6) // Max 6px blur (less than data)
+                    }
+                    
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'transform, filter'
                 })
                 
                 ticking = false
@@ -5813,7 +5852,7 @@ Beast.decl({
                         if (firstStep) {
                             const stepRect = firstStep.getBoundingClientRect()
                             const stepTop = stepRect.top
-                            const triggerPoint = windowHeight * 0.8
+                            const triggerPoint = windowHeight * 0.5
                             const fadeDistance = windowHeight * 0.3 // Fade over 30% of viewport height
                             
                             if (stepTop <= triggerPoint && stepTop > triggerPoint - fadeDistance) {
@@ -6426,35 +6465,6 @@ Beast
     
 });
 
-Beast.decl({
-    Menu: {
-        state: function () {
-            return {
-                items: []
-            }
-        },
-        requestApi: function (path, data) {
-            
-        },
-
-        expand: function () {
-            this.append(
-                this.get('menu-item')
-            )
-        },
-            
-    },
-    'Menu__menu-item': {
-        expand: function () {
-            this.append(
-                this.text()
-            )
-        }
-    },
-     
-})
-
-
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
@@ -6762,3 +6772,31 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    Menu: {
+        state: function () {
+            return {
+                items: []
+            }
+        },
+        requestApi: function (path, data) {
+            
+        },
+
+        expand: function () {
+            this.append(
+                this.get('menu-item')
+            )
+        },
+            
+    },
+    'Menu__menu-item': {
+        expand: function () {
+            this.append(
+                this.text()
+            )
+        }
+    },
+     
+})
+
