@@ -1,8 +1,144 @@
 
+.Reviews
+    size = 4vw
+    height 30vw
+    background-size 100%
+    width 100%
+    background-position center center
+    background-repeat no-repeat
+
+    margin-bottom 1vw
+    background-image url('/assets/reviews.svg')
+    transition opacity 0.8s ease
+    &_dimmed
+        opacity 0.3
+
+.cassette_piece_1.Cassette_piece_fixed
+    position fixed
+
+.Cassette
+    position absolute
+    width 24vw
+    height 26vw
+    right 11vw
+    top 6vw
+    z-index 1000
+    background-position center
+    background-repeat no-repeat
+    &_piece
+        &_1
+            background-image url('/assets/cassette/piece-01.svg')
+            .Cassette
+                &_fixed
+                    position fixed
+
+            
+        &_2
+            background-image url('/assets/cassette/piece-02.svg')
+            
+        &_3
+            background-image url('/assets/cassette/piece-03.svg')
+            
+        &_4
+            background-image url('/assets/cassette/piece-04.svg')
+            
+        &_5
+            background-image url('/assets/cassette/piece-05.svg')
+            
 
 
+.Process
+    margin-top 0 
+    position relative   
+    font-size 1.3vw
+    line-height 1.5vw
 
-    
+    &__misc-line_blue
+        color blue
+    &__num
+        color red
+        font-size 3vw
+        position absolute
+        right 3vw
+        top 3vw
+    &__misc
+        position absolute
+        bottom 3.5vw
+        background black
+        padding-right 1vw
+    &__text
+        width 40%
+        opacity .4
+    &__title
+        color red
+        font-size 3vw
+        margin-bottom 2vw
+        transition text-shadow 0.6s ease
+        &_glow
+            text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
+
+        
+    &__step
+        position relative
+        padding 3vw
+        margin 0
+        transition opacity 0.6s ease
+        
+        &_faded
+            opacity 0.3
+            &::after
+                content ''
+                position absolute
+                top 0
+                left 0
+                right 0
+                bottom 0
+                background linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.6) 100%)
+                pointer-events none
+                z-index 10
+                transition opacity 0.6s ease
+        
+        // Create pseudo-element for background image with opacity control
+        &::before
+            content ''
+            position absolute
+            top 0
+            left 0
+            right 0
+            bottom 0
+            background-position bottom center
+            background-repeat repeat-x
+            background-size 100%
+            opacity var(--bg-opacity, 0)
+            transition opacity 0.4s ease
+            z-index -1
+
+        &_01
+            &::before
+                background-image url('/assets/process_1.svg')
+            height 32vw
+        &_02
+            &::before
+                background-image url('/assets/process_2.svg')
+            height 33vw
+        &_03
+            &::before
+                background-image url('/assets/process_3.svg')
+            height 33vw
+        &_04
+            &::before
+                background-image url('/assets/process_4.svg')
+            height 33vw
+        &_05
+            &::before
+                background-image url('/assets/process_5.svg')
+            height 31.8vw
+            .Process
+                &__title, &__num
+                    margin-top .7vw
+
+        
+        
 
 .Clients
     font-size 1.3vw
@@ -31,28 +167,42 @@
         background-image url('/assets/glyph-services.svg')
     &_Clients
         background-image url('/assets/glyph-clients.svg')
+    &_Process
+        background-image url('/assets/glyph-process.svg')
+    &_Reviews
+        background-image url('/assets/glyph-reviews.svg')
 
 
 .Services
-    font-size 1.3vw
-    line-height 1.5vw
+    font-size 1.6vw
+    line-height 1.8vw
     display flex
     gap 6vw
+    counter-reset services-counter
     
     &__item
         flex 1
         display flex
         flex-direction column
+        counter-increment services-counter
+        opacity 0
+        filter blur(5px)
+        transition opacity 0.8s ease, filter 0.8s ease
         &::before
-            content ' / '
+            content counter(services-counter)
             display block
             color blue
+            font-size 4vw
+            line-height 4vw
+        &_loaded
+            opacity 1
+            filter blur(0px)
 
 .Section
     margin 5vw 30px 0 30px
     position relative
     &_Services
-        margin-top 16vw
+        margin-top 21vw
     &__head
         padding-top 1vw
         margin-bottom 1vw
@@ -70,29 +220,48 @@
 
 
 .Action
-    position absolute
+    position fixed
+    z-index 9999
     right 30px
     top 30px
     border 1px solid red
     padding 1vw 2vw
     color red
     font-size 1vw
+    transition all 0.3s ease
+    backdrop-filter blur(10px)
+    background rgba(255, 255, 255, 0.01)
+    white-space nowrap
+    min-width max-content
+    box-sizing border-box
+    &:hover
+        background red
+        color black
+        transform scale(1.02)
+        border-color red
+        backdrop-filter blur(15px)
 
 .Text
     position relative
-    font-size 1.3vw
-    line-height 1.5vw
+    font-size 1.6vw
+    line-height 1.8vw
     &__s
         color red
         display inline
     &__item
         max-width 40vw
         position absolute
+        opacity 0
+        filter blur(5px)
+        transition opacity 0.8s ease, filter 0.8s ease
         &_left 
             left 0
         &_right
             right 0
             top 8vw
+        &_loaded
+            opacity 1
+            filter blur(0px)
 
 
 .Data
@@ -205,6 +374,7 @@ html
     font-family 'Ticketing'
     padding-top 11vw
     position relative
+    cursor url('/assets/cursor.svg'), auto
     
     &::before
         content ''
@@ -242,10 +412,24 @@ html
     100%
         text-shadow 0 0 15px #FF3050, 0 0 30px #FF2040, 0 0 50px #FF1030, 0 0 70px rgba(255, 48, 80, 0.3)
 
+@keyframes symbols-float
+    0%
+        transform translate(-50%, -50%) rotate(0deg) scale(1)
+        filter blur(0px)
+    25%
+        transform translate(-50%, -60%) rotate(5deg) scale(1.1)
+        filter blur(1px)
+    50%
+        transform translate(-50%, -40%) rotate(-3deg) scale(0.9)
+        filter blur(2px)
+    75%
+        transform translate(-50%, -55%) rotate(8deg) scale(1.05)
+        filter blur(1px)
+    100%
+        transform translate(-50%, -50%) rotate(0deg) scale(1)
+        filter blur(0px)
+
     
 
-// Rolling animation styles
-.rolling-animation
-    font-family 'JetBrains Mono', monospace
-    font-weight 600
-    transition color 0.1s ease
+
+    

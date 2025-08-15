@@ -5133,6 +5133,439 @@ Beast.decl({
                 }, 1500) // 1.5 seconds buffer
             })
 
+            // Action elements shuffling animation
+            const actionElements = document.querySelectorAll('.Action, .Footer__action, .Button_Type_Action')
+            
+            actionElements.forEach(element => {
+                element.isAnimating = false
+                element.animationInterval = null
+                element.originalText = element.textContent // Store original text
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.originalText
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length + 8  // Animation length based on text length
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    // Ensure stable width during animation
+                    const originalWidth = element.offsetWidth
+                    const originalHeight = element.offsetHeight
+                    const isActionElement = element.classList.contains('Action')
+                    
+                    // Lock the exact width and height to prevent any changes
+                    element.style.width = originalWidth + 'px'
+                    element.style.height = originalHeight + 'px'
+                    element.style.display = isActionElement ? 'flex' : 'inline-flex'
+                    element.style.whiteSpace = 'nowrap'
+                    element.style.overflow = 'hidden'
+                    element.style.textAlign = 'center'
+                    
+                    // For Action elements, also lock the specific positioning styles
+                    if (isActionElement) {
+                        element.style.alignItems = 'center'
+                        element.style.justifyContent = 'center'
+                        element.style.minWidth = originalWidth + 'px'
+                        element.style.maxWidth = originalWidth + 'px'
+                    }
+                    
+                    element.animationInterval = setInterval(() => {
+                        let currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i >= originalText.length - swapsRemaining) {
+                                // Characters that are still random
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                // Characters that have resolved to final
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Reset styles
+                            element.style.width = ''
+                            element.style.height = ''
+                            element.style.display = ''
+                            element.style.whiteSpace = ''
+                            element.style.overflow = ''
+                            element.style.textAlign = ''
+                            element.style.alignItems = ''
+                            element.style.justifyContent = ''
+                            element.style.minWidth = ''
+                            element.style.maxWidth = ''
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 30)
+                })
+                
+                element.addEventListener('mouseleave', () => {
+                    if (element.animationInterval) {
+                        clearInterval(element.animationInterval)
+                        element.textContent = element.originalText // Restore original text
+                        element.classList.remove('rolling-animation')
+                        element.isAnimating = false
+                        
+                        // Reset styles
+                        element.style.width = ''
+                        element.style.height = ''
+                        element.style.display = ''
+                        element.style.whiteSpace = ''
+                        element.style.overflow = ''
+                        element.style.textAlign = ''
+                        element.style.alignItems = ''
+                        element.style.justifyContent = ''
+                        element.style.minWidth = ''
+                        element.style.maxWidth = ''
+                        element.style.fontFamily = ''
+                        element.style.fontSize = ''
+                        element.style.fontWeight = ''
+                    }
+                })
+            })
+
+            // Parallax scrolling for .Data and .Logo elements
+            const parallaxElements = document.querySelectorAll('.Data, .Logo')
+            let ticking = false
+            
+            function updateParallax() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+                
+                parallaxElements.forEach(element => {
+                    // Move elements at 70% of normal scroll speed (slower)
+                    // This creates a lag effect in both directions (up and down)
+                    const parallaxSpeed = 0.8
+                    const yPos = -(scrollTop * (1 - parallaxSpeed))
+                    
+                    // Apply transform with smooth rendering optimization
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
+                    element.style.willChange = 'transform'
+                })
+                
+                ticking = false
+            }
+            
+            function requestParallaxUpdate() {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax)
+                    ticking = true
+                }
+            }
+            
+            // Listen for scroll events
+            window.addEventListener('scroll', requestParallaxUpdate, { passive: true })
+            
+            // Initial positioning
+            updateParallax()
+
+            // Text__item fade-in with character animation on page load
+            const textItems = document.querySelectorAll('.Text__item')
+            console.log('Found text items:', textItems.length) // Debug log
+            
+            textItems.forEach((element, index) => {
+                console.log(`Text item ${index}: "${element.textContent.trim()}"`) // Debug log
+                
+                // Start animation after a delay based on index
+                setTimeout(() => {
+                    // Simple fade in and unblur
+                    element.classList.add('Text__item_loaded')
+                    console.log(`Text item ${index} fade + unblur complete`) // Debug log
+                    
+                }, index * 1000) // 1 second delay between each item
+            })
+
+            // Services__item scroll-triggered fade/unblur animation
+            const servicesItems = document.querySelectorAll('.Services__item')
+            console.log('Found services items:', servicesItems.length) // Debug log
+            
+            if (servicesItems.length > 0) {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
+                    threshold: 0.3
+                }
+                
+                const servicesObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Reset and start animation when entering viewport
+                            if (!entry.target.classList.contains('Services__item_loaded')) {
+                                let animatedItemsCount = 0
+                                
+                                // Reset all services items first
+                                servicesItems.forEach(item => {
+                                    item.classList.remove('Services__item_loaded')
+                                })
+                                
+                                // Animate all services items in sequence
+                                servicesItems.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        item.classList.add('Services__item_loaded')
+                                        
+                                        // Animate the digit (::before element content) after fade-in starts
+                                        setTimeout(() => {
+                                            animateServiceDigit(item, index + 1)
+                                        }, 200) // Start digit animation 200ms after fade begins
+                                        
+                                        console.log('Services item animated:', index) // Debug log
+                                    }, index * 200) // 200ms delay between each item
+                                })
+                            }
+                        } else {
+                            // Reset when leaving viewport (scrolling away)
+                            entry.target.classList.remove('Services__item_loaded')
+                        }
+                    })
+                }, observerOptions)
+                
+                // Function to animate the digit in ::before element
+                function animateServiceDigit(element, finalDigit) {
+                    const randomChars = '0123456789'
+                    let swapsRemaining = 6 // Short animation - 6 swaps
+                    const digitStr = finalDigit.toString()
+                    
+                    // Create a temporary span to hold the animated digit
+                    const digitSpan = document.createElement('span')
+                    digitSpan.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        color: #00f;
+                        font-size: 4vw;
+                        line-height: 4vw;
+                        display: block;
+                        z-index: 10;
+                    `
+                    
+                    // Hide the original ::before content during animation
+                    element.style.position = 'relative'
+                    element.appendChild(digitSpan)
+                    
+                    const animationInterval = setInterval(() => {
+                        if (swapsRemaining > 0) {
+                            // Show random digit
+                            const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                            digitSpan.textContent = randomChar
+                            swapsRemaining--
+                        } else {
+                            // Animation complete - show final digit and cleanup
+                            digitSpan.textContent = digitStr
+                            clearInterval(animationInterval)
+                            
+                            // Remove temporary span after a brief moment
+                            setTimeout(() => {
+                                if (digitSpan.parentNode) {
+                                    digitSpan.parentNode.removeChild(digitSpan)
+                                }
+                            }, 100)
+                        }
+                    }, 80) // 80ms between swaps for quick animation
+                }
+                
+                // Observe all services items
+                servicesItems.forEach(item => {
+                    servicesObserver.observe(item)
+                })
+            }
+            
+            // Card scroll-triggered fade/unblur animation
+            const cardItems = document.querySelectorAll('.Card')
+            console.log('Found card items:', cardItems.length) // Debug log
+            
+            if (cardItems.length > 0) {
+                const cardObserverOptions = {
+                    root: null,
+                    rootMargin: '0px 0px 0px 0px', // No margin - trigger exactly when entering/leaving
+                    threshold: 0.1 // Very small threshold - almost completely out of view
+                }
+                
+                let lastScrollY = window.scrollY
+                
+                const cardObserver = new IntersectionObserver((entries) => {
+                    const currentScrollY = window.scrollY
+                    const scrollingUp = currentScrollY < lastScrollY
+                    lastScrollY = currentScrollY
+                    
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Card is visible - animate if not already loaded
+                            if (!entry.target.classList.contains('Card_loaded')) {
+                                // Reset all cards first
+                                cardItems.forEach(card => {
+                                    card.classList.remove('Card_loaded')
+                                })
+                                
+                                // Animate all cards in sequence
+                                cardItems.forEach((card, index) => {
+                                    setTimeout(() => {
+                                        card.classList.add('Card_loaded')
+                                        console.log('Card animated:', index) // Debug log
+                                    }, index * 150) // 150ms delay between each card
+                                })
+                            }
+                        } else {
+                            // Card is NOT visible
+                            // Only reset when scrolling UP and card is out of viewport
+                            if (scrollingUp) {
+                                entry.target.classList.remove('Card_loaded')
+                                console.log('Card reset - scrolled up and card no longer visible') // Debug log
+                            }
+                            // Don't reset when scrolling down (card may be above viewport)
+                        }
+                    })
+                }, cardObserverOptions)
+                
+                // Observe all card items
+                cardItems.forEach(card => {
+                    cardObserver.observe(card)
+                })
+            }
+            
+            // Reviews dimming when footer comes into view
+            const reviewsElement = document.querySelector('.Reviews')
+            const footerElement = document.querySelector('.Footer')
+            console.log('Found reviews element:', !!reviewsElement) // Debug log
+            console.log('Found footer element:', !!footerElement) // Debug log
+            
+            if (reviewsElement && footerElement) {
+                const footerObserverOptions = {
+                    root: null,
+                    rootMargin: '0px 0px 0px 0px', // Trigger when footer starts entering viewport
+                    threshold: 0.4 // Trigger when 40% of footer is visible
+                }
+                
+                const footerObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Footer is entering viewport - dim reviews
+                            reviewsElement.classList.add('Reviews_dimmed')
+                            console.log('Reviews dimmed - footer in view') // Debug log
+                        } else {
+                            // Footer is leaving viewport - restore reviews
+                            reviewsElement.classList.remove('Reviews_dimmed')
+                            console.log('Reviews restored - footer out of view') // Debug log
+                        }
+                    })
+                }, footerObserverOptions)
+                
+                // Observe the footer
+                footerObserver.observe(footerElement)
+            }
+            
+            // Fallback: ensure all text items are visible after 5 seconds
+            setTimeout(() => {
+                textItems.forEach(element => {
+                    if (!element.classList.contains('Text__item_loaded')) {
+                        console.log('Fallback: showing text item') // Debug log
+                        element.classList.add('Text__item_loaded')
+                    }
+                })
+            }, 5000)
+
+            // Footer__jp and Footer__ch letter-by-letter rolling animation - same as Data elements
+            const footerJpElements = document.querySelectorAll('.Footer__jp')
+            const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+            const allFooterTextElements = [...footerJpElements, ...footerChElements]
+            
+            allFooterTextElements.forEach(element => {
+                const originalText = element.textContent
+                const isJapanese = element.classList.contains('Footer__jp')
+                const randomChars = isJapanese ? 
+                    'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                    '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                
+                // Split text into individual letters
+                element.innerHTML = ''
+                const letterSpans = []
+                
+                for (let i = 0; i < originalText.length; i++) {
+                    const span = document.createElement('span')
+                    span.textContent = originalText[i]
+                    span.style.display = 'inline-block'
+                    
+                    span.style.width = 'auto'
+                    element.appendChild(span)
+                    letterSpans.push(span)
+                    
+                    // Measure the width of the original character and lock it
+                    setTimeout(() => {
+                        const charWidth = span.offsetWidth
+                        span.style.width = charWidth + 'px'
+                        span.style.textAlign = 'center'
+                    }, 10)
+                }
+                
+                // Function to animate all letters
+                function animateLetters() {
+                    letterSpans.forEach((span, index) => {
+                        const targetLetter = originalText[index]
+                        let rollCount = 0
+                        const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                        
+                        setTimeout(() => {
+                            span.classList.add('rolling-animation')
+                            
+                            const letterInterval = setInterval(() => {
+                                if (rollCount < maxRolls) {
+                                    // Show random character
+                                    const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                    span.textContent = randomChar
+                                    rollCount++
+                                } else {
+                                    // Show final character
+                                    span.textContent = targetLetter
+                                    span.classList.remove('rolling-animation')
+                                    clearInterval(letterInterval)
+                                }
+                            }, 80) // 80ms per roll
+                            
+                        }, index * 100) // 100ms delay between each letter
+                    })
+                }
+                
+                // Function to schedule next animation
+                function scheduleNextFooterAnimation() {
+                    const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                    setTimeout(() => {
+                        animateLetters()
+                        scheduleNextFooterAnimation() // Schedule the next one
+                    }, randomDelay)
+                }
+                
+                // Start initial animation
+                animateLetters()
+                
+                // Schedule repeating animations after initial completes
+                // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                setTimeout(() => {
+                    scheduleNextFooterAnimation()
+                }, 1500) // 1.5 seconds buffer
+            })
+
             // PathOfAwakening scroll-based blur system for headline, text, and cast
             const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
             const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
@@ -5342,6 +5775,133 @@ Beast.decl({
                 }
             }
 
+            // Process step background image fade-in animation
+            console.log('Setting up process step animations...')
+            
+            // Wait for DOM to be fully loaded
+            setTimeout(() => {
+                const processSteps = document.querySelectorAll('.Process__step')
+                const cassetteContainer = document.querySelector('.Cassette')
+                
+                console.log('Process steps found:', processSteps.length)
+                console.log('Cassette container found:', cassetteContainer)
+                
+                // Initialize all process steps with opacity 0 for background images
+                processSteps.forEach(step => {
+                    step.style.position = 'relative'
+                    step.style.setProperty('--bg-opacity', '0')
+                })
+                
+                // Debug: log all cassette pieces
+                for (let i = 1; i <= 5; i++) {
+                    const piece = document.querySelector(`.Cassette_piece_${i}`)
+                    console.log(`Cassette piece ${i}:`, piece)
+                }
+                
+                let fadeAnimationTriggered = false
+                
+                if (processSteps.length > 0) {
+                    // Get all process titles for glow effect
+                    const processTitles = document.querySelectorAll('.Process__title')
+                    
+                    function updateProcessAnimations() {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+                        const windowHeight = window.innerHeight
+                        
+                        // Check if first process step is in trigger range
+                        const firstStep = processSteps[0]
+                        if (firstStep) {
+                            const stepRect = firstStep.getBoundingClientRect()
+                            const stepTop = stepRect.top
+                            const triggerPoint = windowHeight * 0.8
+                            const fadeDistance = windowHeight * 0.3 // Fade over 30% of viewport height
+                            
+                            if (stepTop <= triggerPoint && stepTop > triggerPoint - fadeDistance) {
+                                // First step is in fade-in range - apply to all steps
+                                const progress = 1 - ((stepTop - (triggerPoint - fadeDistance)) / fadeDistance)
+                                const opacity = Math.max(0, Math.min(1, progress))
+                                
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', opacity.toString())
+                                })
+                                
+                                console.log('All process steps opacity:', opacity)
+                            } else if (stepTop <= triggerPoint - fadeDistance) {
+                                // First step is fully visible - all backgrounds fully visible
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', '1')
+                                })
+                            } else {
+                                // First step hasn't entered fade range yet - all backgrounds hidden
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', '0')
+                                })
+                            }
+                        }
+                        
+                        // Check each process title for glow effect and track active step
+                        let activeStepIndex = -1
+                        
+                        processTitles.forEach((title, index) => {
+                            const rect = title.getBoundingClientRect()
+                            const titleCenter = rect.top + rect.height / 2
+                            const viewportCenter = windowHeight / 2
+                            const glowTriggerZone = windowHeight * 0.6 // Glow when title is within 60% of viewport height
+                            
+                            // Calculate distance from viewport center
+                            const distanceFromCenter = Math.abs(titleCenter - viewportCenter)
+                            const maxDistance = glowTriggerZone / 2
+                            
+                            if (distanceFromCenter <= maxDistance) {
+                                // Title is in glow zone - add glow class
+                                title.classList.add('Process__title_glow')
+                                activeStepIndex = index
+                                
+                                // Also make the corresponding process text fully visible
+                                const processStep = title.closest('.Process__step')
+                                if (processStep) {
+                                    const processText = processStep.querySelector('.Process__text')
+                                    if (processText) {
+                                        processText.style.opacity = '1'
+                                    }
+                                }
+                            } else {
+                                // Title is out of glow zone - remove glow class
+                                title.classList.remove('Process__title_glow')
+                                
+                                // Reset process text opacity to default
+                                const processStep = title.closest('.Process__step')
+                                if (processStep) {
+                                    const processText = processStep.querySelector('.Process__text')
+                                    if (processText) {
+                                        processText.style.opacity = ''
+                                    }
+                                }
+                            }
+                        })
+                        
+                        // Fade previous steps based on active step
+                        processSteps.forEach((step, index) => {
+                            if (activeStepIndex >= 0 && index < activeStepIndex) {
+                                // This is a previous step - fade it out
+                                step.classList.add('Process__step_faded')
+                            } else {
+                                // This is current or future step - remove fade
+                                step.classList.remove('Process__step_faded')
+                            }
+                        })
+                    }
+                    
+                    // Add scroll event listener for process animations
+                    window.addEventListener('scroll', updateProcessAnimations)
+                    
+                    // Initial call
+                    updateProcessAnimations()
+                } else {
+                    console.log('Missing process steps')
+                }
+            }, 1000) // Wait 1 second for DOM to be ready
+
         }
     },
     App__live: {
@@ -5439,20 +5999,40 @@ Beast.decl({
     
 })
 Beast.decl({
-    Footer: {
+    Button: {
         expand: function () {
-            
-            this.append(
 
-                
-            )
+            if (this.mod('Size')) {
 
-            
-        },
-            
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
     }   
 })
-
 Beast.decl({
     Card: {
         expand: function () {
@@ -5540,6 +6120,21 @@ Beast.decl({
         }      
     }   
 })
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                
+            )
+
+            
+        },
+            
+    }   
+})
+
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -5659,170 +6254,6 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
-Beast.decl({
-    HeadArtsy: {
-        expand: function () {
-            
-        },
-        domInit: function fn() {
-            const headartsy = document.querySelector('.headartsy');
-            let defaultTopPosition = -44; // Initial position in pixels (default for desktop)
-            let maxTopPosition = -95; // Maximum top position to stop movement (default for desktop)
-            let scrollMultiplier = 2; // Scroll multiplier (default for desktop)
-            let isHovered = false; // Track hover state
-
-            // Function to set offsets based on screen width
-            function updateOffsetsForScreenSize() {
-                if (window.innerWidth <= 768) { // Adjust for mobile devices
-                    defaultTopPosition = 2; // New initial position for mobile
-                    maxTopPosition = -13; // New max position for mobile
-                    scrollMultiplier = 1.5; // Slower scroll effect for mobile
-                } else { // Default for desktop
-                    defaultTopPosition = -44;
-                    maxTopPosition = -95;
-                    scrollMultiplier = 2;
-                }
-            }
-
-            // Set initial offsets based on screen size
-            updateOffsetsForScreenSize();
-
-            // Update offsets if window is resized
-            window.addEventListener('resize', updateOffsetsForScreenSize);
-
-            window.addEventListener('scroll', () => {
-                if (!isHovered) {
-                    updateTopPosition();
-                }
-            });
-
-            // Function to update the top position based on scroll
-            function updateTopPosition() {
-                const scrollOffset = window.pageYOffset;
-                let topOffset = defaultTopPosition - (scrollOffset * scrollMultiplier); // Adjust with multiplier
-
-                // Cap the movement to stop at maxTopPosition
-                if (topOffset < maxTopPosition) {
-                    topOffset = maxTopPosition;
-                }
-
-                headartsy.style.top = `${topOffset}px`;
-            }
-
-            // Listen for hover events to enable/disable JavaScript control
-            headartsy.addEventListener('mouseenter', () => {
-                isHovered = true; // Disable JS scroll effect on hover
-                headartsy.style.top = '0'; // Move to top 0 on hover
-            });
-
-            headartsy.addEventListener('mouseleave', () => {
-                isHovered = false; // Re-enable JS scroll effect after hover ends
-                updateTopPosition(); // Immediately apply scroll-based position on mouse leave
-            });
-        }       
-    }
-})
-
-
-
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-                Beast.node("content",{__context:this},"\n                    ",Beast.node("logo",undefined,"\n                        \n                            ",Beast.node("Logo"),"\n                        \n                    "),"\n                    ",Beast.node("menu",undefined,"\n                        ",this.get('Menu'),"\n                    "),"\n                    ",Beast.node("Icon",{"Name":"Menu"}),"\n                ")
-            )
-        },
-        // domInit: function fn() {
-        //     var lastScrollTop = 0; // This variable will hold the last scroll position
-        //     var head = document.querySelector('.head'); // Select the header element
-
-        //     window.addEventListener('scroll', function() {
-        //         // Check if 'App' div has the 'Mobile' class
-        //         var appDiv = document.querySelector('.App');
-        //         if (appDiv.classList.contains('mobile')) {
-        //             return; // Exit the function early if 'App' div has 'Mobile' class
-        //         }
-
-        //         var currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        //         if (currentScrollTop > lastScrollTop) {
-        //             // If the current scroll position is greater than the last scroll position, the user is scrolling down
-        //             head.classList.add('head_hide');
-        //         } else if (currentScrollTop < lastScrollTop) {
-        //             // If the current scroll position is less than the last scroll position, the user is scrolling up
-        //             head.classList.remove('head_hide');
-        //         }
-
-        //         lastScrollTop = currentScrollTop; // Update the last scroll position to the current position
-        //     });
-
-        // }       
-    }
-})
-
-
-Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
-    }   
-})
-Beast
-.decl('link', {
-    tag:'a',
-    mod: {
-        type:'blue'
-    },
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-
-
-Beast
-.decl('footer__link', {
-    tag:'a',
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -5855,6 +6286,33 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
+Beast
+.decl('link', {
+    tag:'a',
+    mod: {
+        type:'blue'
+    },
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+
+
+Beast
+.decl('footer__link', {
+    tag:'a',
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 Beast
 .decl('logo', {
     expand: function() {
@@ -6202,3 +6660,104 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    HeadArtsy: {
+        expand: function () {
+            
+        },
+        domInit: function fn() {
+            const headartsy = document.querySelector('.headartsy');
+            let defaultTopPosition = -44; // Initial position in pixels (default for desktop)
+            let maxTopPosition = -95; // Maximum top position to stop movement (default for desktop)
+            let scrollMultiplier = 2; // Scroll multiplier (default for desktop)
+            let isHovered = false; // Track hover state
+
+            // Function to set offsets based on screen width
+            function updateOffsetsForScreenSize() {
+                if (window.innerWidth <= 768) { // Adjust for mobile devices
+                    defaultTopPosition = 2; // New initial position for mobile
+                    maxTopPosition = -13; // New max position for mobile
+                    scrollMultiplier = 1.5; // Slower scroll effect for mobile
+                } else { // Default for desktop
+                    defaultTopPosition = -44;
+                    maxTopPosition = -95;
+                    scrollMultiplier = 2;
+                }
+            }
+
+            // Set initial offsets based on screen size
+            updateOffsetsForScreenSize();
+
+            // Update offsets if window is resized
+            window.addEventListener('resize', updateOffsetsForScreenSize);
+
+            window.addEventListener('scroll', () => {
+                if (!isHovered) {
+                    updateTopPosition();
+                }
+            });
+
+            // Function to update the top position based on scroll
+            function updateTopPosition() {
+                const scrollOffset = window.pageYOffset;
+                let topOffset = defaultTopPosition - (scrollOffset * scrollMultiplier); // Adjust with multiplier
+
+                // Cap the movement to stop at maxTopPosition
+                if (topOffset < maxTopPosition) {
+                    topOffset = maxTopPosition;
+                }
+
+                headartsy.style.top = `${topOffset}px`;
+            }
+
+            // Listen for hover events to enable/disable JavaScript control
+            headartsy.addEventListener('mouseenter', () => {
+                isHovered = true; // Disable JS scroll effect on hover
+                headartsy.style.top = '0'; // Move to top 0 on hover
+            });
+
+            headartsy.addEventListener('mouseleave', () => {
+                isHovered = false; // Re-enable JS scroll effect after hover ends
+                updateTopPosition(); // Immediately apply scroll-based position on mouse leave
+            });
+        }       
+    }
+})
+
+
+
+Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+                Beast.node("content",{__context:this},"\n                    ",Beast.node("logo",undefined,"\n                        \n                            ",Beast.node("Logo"),"\n                        \n                    "),"\n                    ",Beast.node("menu",undefined,"\n                        ",this.get('Menu'),"\n                    "),"\n                    ",Beast.node("Icon",{"Name":"Menu"}),"\n                ")
+            )
+        },
+        // domInit: function fn() {
+        //     var lastScrollTop = 0; // This variable will hold the last scroll position
+        //     var head = document.querySelector('.head'); // Select the header element
+
+        //     window.addEventListener('scroll', function() {
+        //         // Check if 'App' div has the 'Mobile' class
+        //         var appDiv = document.querySelector('.App');
+        //         if (appDiv.classList.contains('mobile')) {
+        //             return; // Exit the function early if 'App' div has 'Mobile' class
+        //         }
+
+        //         var currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        //         if (currentScrollTop > lastScrollTop) {
+        //             // If the current scroll position is greater than the last scroll position, the user is scrolling down
+        //             head.classList.add('head_hide');
+        //         } else if (currentScrollTop < lastScrollTop) {
+        //             // If the current scroll position is less than the last scroll position, the user is scrolling up
+        //             head.classList.remove('head_hide');
+        //         }
+
+        //         lastScrollTop = currentScrollTop; // Update the last scroll position to the current position
+        //     });
+
+        // }       
+    }
+})
+

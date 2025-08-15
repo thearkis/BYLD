@@ -18,7 +18,7 @@
         opacity .5
         &:hover
             opacity 1
-            cursor pointer
+            
     &__copy
         border-top 1px solid white
         margin-top 2vw
@@ -37,11 +37,28 @@
         .Footer
             &__text
                 font-size 5.92vw
+                line-height 5vw
                 color white
             &__action
                 background white
+                color blue
+                display flex
+                align-items center
+                justify-content center
+                text-align center
+                font-size 1.5vw
+                transition all 0.2s ease
+            
+                &:hover
+                    background rgba(255, 255, 255, 0.9)
+                    transform scale(1.01)
+                    backdrop-filter blur(12px)
+                
     &__left, &__mid, &__right
         position absolute
+    &__left
+        left 0
+        width 50%
     &__jp, &__ch
         line-height 1vw
         color red
@@ -54,13 +71,21 @@
     &__jp
         letter-spacing -.6vw
         margin-right 20px
+    &__ch
+        position absolute
+        right 0
         &_Hide
             opacity 0
     &__text
         display inline-block
         color white
+        &_R
+            position absolute
+            right 0
     &__right
         right 0
+        width 50%
     &__mid
-        right 20vw
+        
         color blue
+        
