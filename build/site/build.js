@@ -5439,40 +5439,20 @@ Beast.decl({
     
 })
 Beast.decl({
-    Button: {
+    Footer: {
         expand: function () {
+            
+            this.append(
 
-            if (this.mod('Size')) {
+                
+            )
 
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
+            
+        },
+            
     }   
 })
+
 Beast.decl({
     Card: {
         expand: function () {
@@ -5560,23 +5540,6 @@ Beast.decl({
         }      
     }   
 })
-Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("Link",{"href":"https://cdn.sanity.io/files/7wbnm9gp/production/c7a90cddfbaf867a7fda0319540c1353709b1b12.pdf"}," ",Beast.node("item",undefined,"Whitepaper")," "),"\n                    ",Beast.node("Link",{"href":"/newsroom"}," ",Beast.node("item",undefined,"Newsroom")," "),"\n                    ",Beast.node("Link",{"href":"/careers"}," ",Beast.node("item",undefined,"Careers")," "),"\n                    ",Beast.node("Link",{"href":"/people"}," ",Beast.node("item",undefined,"People")," "),"\n                    ",Beast.node("Link",{"href":"/contact"}," ",Beast.node("item",undefined,"Contact")," "),"\n                    ",Beast.node("Link",{"New":true,"href":"https://www.linkedin.com/company/zenno-astronautics/"}," ",Beast.node("item",undefined,"Linkedin")," "),"\n                "),
-                
-                Beast.node("copy",{__context:this},"Zenno 2024")
-            )
-
-            
-        },
-            
-    }   
-})
-
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -5798,6 +5761,68 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
+Beast
+.decl('link', {
+    tag:'a',
+    mod: {
+        type:'blue'
+    },
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+
+
+Beast
+.decl('footer__link', {
+    tag:'a',
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -5830,33 +5855,6 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast
-.decl('link', {
-    tag:'a',
-    mod: {
-        type:'blue'
-    },
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-
-
-Beast
-.decl('footer__link', {
-    tag:'a',
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
 Beast
 .decl('logo', {
     expand: function() {
