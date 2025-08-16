@@ -579,10 +579,13 @@ Beast.decl({
                     
                     let blurAmount = 0
                     
-                    // Blur when element is exiting the top of viewport
-                    if (elementTop < 3 && elementBottom > 0) {
-                        // Element is partially above viewport
-                        const exitProgress = Math.abs(elementTop) / elementRect.height
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
+                        // Element is in upper 15% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
                         blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur
                     }
                     
@@ -603,16 +606,42 @@ Beast.decl({
                     
                     let blurAmount = 0
                     
-                    // Blur when element is exiting the top of viewport
-                    if (elementTop < 0 && elementBottom > 0) {
-                        // Element is partially above viewport
-                        const exitProgress = Math.abs(elementTop) / elementRect.height
-                        blurAmount = Math.min(exitProgress * 6, 6) // Max 6px blur (less than data)
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.15 && elementBottom > 0) {
+                        // Element is in upper 15% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * 20, 20) // Max 6px blur (less than data)
                     }
                     
                     element.style.transform = `translate3d(0, ${yPos}px, 0)`
                     element.style.filter = `blur(${blurAmount}px)`
                     element.style.willChange = 'transform, filter'
+                })
+                
+                // Handle Text__item parallax blur
+                const textItems = document.querySelectorAll('.Text__item')
+                textItems.forEach(element => {
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
+                        // Element is in upper 20% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * 12, 12) // Max 12px blur (medium intensity)
+                    }
+                    
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'filter'
                 })
                 
                 ticking = false
@@ -703,11 +732,12 @@ Beast.decl({
                         position: absolute;
                         top: 0;
                         left: 0;
-                        color: #00f;
+                        color: #f00;
                         font-size: 4vw;
                         line-height: 4vw;
                         display: block;
                         z-index: 10;
+                        text-shadow: 0 0 3px #f00;
                     `
                     
                     // Hide the original ::before content during animation
@@ -721,7 +751,9 @@ Beast.decl({
                             digitSpan.textContent = randomChar
                             swapsRemaining--
                         } else {
-                            // Animation complete - show final digit and cleanup
+                            // Animation complete - change to normal color and remove glow
+                            digitSpan.style.color = '#00f' // Return to normal blue color
+                            digitSpan.style.textShadow = 'none' // Remove glow effect
                             digitSpan.textContent = digitStr
                             clearInterval(animationInterval)
                             
