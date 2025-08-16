@@ -580,7 +580,7 @@ Beast.decl({
                     let blurAmount = 0
                     
                     // Blur when element is exiting the top of viewport
-                    if (elementTop < 0 && elementBottom > 0) {
+                    if (elementTop < 3 && elementBottom > 0) {
                         // Element is partially above viewport
                         const exitProgress = Math.abs(elementTop) / elementRect.height
                         blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur

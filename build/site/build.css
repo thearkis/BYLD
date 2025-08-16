@@ -437,8 +437,6 @@
 .Action:hover {
   background: #ff4000;
   color: #000;
-  -webkit-transform: scale(1.02);
-  transform: scale(1.02);
   border-color: #ff4000;
   -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
