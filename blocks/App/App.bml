@@ -1,6 +1,17 @@
 const api = `https://o8a3bj9a.api.sanity.io/v2022-03-07/data/query/production?query=`
 
 
+
+Beast.decl({
+    Case: {
+        expand: function () {
+
+               
+        }       
+    }   
+})
+
+
 Beast.decl({
     'ae__show-item': {
         expand: function () {
@@ -443,8 +454,88 @@ Beast.decl({
                 }, 1500) // 1.5 seconds buffer
             })
 
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation on page load and repeating (same as Data)
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                const originalText = element.textContent
+                const isJapanese = element.classList.contains('CaseData__jp')
+                const randomChars = isJapanese ? 
+                    'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                    '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                
+                // Split text into individual letters
+                element.innerHTML = ''
+                const letterSpans = []
+                
+                for (let i = 0; i < originalText.length; i++) {
+                    const span = document.createElement('span')
+                    span.textContent = originalText[i]
+                    span.style.display = 'inline-block'
+                    
+                    span.style.width = 'auto'
+                    element.appendChild(span)
+                    letterSpans.push(span)
+                    
+                    // Measure the width of the original character and lock it
+                    setTimeout(() => {
+                        const charWidth = span.offsetWidth
+                        span.style.width = charWidth + 'px'
+                        span.style.textAlign = 'center'
+                    }, 10)
+                }
+                
+                // Function to animate all letters
+                function animateCaseDataLetters() {
+                    letterSpans.forEach((span, index) => {
+                        const targetLetter = originalText[index]
+                        let rollCount = 0
+                        const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                        
+                        setTimeout(() => {
+                            span.classList.add('rolling-animation')
+                            
+                            const letterInterval = setInterval(() => {
+                                if (rollCount < maxRolls) {
+                                    // Show random character
+                                    const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                    span.textContent = randomChar
+                                    rollCount++
+                                } else {
+                                    // Show final character
+                                    span.textContent = targetLetter
+                                    span.classList.remove('rolling-animation')
+                                    clearInterval(letterInterval)
+                                }
+                            }, 80) // 80ms per roll
+                            
+                        }, index * 100) // 100ms delay between each letter
+                    })
+                }
+                
+                // Function to schedule next animation
+                function scheduleNextCaseDataAnimation() {
+                    const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                    setTimeout(() => {
+                        animateCaseDataLetters()
+                        scheduleNextCaseDataAnimation() // Schedule the next one
+                    }, randomDelay)
+                }
+                
+                // Start initial animation
+                animateCaseDataLetters()
+                
+                // Schedule repeating animations after initial completes
+                // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                setTimeout(() => {
+                    scheduleNextCaseDataAnimation()
+                }, 1500) // 1.5 seconds buffer
+            })
+
             // Action elements shuffling animation
-            const actionElements = document.querySelectorAll('.Action, .Footer__action, .Button_Type_Action')
+            const actionElements = document.querySelectorAll('.Action, .Footer__action, .Button_Type_Action, .CaseAction')
             
             actionElements.forEach(element => {
                 element.isAnimating = false
@@ -475,21 +566,28 @@ Beast.decl({
                     const originalWidth = element.offsetWidth
                     const originalHeight = element.offsetHeight
                     const isActionElement = element.classList.contains('Action')
+                    const isCaseActionElement = element.classList.contains('CaseAction')
+                    
+                    // Store original display value
+                    const originalDisplay = window.getComputedStyle(element).display
                     
                     // Lock the exact width and height to prevent any changes
                     element.style.width = originalWidth + 'px'
                     element.style.height = originalHeight + 'px'
-                    element.style.display = isActionElement ? 'flex' : 'inline-flex'
+                    element.style.minWidth = originalWidth + 'px'
+                    element.style.maxWidth = originalWidth + 'px'
+                    element.style.minHeight = originalHeight + 'px'
+                    element.style.maxHeight = originalHeight + 'px'
+                    element.style.display = originalDisplay
                     element.style.whiteSpace = 'nowrap'
                     element.style.overflow = 'hidden'
                     element.style.textAlign = 'center'
+                    element.style.boxSizing = 'border-box'
                     
-                    // For Action elements, also lock the specific positioning styles
-                    if (isActionElement) {
+                    // For Action and CaseAction elements, ensure centering
+                    if (isActionElement || isCaseActionElement) {
                         element.style.alignItems = 'center'
                         element.style.justifyContent = 'center'
-                        element.style.minWidth = originalWidth + 'px'
-                        element.style.maxWidth = originalWidth + 'px'
                     }
                     
                     element.animationInterval = setInterval(() => {
@@ -518,14 +616,17 @@ Beast.decl({
                             // Reset styles
                             element.style.width = ''
                             element.style.height = ''
+                            element.style.minWidth = ''
+                            element.style.maxWidth = ''
+                            element.style.minHeight = ''
+                            element.style.maxHeight = ''
                             element.style.display = ''
                             element.style.whiteSpace = ''
                             element.style.overflow = ''
                             element.style.textAlign = ''
                             element.style.alignItems = ''
                             element.style.justifyContent = ''
-                            element.style.minWidth = ''
-                            element.style.maxWidth = ''
+                            element.style.boxSizing = ''
                             element.style.fontFamily = ''
                             element.style.fontSize = ''
                             element.style.fontWeight = ''
@@ -543,14 +644,17 @@ Beast.decl({
                         // Reset styles
                         element.style.width = ''
                         element.style.height = ''
+                        element.style.minWidth = ''
+                        element.style.maxWidth = ''
+                        element.style.minHeight = ''
+                        element.style.maxHeight = ''
                         element.style.display = ''
                         element.style.whiteSpace = ''
                         element.style.overflow = ''
                         element.style.textAlign = ''
                         element.style.alignItems = ''
                         element.style.justifyContent = ''
-                        element.style.minWidth = ''
-                        element.style.maxWidth = ''
+                        element.style.boxSizing = ''
                         element.style.fontFamily = ''
                         element.style.fontSize = ''
                         element.style.fontWeight = ''
@@ -558,9 +662,15 @@ Beast.decl({
                 })
             })
 
-            // Parallax scrolling for .Data and .Logo elements with different speeds
+            // Parallax scrolling for .Data, .Logo, .Case__head, .CaseMeta/.Divider_One, and .Case__image/.About/.Services elements with different speeds
             const dataElements = document.querySelectorAll('.Data')
             const logoElements = document.querySelectorAll('.Logo')
+            const caseHeadElements = document.querySelectorAll('.Case__head')
+            const caseMetaElements = document.querySelectorAll('.CaseMeta')
+            const dividerOneElements = document.querySelectorAll('.Divider_One')
+            const caseImageElements = document.querySelectorAll('.Case__image')
+            const aboutElements = document.querySelectorAll('.About')
+            const servicesElements = document.querySelectorAll('.Services')
             let ticking = false
             
             function updateParallax() {
@@ -621,6 +731,86 @@ Beast.decl({
                     element.style.willChange = 'transform, filter'
                 })
                 
+                // Case__head elements - same speed as Data elements with blur
+                caseHeadElements.forEach(element => {
+                    const parallaxSpeed = 0.7 // Same as Data - slower parallax with more lag effect
+                    const yPos = -(scrollTop * (1 - parallaxSpeed))
+                    
+                    // Calculate blur based on element position relative to viewport
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
+                        // Element is in upper 20% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur (same as Data)
+                    }
+                    
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'transform, filter'
+                })
+                
+                // CaseMeta and Divider_One elements - different speed than Case__head, move together
+                const caseMetaGroupElements = [...caseMetaElements, ...dividerOneElements]
+                caseMetaGroupElements.forEach(element => {
+                    const parallaxSpeed = 0.8 // Faster than Data/Case__head (0.7) - less lag effect
+                    const yPos = -(scrollTop * (1 - parallaxSpeed))
+                    
+                    // Calculate blur based on element position relative to viewport
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
+                        // Element is in upper 20% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur (same as other elements)
+                    }
+                    
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'transform, filter'
+                })
+                
+                // Case__image, About, and Services elements - blur only (no parallax movement)
+                const caseContentElements = [...caseImageElements, ...aboutElements, ...servicesElements]
+                caseContentElements.forEach(element => {
+                    // Calculate blur based on element position relative to viewport
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    // Blur when element approaches or exits the top of viewport
+                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
+                        // Element is in upper 20% of viewport or above
+                        const triggerPoint = windowHeight * 0.15
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur (same as other elements)
+                    }
+                    
+                    // Only apply blur, no transform/movement
+                    element.style.filter = `blur(${blurAmount}px)`
+                    element.style.willChange = 'filter'
+                })
+                
                 // Handle Text__item parallax blur
                 const textItems = document.querySelectorAll('.Text__item')
                 textItems.forEach(element => {
@@ -674,6 +864,144 @@ Beast.decl({
                     console.log(`Text item ${index} fade + unblur complete`) // Debug log
                     
                 }, index * 1000) // 1 second delay between each item
+            })
+
+            // Case__client and Case__title fade-in on page load
+            const caseClientElements = document.querySelectorAll('.Case__client')
+            const caseTitleElements = document.querySelectorAll('.Case__title')
+            console.log('Found case client elements:', caseClientElements.length) // Debug log
+            console.log('Found case title elements:', caseTitleElements.length) // Debug log
+            
+            // Animate Case__client first
+            caseClientElements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('Case__client_loaded')
+                    console.log(`Case client ${index} animated`) // Debug log
+                }, index * 300) // 300ms delay between each client element
+            })
+            
+            // Animate Case__title after client elements (with additional delay)
+            caseTitleElements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('Case__title_loaded')
+                    console.log(`Case title ${index} animated`) // Debug log
+                }, (caseClientElements.length * 300) + (index * 300) + 200) // Start after clients finish + 200ms
+            })
+
+            // CaseMeta__meta-item fade-in on page load (after Case elements)
+            const caseMetaItems = document.querySelectorAll('.CaseMeta__meta-item')
+            console.log('Found case meta items:', caseMetaItems.length) // Debug log
+            
+            // Calculate when Case elements will finish (minimum 800ms even if no elements)
+            const caseElementsFinishTime = Math.max(
+                (caseClientElements.length * 300) + (caseTitleElements.length * 300) + 400,
+                800
+            )
+            
+            console.log('Case elements finish time:', caseElementsFinishTime) // Debug log
+            
+            // Animate CaseMeta__meta-item elements after Case elements finish
+            caseMetaItems.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('CaseMeta__meta-item_loaded')
+                    console.log(`Case meta item ${index} animated at time:`, caseElementsFinishTime + (index * 200)) // Debug log
+                }, caseElementsFinishTime + (index * 200)) // Start after Case elements + 200ms delay between each
+            })
+            
+            // Fallback: ensure all meta items are visible after 5 seconds
+            setTimeout(() => {
+                caseMetaItems.forEach((element, index) => {
+                    if (!element.classList.contains('CaseMeta__meta-item_loaded')) {
+                        console.log(`Fallback: showing meta item ${index}`) // Debug log
+                        element.classList.add('CaseMeta__meta-item_loaded')
+                    }
+                })
+            }, 5000)
+
+            // Caseresult__item fade-in on page load (after CaseMeta items finish)
+            const caseresultItems = document.querySelectorAll('.Caseresult__item')
+            console.log('Found caseresult items:', caseresultItems.length) // Debug log
+            
+            // Calculate when CaseMeta items will finish
+            const caseMetaFinishTime = caseElementsFinishTime + (caseMetaItems.length * 200) + 200
+            console.log('Case meta finish time:', caseMetaFinishTime) // Debug log
+            
+            // Animate Caseresult__item elements earlier, overlapping with CaseMeta items
+            caseresultItems.forEach((element, index) => {
+                const earlierStartTime = caseMetaFinishTime - 300 // Start 300ms earlier
+                setTimeout(() => {
+                    element.classList.add('Caseresult__item_loaded')
+                    console.log(`Caseresult item ${index} animated at time:`, earlierStartTime + (index * 100)) // Debug log
+                }, earlierStartTime + (index * 100)) // Faster sequence: 100ms delay between each
+            })
+
+            // caseresult__title and caseresult__text character swapping animation on load
+            const caseresultTitleElements = document.querySelectorAll('.caseresult__title')
+            const caseresultTextElements = document.querySelectorAll('.caseresult__text')
+            console.log('Found caseresult elements - titles:', caseresultTitleElements.length, 'texts:', caseresultTextElements.length)
+            const allCaseresultTextElements = [...caseresultTitleElements, ...caseresultTextElements]
+            
+            allCaseresultTextElements.forEach(element => {
+                const text = element.textContent.trim()
+                if (text.length === 0) return
+                
+                console.log('Setting up character swapping for:', text)
+                
+                // Split text into individual character spans
+                element.innerHTML = text.split('').map(char => '<span>' + char + '</span>').join('')
+                
+                const spans = element.querySelectorAll('span')
+                const originalText = text.split('')
+                
+                function animateCaseresultLetters() {
+                    console.log('Starting character animation for:', text)
+                    spans.forEach((span, index) => {
+                        const delay = index * 30 // 30ms delay between letters (same as other animations)
+                        setTimeout(() => {
+                            let rollCount = 0
+                            const maxRolls = 15 // More character swaps for longer rolling effect
+                            
+                            const rollInterval = setInterval(() => {
+                                if (rollCount < maxRolls) {
+                                    // Random character from ASCII 33-126 (visible characters)
+                                    const randomChar = String.fromCharCode(33 + Math.floor(Math.random() * 94))
+                                    span.textContent = randomChar
+                                    rollCount++
+                                } else {
+                                    // Animation complete - restore original character
+                                    span.textContent = originalText[index]
+                                    clearInterval(rollInterval)
+                                }
+                            }, 50) // 50ms between character swaps (same as other animations)
+                        }, delay)
+                    })
+                }
+                
+                // Determine timing based on element type
+                const isTitleElement = element.classList.contains('caseresult__title')
+                const isTextElement = element.classList.contains('caseresult__text')
+                
+                // Find which caseresult__item this element belongs to
+                const parentItem = element.closest('.caseresult__item')
+                if (parentItem) {
+                    // Find the index of this item among all caseresult items
+                    const allItems = document.querySelectorAll('.caseresult__item')
+                    const itemIndex = Array.from(allItems).indexOf(parentItem)
+                    
+                    // Calculate when this specific item will fade in (using new earlier timing)
+                    const earlierStartTime = caseMetaFinishTime - 300 // Start 300ms earlier
+                    const itemFadeInTime = earlierStartTime + (itemIndex * 100) // Faster sequence: 100ms delay
+                    
+                    // Start character animation almost immediately with the fade-in
+                    const characterAnimationDelay = isTitleElement ? 30 : 100 // Even earlier: Title first, then text with delay
+                    const totalDelay = itemFadeInTime + characterAnimationDelay
+                    
+                    console.log(`Scheduling ${isTitleElement ? 'title' : 'text'} animation for item ${itemIndex} at ${totalDelay}ms:`, element.textContent)
+                    setTimeout(() => {
+                        console.log(`Starting character animation for item ${itemIndex}:`, element.textContent)
+                        animateCaseresultLetters()
+                    }, totalDelay)
+                }
             })
 
             // Services__item scroll-triggered fade/unblur animation
@@ -826,6 +1154,173 @@ Beast.decl({
                 })
             }
             
+            // CaseAction scroll-triggered character swapping animation
+            const caseActionElements = document.querySelectorAll('.CaseAction')
+            console.log('Found CaseAction elements for scroll animation:', caseActionElements.length) // Debug log
+            
+            if (caseActionElements.length > 0) {
+                const caseActionObserverOptions = {
+                    root: null,
+                    rootMargin: '0px 0px -20% 0px', // Trigger when 20% into viewport
+                    threshold: 0.1
+                }
+                
+                const caseActionObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !entry.target.hasScrollTriggered) {
+                            // Element is visible for first time - trigger character swap animation
+                            entry.target.hasScrollTriggered = true
+                            triggerCaseActionAnimation(entry.target)
+                            console.log('CaseAction scroll animation triggered') // Debug log
+                            
+                            // Start occasional repeating animations
+                            startCaseActionRepeatingAnimation(entry.target)
+                        }
+                    })
+                }, caseActionObserverOptions)
+                
+                // Function to trigger the character swapping animation (same as hover)
+                function triggerCaseActionAnimation(element) {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent.trim()
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length + 8  // Animation length based on text length
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Store original font properties to prevent jumping
+                    const originalFontFamily = window.getComputedStyle(element).fontFamily
+                    const originalFontSize = window.getComputedStyle(element).fontSize
+                    const originalFontWeight = window.getComputedStyle(element).fontWeight
+                    const originalDisplay = window.getComputedStyle(element).display
+                    
+                    // Lock the exact width and height to prevent any changes
+                    const originalWidth = element.offsetWidth
+                    const originalHeight = element.offsetHeight
+                    element.style.width = originalWidth + 'px'
+                    element.style.height = originalHeight + 'px'
+                    element.style.minWidth = originalWidth + 'px'
+                    element.style.maxWidth = originalWidth + 'px'
+                    element.style.minHeight = originalHeight + 'px'
+                    element.style.maxHeight = originalHeight + 'px'
+                    element.style.display = originalDisplay
+                    element.style.whiteSpace = 'nowrap'
+                    element.style.overflow = 'hidden'
+                    element.style.textAlign = 'center'
+                    element.style.boxSizing = 'border-box'
+                    element.style.alignItems = 'center'
+                    element.style.justifyContent = 'center'
+                    
+                    element.animationInterval = setInterval(() => {
+                        let currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i >= originalText.length - swapsRemaining) {
+                                // Characters that are still random
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                // Characters that have resolved to final
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Reset styles
+                            element.style.width = ''
+                            element.style.height = ''
+                            element.style.minWidth = ''
+                            element.style.maxWidth = ''
+                            element.style.minHeight = ''
+                            element.style.maxHeight = ''
+                            element.style.display = ''
+                            element.style.whiteSpace = ''
+                            element.style.overflow = ''
+                            element.style.textAlign = ''
+                            element.style.alignItems = ''
+                            element.style.justifyContent = ''
+                            element.style.boxSizing = ''
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 30)
+                }
+                
+                // Function to start occasional repeating animations
+                function startCaseActionRepeatingAnimation(element) {
+                    function scheduleNextAnimation() {
+                        const randomDelay = 3000 + Math.random() * 4000 // 3-7 seconds
+                        setTimeout(() => {
+                            if (!element.isAnimating) { // Only animate if not already animating
+                                triggerCaseActionAnimation(element)
+                            }
+                            scheduleNextAnimation() // Schedule the next one
+                        }, randomDelay)
+                    }
+                    
+                    // Start the repeating cycle after initial animation completes
+                    setTimeout(() => {
+                        scheduleNextAnimation()
+                    }, 2000) // 2 second buffer after initial animation
+                }
+                
+                // Observe all CaseAction elements
+                caseActionElements.forEach(element => {
+                    caseActionObserver.observe(element)
+                })
+            }
+            
+            // Scroll-triggered fade/unblur animation for Case__image, About, Solution, and Review
+            const scrollAnimationElements = [
+                { selector: '.Case__image', className: 'Case__image_loaded' },
+                { selector: '.About', className: 'About_loaded' },
+                { selector: '.Solution', className: 'Solution_loaded' },
+                { selector: '.Review', className: 'Review_loaded' }
+            ]
+            
+            scrollAnimationElements.forEach(({ selector, className }) => {
+                const elements = document.querySelectorAll(selector)
+                console.log(`Found ${selector} elements:`, elements.length) // Debug log
+                
+                if (elements.length > 0) {
+                    const observerOptions = {
+                        root: null,
+                        rootMargin: '0px 0px -20% 0px', // Trigger when 20% into viewport
+                        threshold: 0.1
+                    }
+                    
+                    const elementObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                // Element is visible - animate
+                                entry.target.classList.add(className)
+                                console.log(`${selector} animated`) // Debug log
+                            } else {
+                                // Element is not visible - reset animation
+                                entry.target.classList.remove(className)
+                                console.log(`${selector} reset`) // Debug log
+                            }
+                        })
+                    }, observerOptions)
+                    
+                    // Observe all elements of this type
+                    elements.forEach(element => {
+                        elementObserver.observe(element)
+                    })
+                }
+            })
+
             // Reviews dimming when footer comes into view
             const reviewsElement = document.querySelector('.Reviews')
             const footerElement = document.querySelector('.Footer')
