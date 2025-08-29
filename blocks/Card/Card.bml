@@ -8,7 +8,7 @@ Beast.decl({
             // Card text hover animation - same rolling effect as Menu
             // Debug: log what elements we find
             const cardElements = document.querySelectorAll('.Card')
-            console.log('Found Cards:', cardElements.length)
+            
             
             const cardTextElements = []
             cardElements.forEach(card => {
@@ -18,13 +18,13 @@ Beast.decl({
                 cardTextElements.push(...titles, ...texts)
             })
             
-            console.log('Found card text elements:', cardTextElements.length)
+            
             
             // Fallback: if no elements found, try broader search
             if (cardTextElements.length === 0) {
                 const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
                 cardTextElements.push(...allElements)
-                console.log('Fallback found:', cardTextElements.length, 'elements')
+                
             }
             
             cardTextElements.forEach(element => {

@@ -1,0 +1,51 @@
+.Action
+    text-align center
+    transition all 0.3s ease
+    white-space nowrap
+    min-width max-content
+    box-sizing border-box
+    display flex
+    align-items center
+    justify-content center
+    box-sizing border-box
+    
+    &_Size
+        &_M
+            padding 1vw 2vw
+            font-size 1vw
+        &_L
+            height 5vw
+            font-size 1vw
+            line-height 5vw
+        &_XL
+            font-size 1.5vw
+            line-height 5vw
+            
+    &_Wide
+        width 100%
+
+    &_Type
+        &_White
+            background white
+            color blue
+            display flex
+            align-items center
+            justify-content center
+            text-align center
+            transition all 0.2s ease
+            &:hover
+                background rgba(255, 255, 255, 0.9)
+                transform scale(1.01)
+                backdrop-filter blur(12px)
+        &_Red
+            background white
+            background rgba(255, 255, 255, 0.01)
+            backdrop-filter blur(10px)
+            color red
+            border 1px solid red
+            &:hover
+                background red
+                color black
+                border-color red
+                backdrop-filter blur(15px)
+

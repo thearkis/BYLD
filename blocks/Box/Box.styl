@@ -1,0 +1,84 @@
+.Box
+    border .05vw solid grey
+    padding 1vw
+    position relative
+    display flex
+    flex-direction column
+    
+    &__p 
+        & + &
+            margin-top 1.2vw
+
+    &__corner
+        width .3vw
+        height .3vw
+        background grey
+        position absolute
+        
+        corners = {
+            TL: (left top)
+            TR: (right top)
+            BR: (right bottom)
+            BL: (left bottom)
+        }
+        for pos, coords in corners
+            &_{pos}
+                {coords[0]} 0
+                {coords[1]} 0
+    &_type
+        &_Challenge
+            .Box__meta
+                position absolute
+                right 1vw
+                bottom 1vw
+                size = 7.8vw
+                height 6vw
+                width size
+                background url('/blocks/Box/i/tail-challenge.svg') center center / size no-repeat
+        &_Solution
+            .Box__footer
+                box-sizing border-box
+                margin-top 2vw
+                position relative
+                padding 1vw 
+                size = 100%
+                height 6vw
+                width size
+                background url('/blocks/Box/i/footer-descr.svg') center center / size no-repeat
+
+    &_Size
+        &_Small
+            height 100%
+            .Box
+                &__text
+                    max-width initial
+                &__title
+                    margin-bottom .5vw
+    &__title
+        caption()
+        color grey
+        margin-bottom 2.6vw
+        flex-shrink 0
+    &__hint
+        hint()
+    &__text
+        max-width 70%
+        header()
+        &_Type
+            &_Red
+                color red
+        
+                
+    &__s
+        display inline
+        color red
+    
+    &__wrap
+        flex 1
+        display flex
+        flex-direction column
+        justify-content flex-end
+        gap .2vw
+        position relative
+
+    

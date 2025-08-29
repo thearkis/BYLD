@@ -1,0 +1,31 @@
+.Solution
+    margin-top 4vw
+    
+    transition opacity 0.8s ease, filter 0.8s ease
+    &_loaded
+        opacity 1
+        filter blur(0px)
+    &__description
+        width 50%
+        margin-top 2vw
+        
+    &__solutions
+        display flex
+        gap 0vw
+        align-items stretch
+        flex-wrap wrap
+    &__plus
+        position relative
+        width 25%
+    &__icon
+        size = 3.6vw
+        height size
+        width size
+        background url('/assets/i/Plus.svg') center center / size no-repeat
+        margin 0 auto
+        position absolute
+        top 50%
+        left 50%
+        transform translate(-50%, -50%)
+    &__item
+        width 25%

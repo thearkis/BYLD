@@ -4,6 +4,45 @@ Beast.decl({
             
             this.append(
 
+                <level>
+                    <left>
+                        <jp>ソフトウェア</jp>
+                    </left>
+                    
+                    <right>
+                        <mid>
+                            <text>//////////////////////////// <br />+++++++++++++++</text>
+                        </mid>
+                        <ch>信頼</ch>
+                    </right>
+                </level>,
+
+                <level>
+                    <left>
+                        <text>PN: 2483-AX9 <br /> DO NOT REMOVE DURING OPERATION</text>
+                    </left>
+
+                    <right>
+                        <mid>
+                        <text>BATCH: 07/2025-A1 <br /> TOL: ±0.02mm</text>
+                    </mid>
+                        <text R>SN: 002194-C <br /> MAT: AL6061-T6</text>
+                    </right>
+                </level>,
+
+                <items>
+                    <text>We build software that builds trust</text>
+                    
+                        <Action Type="White" Size="XL">Tell us about your project</Action>
+                    
+                </items>,
+                
+                <copy>
+                    <text>© 2025 Byld. All Rights Reserved.</text>
+                    <ark>
+                        <Ark/>
+                    </ark>
+                </items>
                 
             )
 

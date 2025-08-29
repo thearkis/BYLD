@@ -1,0 +1,161 @@
+Beast.decl({
+    Case: {
+        expand: function () {
+            this.append(
+                <head>
+                    <client-card>
+                        <tail />
+                        <wrap>
+                            <hint>Client</hint>
+                            {this.get('client')}
+                        </wrap>
+                    </client-card>
+                    {this.get('title')}
+                </head>,
+
+
+                this.get('impact', 'image', 'descr'),
+
+                <descr>
+                    
+                    <descr-about>
+                        <Header>
+                            <title>About<br/> the project</title>
+                            <glyph>プロジェクト</glyph>
+                        </Header>
+                        {this.get('description')}
+                    </descr-about>
+
+                    <descr-plus>
+                        <descr-icon/>
+                    </descr-plus>
+
+                    <descr-challenge>
+                        <Header>
+                            <title>The<br/> challenge</title>
+                            <glyph>挑戦</glyph>
+                        </Header>
+                        <Box Type="Challenge">
+                            <title>ID.5.001</title>
+                            <text Size="L">
+                                {this.get('challenge')}
+                            </text>    
+                        </Box>
+                        
+                    </descr-challenge>
+                    
+                </descr>,
+
+                this.get('solution'),
+
+                <impact-bottom>
+                    <Header>
+                        <title>Impact of<br/> our work</title>
+                        <glyph>プロジェクトについて</glyph>
+                    </Header>
+                    <impact-items>
+                        {this.get('impact-meta-item')}
+                    </impact-items>
+                </impact-bottom>,
+
+                this.get('review', 'link'),
+
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    Case__link: {
+        expand: function () {
+            var text = this.text()
+            var href = 'http://' + text
+            this.append(
+                <action>
+                    <Link New href="{href}">
+                        <Action Size="L" Wide  Type="Red">{text}</Action>
+                    </Link>
+                </action>
+            )
+        },
+    },
+
+    Case__impact: {
+        expand: function () {
+            this.append(
+                <Header Top>
+                    <title>Impact of<br/> our work</title>
+                    <glyph>プロジェクトについて</glyph>
+                </Header>,
+
+                <CaseMeta>
+                    {this.get('item')}
+                </CaseMeta>
+            )
+        },
+    },
+
+    Case__solution: {
+        expand: function () {
+            this.append(
+                <Header>
+                    <title>The<br/> solution</title>
+                    <glyph>解決策</glyph>
+                </Header>,
+                <Solution>
+                    {this.get('item','descr')}
+                </Solution>
+            )
+        },
+    },
+
+    Case__review: {
+        expand: function () {
+            this.append(
+                <Header>
+                    <title>Client<br/> feedback</title>
+                    <glyph>人々が言うこと</glyph>
+                </Header>,
+                <Review Size="L">
+                    {this.get('text')}
+                    <person>
+                        {this.get('photo', 'name')}
+                    </person>
+                </Review> 
+                
+            )
+        },
+            
+    },
+
+    Case__image: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        },
+            
+    },
+
+    
+
+    
+
+    'Case__impact-meta-item': {
+        
+        expand: function () {
+            this.append(
+                <CaseResult>
+                    <item>
+                        <title>{this.get('impact-meta-title')}</title>
+                        <text>{this.get('impact-meta-text')}</text>
+                    </item>
+                </CaseResult>
+            )
+        }
+            
+    },
+})

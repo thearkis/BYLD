@@ -1,0 +1,29 @@
+.CaseMeta
+    display flex
+    @media $screen-phone
+        display block
+    gap 0
+    &__text
+        superheader()
+        margin-bottom 2vw
+        color grey
+        max-width 21vw
+    &__title
+        caption()
+        color red
+        margin-bottom .4vw
+    &__item
+        width 25vw
+        display inline-block
+        vertical-align top
+        opacity 0
+        filter blur(5px)
+        transition opacity 0.8s ease, filter 0.8s ease
+        @media $screen-phone
+            width 100%
+            display block
+            &:last-child
+                display inline-block
+        &_loaded
+            opacity 1
+            filter blur(0px)

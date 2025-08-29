@@ -1,0 +1,23 @@
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                <corner TL/>,
+                <corner TR/>,
+                <corner BR/>,
+                <corner BL/>,
+                this.get('title'),
+                <wrap>
+                    {this.get('text')}
+                    <meta/>
+                    {this.get('hint')}
+                    <footer/>
+                </wrap>
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})

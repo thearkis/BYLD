@@ -5,17 +5,14 @@
       "src": "^/$",
       "dest": "/projects/site/pages/main.html"
     },
+    
     {
-      "src": "^/case",
-      "dest": "/projects/site/pages/case.html"
+      "src": "^/av-mastery",
+      "dest": "/projects/site/pages/av-mastery.html"
     },
     
     { "src": "^/assets/(.*)", "dest": "/assets/$1" }, 
     { "src": "^/build/site/(.*)", "dest": "/build/site/$1" },
-    {
-      "src": "^/work/pokras-lampas/?$",
-      "dest": "/projects/site/pages/plstorage.html"
-    },
     
     {
       "src": "^/(.*)",

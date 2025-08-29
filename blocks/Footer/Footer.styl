@@ -1,23 +1,16 @@
 .Footer
     position relative
     background blue
+    color white
     padding 4vw 30px 2vw 30px
     margin-top 10vw
     margin-bottom 0
+
     &__ark
         position absolute
         right 0
         top 0
-        size = 4vw
-        height size
-        background-size size
-        width size
-        background-position center center
-        background-repeat no-repeat
-        background-image url('/assets/ark.svg')
-        opacity .5
-        &:hover
-            opacity 1
+        
             
     &__copy
         border-top 1px solid white
@@ -36,9 +29,8 @@
             flex 1
         .Footer
             &__text
-                font-size 5.92vw
-                line-height 5vw
-                color white
+                topline()
+                
             &__action
                 background white
                 color blue

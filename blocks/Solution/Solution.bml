@@ -1,0 +1,46 @@
+Beast.decl({
+    Solution: {
+        expand: function () {
+            this.append(
+                <solutions>
+                    <plus>
+                        <icon/>
+                    </plus>
+                    {this.get('item')}
+                </solutions>,
+                <description>
+                    <Box Type="Solution">
+                        <title>ID.1.000</title>
+                        <hint>{this.get('descr')}</hint>
+                    </Box>
+                </description>
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                <Box Size="Small">
+                    <title>ID.1.{idNumber}</title>
+                    <text Type="Red">{this.get('text')}</text>
+                    <hint Type="Red">{this.get('hint')}</hint>
+                </Box>
+            )
+        }
+            
+    },
+    
+})

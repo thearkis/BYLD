@@ -1,28 +1,34 @@
 Beast.decl({
     Menu: {
-        state: function () {
-            return {
-                items: []
-            }
-        },
-        requestApi: function (path, data) {
-            
-        },
+        
 
         expand: function () {
             this.append(
-                this.get('menu-item')
+                <item>
+                    <digit>[01]</digit>
+                    <text>About</text>
+                </item>,
+                <item>
+                    <digit>[02]</digit>
+                    <text>What we do</text>
+                </item>,
+                <item>
+                    <digit>[03]</digit>
+                    <text>What we've built</text>
+                </item>,
+                <item>
+                    <digit>[04]</digit>
+                    <text>How we build</text>
+                </item>,
+                <item>
+                    <digit>[05]</digit>
+                    <text>What people say</text>
+                </item>
             )
         },
             
     },
-    'Menu__menu-item': {
-        expand: function () {
-            this.append(
-                this.text()
-            )
-        }
-    },
+    
      
 })
 

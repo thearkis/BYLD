@@ -1,22 +1,7 @@
 Beast
-.decl('link', {
+.decl('Link', {
     tag:'a',
-    mod: {
-        type:'blue'
-    },
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-
-
-Beast
-.decl('footer__link', {
-    tag:'a',
+    
     noElems:true,
     expand: function () {
         this.domAttr('href', this.param('href'))

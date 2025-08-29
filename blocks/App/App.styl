@@ -1,277 +1,103 @@
-
-.Review
-    opacity 0
-    filter blur(5px)
-    transition opacity 0.8s ease, filter 0.8s ease
-    &_loaded
-        opacity 1
-        filter blur(0px)
-    &__text
-        font-size 3vw
-        margin-bottom 2vw
-    &__person
-        font-size 1vw
-        color red
-        display flex
-        line-height 1.2vw
-        margin-top -1vw
-    &__photo
-        margin-right .6vw
-        size = 2.1vw
-        margin-top .2vw
-        background-position center center
-        background-repeat no-repeat
-        background-size size
-        width size
-        height size
-        background-image url('/assets/work/av-mastery/photo.png')
-        
-            
-.CaseAction
-    border 1px solid #ff4000
-    width 100%
-    font-size 1vw
-    color red
-    height 5vw
-    line-height 5vw
-    text-align center
-    margin-top 3vw
-    margin-bottom -8vw
-    display flex
-    align-items center
-    justify-content center
-    box-sizing border-box
-    &:hover
-        background red
-        color black
-.App_Case
-    padding-top 10vw !important
-
-.CaseData
-    font-size 1vw
-    margin-right 19vw
-    height 3.3vw
-    margin-left 30px
-    position absolute
-    top 1.3vw
-    right 0
-    left 0
+.App
+    overflow-x hidden
+    overflow-y auto
+    background #000
+    color #f0f0f0
+    text-transform uppercase
+    padding 0
+    margin 0
+    touch-highlight none
+    font-smoothing antialiased
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
     font-family 'Ticketing'
-    border-bottom 1px solid blue
-    vertical-align bottom
-    z-index 88
+    position relative
+    cursor()
         
-    &__item_two
-        left 12vw
-        
-    &__mid, &__item_two, &__right
-        top .5vw
-    &__item, &__mid
-        position absolute
-    &__jp, &__ch
-        line-height 1vw
-        color red
-        display inline
-        font-size 2.6vw
-        font-weight bold
-        font-family Arial
-        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
-        animation text-glow 4s ease-in-out infinite alternate
-    &__jp
-        letter-spacing -.6vw
-        margin-right 20px
-        &_Hide
-            opacity 0
-    &__text
-        display inline-block
-        color blue
-    &__right
-        position absolute
+    &::before
+        content ''
+        position fixed
+        top 0
+        left 0
         right 0
-    &__mid
-        right 20vw
-        color blue
+        bottom 50%
+        z-index -1
+        background-image linear-gradient(rgba(0, 255, 255, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.25) 1px, transparent 1px)
+        background-size 100px 100px
+        transform perspective(400px) rotateX(-60deg)
+        transform-origin center top
+        will-change transform
+        backface-visibility hidden
+    
+    &::after
+        content ''
+        position fixed
+        top 50%
+        left 0
+        right 0
+        bottom 0
+        z-index -1
+        background-image linear-gradient(rgba(0, 255, 255, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.25) 1px, transparent 1px)
+        background-size 100px 100px
+        transform perspective(400px) rotateX(60deg)
+        transform-origin center bottom
+        will-change transform
+        backface-visibility hidden
 
+@keyframes text-glow
+    0%
+        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
+    100%
+        text-shadow 0 0 15px #FF3050, 0 0 30px #FF2040, 0 0 50px #FF1030, 0 0 70px rgba(255, 48, 80, 0.3)
 
-
-.Divider
-    size = 100%
-    background-position center center
-    background-repeat no-repeat
-    background-size size
-    width size
-    &_One 
-        height 4.1vw
-        background-image url('/assets/work/av-mastery/divider-one.svg')
-    &_Four
-        margin-top 2vw
-        height 4.1vw
-        background-image url('/assets/work/av-mastery/divider-four.svg')
-        
-
-.About
-    margin-top 2vw
-    size = 100%
-    background-position center center
-    background-repeat no-repeat
-    background-size size
-    width size
-    height 20vw
-    background-image url('/assets/work/av-mastery/about.svg')
-    opacity 0
-    filter blur(5px)
-    transition opacity 0.8s ease, filter 0.8s ease
-    &_loaded
-        opacity 1
+@keyframes symbols-float
+    0%
+        transform translate(-50%, -50%) rotate(0deg) scale(1)
+        filter blur(0px)
+    25%
+        transform translate(-50%, -60%) rotate(5deg) scale(1.1)
+        filter blur(1px)
+    50%
+        transform translate(-50%, -40%) rotate(-3deg) scale(0.9)
+        filter blur(2px)
+    75%
+        transform translate(-50%, -55%) rotate(8deg) scale(1.05)
+        filter blur(1px)
+    100%
+        transform translate(-50%, -50%) rotate(0deg) scale(1)
         filter blur(0px)
 
-.Solution
-    margin-top 2vw
-    size = 100%
-    background-position center center
-    background-repeat no-repeat
-    background-size size
-    width size
-    height 32vw
-    background-image url('/assets/work/av-mastery/solution.svg')
-    opacity 0
-    filter blur(5px)
-    transition opacity 0.8s ease, filter 0.8s ease
+    
+
+
+    
+
+
+
+
+
+.Case
+    &__review
+        opacity 0
+        filter blur(5px)
+        transition opacity 0.8s ease, filter 0.8s ease
     &_loaded
         opacity 1
         filter blur(0px)
     
+        
+            
 
-.Case
-    margin 0 30px
-    &__wrap
-        background #D9D9D9
-        color black
-        padding .6vw 1vw
-        margin-right 1.7vw
-        height 2.9vw
-    &__name
-        font-size 2vw
-    &__hint
-        font-size 1vw
-    &__client
-        width 23vw
-        margin-top .5vw
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        &_loaded
-            opacity 1
-            filter blur(0px)
-    &__head
-        display flex
-        & > *
-            display inline-block
-            vertical-align top
-    &__client
-        display inline-block
-        vertical-align top
-        position relative
-    &__title
-        font-size 6vw
-        line-height 5.2vw
-        display inline-block
-        vertical-align top
-        width 50vw
-        color #D9D9D9
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        &_loaded
-            opacity 1
-            filter blur(0px)
-    &__tail
-        position absolute
-        right 0
-        size = 1.7vw
-        height 4.1vw
-        background-size size
-        width size
-        background-position center center
-        background-image url('/assets/work/av-mastery/06.svg')
-        background-repeat no-repeat
-    &__image
-        margin-top 2vw
-        size = 100%
-        height 33vw
-        background-size size
-        width size
-        background-position center center
-        background-image url('/assets/work/av-mastery/01.png')
-        background-repeat no-repeat
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        &_loaded
-            opacity 1
-            filter blur(0px)
-
-.CaseMeta
-    display flex
-    gap 0
-    &__text
-        font-size 3vw
-        margin-bottom 2vw
-        color grey
-    &__title
-        font-size 1vw
-        color red
-        margin-bottom .4vw
-    &__meta-item
-        width 25vw
-        display inline-block
-        vertical-align top
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        &:last-child
-            width 30vw
-        &_loaded
-            opacity 1
-            filter blur(0px)
-
-.Caseresult
-    &__title
-        font-size 3vw
-    &__text
-        font-size 1vw 
-        position relative
-        &:after
-            content '////'
-            color red
-            position absolute
-            right 0
-    &__item
-        background-color blue
-        padding 1.8vw 2vw
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        & + & 
-            margin-top .1vw
-        &_loaded
-            opacity 1
-            filter blur(0px)
+.App_Case
+    padding-top 10vw !important
 
 
-.Reviews
-    size = 4vw
-    height 30vw
-    background-size 100%
-    width 100%
-    background-position center center
-    background-repeat no-repeat
 
-    margin-bottom 1vw
-    background-image url('/assets/reviews.svg')
-    transition opacity 0.8s ease
-    &_dimmed
-        opacity 0.3
+
+
+    
+
+
 
 .cassette_piece_1.Cassette_piece_fixed
     position fixed
@@ -413,25 +239,6 @@
         gap .1vw
     
 
-.Glyph
-    size = 4vw
-    height size
-    background-size size
-    width size
-    background-position center center
-    background-repeat no-repeat
-
-    margin-bottom 1vw
-    &_About
-        background-image url('/assets/glyph-about.svg')
-    &_Services
-        background-image url('/assets/glyph-services.svg')
-    &_Clients
-        background-image url('/assets/glyph-clients.svg')
-    &_Process
-        background-image url('/assets/glyph-process.svg')
-    &_Reviews
-        background-image url('/assets/glyph-reviews.svg')
 
 
 .Services
@@ -464,10 +271,7 @@
     position relative
     &_Services
         margin-top 21vw
-    &__head
-        padding-top 1vw
-        margin-bottom 1vw
-        border-bottom 1px solid #303030
+    
 
 .Misc
     size = 100vw
@@ -480,26 +284,7 @@
 
 
 
-.Action
-    position fixed
-    z-index 9999
-    right 30px
-    top 30px
-    border 1px solid red
-    padding 1vw 2vw
-    color red
-    font-size 1vw
-    transition all 0.3s ease
-    backdrop-filter blur(10px)
-    background rgba(255, 255, 255, 0.01)
-    white-space nowrap
-    min-width max-content
-    box-sizing border-box
-    &:hover
-        background red
-        color black
-        border-color red
-        backdrop-filter blur(15px)
+
 
 .Text
     position relative
@@ -559,137 +344,3 @@
 
 
 
-    
-    
-
-
-.noise::before{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 200vw;
-    height: 200vh;
-    content: "";
-    /* you can control opacity of noise  */
-    opacity: .08;  
-    z-index: 1000;
-    pointer-events: none;
-    background: url(/assets/noise.gif) ;
-}
-
-
-
-@keyframes pulse {
-    0% {opacity:1}
-    50% {opacity:0}
-    to {opacity:1}
-}
-
-
-
-
-
-.R
-    display inline-block
-    font-size 5vw
-    line-height 5vw
-    margin-left 0.5vw
-    position absolute
-    
-
-
-
-
-table
-    border-collapse collapse
-    border-spacing 0
-    border none
-
-td
-    padding 0
-    vertical-align baseline
-
-html
-    background transparent
-
-.no-scroll
-    overflow hidden !important
-    height 100%
-    width 100%
-
-
-
-.App
-    overflow-x hidden
-    overflow-y auto
-    background #000
-    color #f0f0f0
-    text-transform uppercase
-    padding 0
-    margin 0
-    touch-highlight none
-    font-smoothing antialiased
-    -webkit-font-smoothing antialiased
-    -moz-osx-font-smoothing grayscale
-    font-family 'Ticketing'
-    padding-top 11vw
-    position relative
-    cursor url('/assets/cursor.svg'), auto
-    
-    &::before
-        content ''
-        position fixed
-        top 0
-        left 0
-        right 0
-        bottom 50%
-        z-index -1
-        background-image linear-gradient(rgba(0, 255, 255, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.25) 1px, transparent 1px)
-        background-size 100px 100px
-        transform perspective(400px) rotateX(-60deg)
-        transform-origin center top
-        will-change transform
-        backface-visibility hidden
-    
-    &::after
-        content ''
-        position fixed
-        top 50%
-        left 0
-        right 0
-        bottom 0
-        z-index -1
-        background-image linear-gradient(rgba(0, 255, 255, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.25) 1px, transparent 1px)
-        background-size 100px 100px
-        transform perspective(400px) rotateX(60deg)
-        transform-origin center bottom
-        will-change transform
-        backface-visibility hidden
-
-@keyframes text-glow
-    0%
-        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
-    100%
-        text-shadow 0 0 15px #FF3050, 0 0 30px #FF2040, 0 0 50px #FF1030, 0 0 70px rgba(255, 48, 80, 0.3)
-
-@keyframes symbols-float
-    0%
-        transform translate(-50%, -50%) rotate(0deg) scale(1)
-        filter blur(0px)
-    25%
-        transform translate(-50%, -60%) rotate(5deg) scale(1.1)
-        filter blur(1px)
-    50%
-        transform translate(-50%, -40%) rotate(-3deg) scale(0.9)
-        filter blur(2px)
-    75%
-        transform translate(-50%, -55%) rotate(8deg) scale(1.05)
-        filter blur(1px)
-    100%
-        transform translate(-50%, -50%) rotate(0deg) scale(1)
-        filter blur(0px)
-
-    
-
-
-    
