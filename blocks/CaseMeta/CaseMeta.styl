@@ -1,7 +1,5 @@
 .CaseMeta
     display flex
-    @media $screen-phone
-        display block
     gap 0
     &__text
         superheader()
@@ -19,11 +17,8 @@
         opacity 0
         filter blur(5px)
         transition opacity 0.8s ease, filter 0.8s ease
-        @media $screen-phone
-            width 100%
-            display block
-            &:last-child
-                display inline-block
+        &:last-child
+            width 30vw
         &_loaded
             opacity 1
             filter blur(0px)
