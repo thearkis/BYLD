@@ -10,6 +10,31 @@
       "src": "^/av-mastery",
       "dest": "/projects/site/pages/av-mastery.html"
     },
+
+    {
+      "src": "^/syftdeals",
+      "dest": "/projects/site/pages/syftdeals.html"
+    },
+
+    {
+      "src": "^/machinegirl",
+      "dest": "/projects/site/pages/machinegirl.html"
+    },
+
+    {
+      "src": "^/swift",
+      "dest": "/projects/site/pages/swift.html"
+    },
+
+    {
+      "src": "^/wealthagile",
+      "dest": "/projects/site/pages/wealthagile.html"
+    },
+
+    {
+      "src": "^/rhytm",
+      "dest": "/projects/site/pages/rhytm.html"
+    },
     
     { "src": "^/assets/(.*)", "dest": "/assets/$1" }, 
     { "src": "^/build/site/(.*)", "dest": "/build/site/$1" },
