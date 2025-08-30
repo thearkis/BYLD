@@ -105,18 +105,28 @@
 
 
 
-.cassette_piece_1.Cassette_piece_fixed
-    position fixed
+
+.Cassette_piece_1.Cassette_fixed
+    position fixed !important
+
+
+    
 
 .Cassette
     position absolute
-    width 24vw
-    height 26vw
+    width 23vw
+    height 27vw
     right 11vw
     top 6vw
     z-index 1000
     background-position center
+    background-size 23vw
     background-repeat no-repeat
+
+    &_Fixed
+        position fixed
+        right calc(11vw + 30px) !important
+        top 7vw !important
     &_piece
         &_1
             background-image url('/assets/cassette/piece-01.svg')
@@ -205,6 +215,7 @@
             opacity var(--bg-opacity, 0)
             transition opacity 0.4s ease
             z-index -1
+
 
         &_01
             &::before

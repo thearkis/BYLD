@@ -1,0 +1,15 @@
+Beast.decl({
+    Ark: {
+        expand: function () {
+            this.append(
+                <Link href="http://ark.studio/byld"> 
+                    <glyph/>
+                </Link>
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
