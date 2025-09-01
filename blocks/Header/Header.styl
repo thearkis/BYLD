@@ -7,6 +7,9 @@
         height .07vw
         width 100%
         background url('/blocks/Header/i/line.svg') center center / 15vw repeat
+        @media $screen-phone
+            height 1px
+            background url('/blocks/Header/i/line.svg') center center / 90px repeat
     &__glyph
         position absolute
         font-family 'Arial', sans-serif
@@ -16,5 +19,6 @@
     &__title
         hintTight()
         margin-bottom .2vw
+            
         
     

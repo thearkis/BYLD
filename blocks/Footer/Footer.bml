@@ -31,14 +31,12 @@ Beast.decl({
                 </level>,
 
                 <items>
-                    <text>We build software that builds trust</text>
-                    
-                        <Action Type="White" Size="XL">Tell us about your project</Action>
-                    
+                    <text Motto>We build software that builds trust</text>
+                    <Action Type="White" Size="XL">Tell us about your project</Action>
                 </items>,
                 
                 <copy>
-                    <text>© 2025 Byld. All Rights Reserved.</text>
+                    <text Copyright>© 2025 Byld. <l/> All Rights Reserved.</text>
                     <ark>
                         <Ark/>
                     </ark>

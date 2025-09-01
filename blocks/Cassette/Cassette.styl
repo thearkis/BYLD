@@ -1,15 +1,40 @@
-.Ark
-    &__glyph
-        size = 4vw
-        height size
-        background-size size
-        width size
-        background-position center center
-        background-repeat no-repeat
-        background-image url('/blocks/Ark/i/ark.svg')
-        opacity .5
-        &:hover
-            cursor()
-            opacity 1
-            
+.Cassette_piece_1.Cassette_fixed
+    position fixed !important
+
+
     
+
+.Cassette
+    position absolute
+    width 23vw
+    height 27vw
+    right 11vw
+    top 6vw
+    z-index 1000
+    background-position center
+    background-size 23vw
+    background-repeat no-repeat
+
+    &_Fixed
+        position fixed
+        right calc(11vw + 30px) !important
+        top 7vw !important
+    &_piece
+        &_1
+            background-image url('/assets/cassette/piece-01.svg')
+            .Cassette
+                &_fixed
+                    position fixed
+
+            
+        &_2
+            background-image url('/assets/cassette/piece-02.svg')
+            
+        &_3
+            background-image url('/assets/cassette/piece-03.svg')
+            
+        &_4
+            background-image url('/assets/cassette/piece-04.svg')
+            
+        &_5
+            background-image url('/assets/cassette/piece-05.svg')

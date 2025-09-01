@@ -8,15 +8,22 @@
     &__description
         width 50%
         margin-top 2vw
+        @media $screen-phone
+            width 100%
+            margin-top 0
         
     &__solutions
         display flex
         gap 0vw
         align-items stretch
         flex-wrap wrap
+        @media $screen-phone
+            display block
     &__plus
         position relative
         width 25%
+        @media $screen-phone
+            width 100%
     &__icon
         size = 3.6vw
         height size
@@ -29,3 +36,5 @@
         transform translate(-50%, -50%)
     &__item
         width 25%
+        @media $screen-phone
+            width 100%

@@ -5509,6 +5509,29 @@ Beast.decl({
             
     },
 })
+
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+            
+    }   
+})
+
 Beast.decl({
     Case__meta: {
         expand: function () {
@@ -5523,19 +5546,6 @@ Beast.decl({
 
     
     
-})
-Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
 })
 /**
  * @block Grid Динамическая сетка
@@ -5657,6 +5667,20 @@ function grid (num, col, gap, margin) {
     return gridWidth
 }
 Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Head: {
         expand: function () {
             this.append(
@@ -5691,28 +5715,6 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",undefined,"We build software that builds trust"),"\n                    \n                        ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                    \n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",undefined,"© 2025 Byld. All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-            
-    }   
-})
-
 /**
  * @block Icon Иконка
  * @tag icon
@@ -5745,20 +5747,17 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
+    },
+    
+});
+
 Beast
 .decl('Link', {
     tag:'a',
@@ -5772,35 +5771,6 @@ Beast
     }
 })
 
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
-    },
-    
-});
-
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 Beast.decl({
     Menu: {
         
@@ -5820,6 +5790,25 @@ Beast.decl({
      
 })
 
+
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 
 Beast.decl({
     Review: {
@@ -5842,6 +5831,7 @@ Beast.decl({
             
     },
 })
+
 Beast.decl({
     Solution: {
         expand: function () {

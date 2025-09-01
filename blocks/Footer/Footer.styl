@@ -6,6 +6,14 @@
     margin-top 10vw
     margin-bottom 0
 
+    &__l
+        display inline
+        @media $screen-phone
+            display block
+
+    @media $screen-phone
+        padding 40px 20px
+
     &__ark
         position absolute
         right 0
@@ -19,9 +27,14 @@
         position relative
     &__level
         position relative
+        @media $screen-phone
+            height 16px
+            font-size 13px
         & + &
             margin-top 4vw
     &__items
+        @media $screen-phone
+            display initial
         display flex
         margin-top 8vw
         gap 0vw
@@ -51,7 +64,11 @@
     &__left
         left 0
         width 50%
+        @media $screen-phone
+            width 60%
     &__jp, &__ch
+        @media $screen-phone
+            font-size 20px
         line-height 1vw
         color red
         display inline
@@ -71,6 +88,13 @@
     &__text
         display inline-block
         color white
+        &_Copyright
+            margin-top 7px
+            font-size 15px
+        &_Motto
+            @media $screen-phone
+                margin-top 36px
+                margin-bottom 18px
         &_R
             position absolute
             right 0
@@ -78,6 +102,7 @@
         right 0
         width 50%
     &__mid
-        
+        @media $screen-phone
+            display none
         color blue
         

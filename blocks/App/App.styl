@@ -13,6 +13,9 @@
     font-family 'Ticketing'
     position relative
     cursor()
+
+    &_Case
+        padding-top 10vw !important
         
     &::before
         content ''
@@ -94,152 +97,22 @@
         
             
 
-.App_Case
-    padding-top 10vw !important
 
 
 
 
-
-    
-
-
-
-
-.Cassette_piece_1.Cassette_fixed
-    position fixed !important
 
 
     
 
-.Cassette
-    position absolute
-    width 23vw
-    height 27vw
-    right 11vw
-    top 6vw
-    z-index 1000
-    background-position center
-    background-size 23vw
-    background-repeat no-repeat
 
-    &_Fixed
-        position fixed
-        right calc(11vw + 30px) !important
-        top 7vw !important
-    &_piece
-        &_1
-            background-image url('/assets/cassette/piece-01.svg')
-            .Cassette
-                &_fixed
-                    position fixed
 
-            
-        &_2
-            background-image url('/assets/cassette/piece-02.svg')
-            
-        &_3
-            background-image url('/assets/cassette/piece-03.svg')
-            
-        &_4
-            background-image url('/assets/cassette/piece-04.svg')
-            
-        &_5
-            background-image url('/assets/cassette/piece-05.svg')
+
+
             
 
 
-.Process
-    margin-top 0 
-    position relative   
-    font-size 1.3vw
-    line-height 1.5vw
 
-    &__misc-line_blue
-        color blue
-    &__num
-        color red
-        font-size 3vw
-        position absolute
-        right 3vw
-        top 3vw
-    &__misc
-        position absolute
-        bottom 3.5vw
-        background black
-        padding-right 1vw
-    &__text
-        width 40%
-        opacity .4
-        transition opacity 0.6s ease
-    &__title
-        color red
-        font-size 3vw
-        margin-bottom 2vw
-        transition text-shadow 0.6s ease
-        &_glow
-            text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
-
-        
-    &__step
-        position relative
-        padding 3vw
-        margin 0
-        transition opacity 0.6s ease
-        
-        &_faded
-            opacity 0.3
-            &::after
-                content ''
-                position absolute
-                top 0
-                left 0
-                right 0
-                bottom 0
-                background linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.6) 100%)
-                pointer-events none
-                z-index 10
-                transition opacity 0.6s ease
-        
-        // Create pseudo-element for background image with opacity control
-        &::before
-            content ''
-            position absolute
-            top 0
-            left 0
-            right 0
-            bottom 0
-            background-position bottom center
-            background-repeat repeat-x
-            background-size 100%
-            opacity var(--bg-opacity, 0)
-            transition opacity 0.4s ease
-            z-index -1
-
-
-        &_01
-            &::before
-                background-image url('/assets/process_1.svg')
-            height 32vw
-        &_02
-            &::before
-                background-image url('/assets/process_2.svg')
-            height 33vw
-        &_03
-            &::before
-                background-image url('/assets/process_3.svg')
-            height 33vw
-        &_04
-            &::before
-                background-image url('/assets/process_4.svg')
-            height 33vw
-        &_05
-            &::before
-                background-image url('/assets/process_5.svg')
-            height 31.8vw
-            .Process
-                &__title, &__num
-                    margin-top .7vw
 
         
         
@@ -254,34 +127,7 @@
         display flex
         flex-direction column
         gap .1vw
-    
 
-
-
-.Services
-    font-size 1.6vw
-    line-height 1.8vw
-    display flex
-    gap 6vw
-    counter-reset services-counter
-    
-    &__item
-        flex 1
-        display flex
-        flex-direction column
-        counter-increment services-counter
-        opacity 0
-        filter blur(5px)
-        transition opacity 0.8s ease, filter 0.8s ease
-        &::before
-            content counter(services-counter)
-            display block
-            color blue
-            font-size 4vw
-            line-height 4vw
-        &_loaded
-            opacity 1
-            filter blur(0px)
 
 .Section
     margin 5vw 30px 0 30px

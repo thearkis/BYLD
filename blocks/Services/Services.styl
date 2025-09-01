@@ -1,0 +1,24 @@
+.Services
+    font-size 1.6vw
+    line-height 1.8vw
+    display flex
+    gap 6vw
+    counter-reset services-counter
+    
+    &__item
+        flex 1
+        display flex
+        flex-direction column
+        counter-increment services-counter
+        opacity 0
+        filter blur(5px)
+        transition opacity 0.8s ease, filter 0.8s ease
+        &::before
+            content counter(services-counter)
+            display block
+            color blue
+            font-size 4vw
+            line-height 4vw
+        &_loaded
+            opacity 1
+            filter blur(0px)

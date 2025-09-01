@@ -86,15 +86,25 @@
         .Header .Header__title
             margin-left 71%
         &-items
+            @media $screen-phone
+                display block
             display flex
             gap .1vw
             & > *
                 flex 1
+        &-meta-item
+            @media $screen-phone
+                & + &
+                    margin-top 1px
             
     &__review
         margin-top 4vw
+        @media $screen-phone
+            margin-top 24px
     &__solution
         margin-top 4vw
+        @media $screen-phone
+            margin-top 24px
         opacity 0
         filter blur(5px)
         transition opacity 0.8s ease, filter 0.8s ease
@@ -103,6 +113,9 @@
             filter blur(0px)
     &__descr
         margin-top 4vw
+        @media $screen-phone
+            margin-top 24px
+            display block
         display flex
         opacity 0
         filter blur(5px)
@@ -113,8 +126,12 @@
         &-about, &-plus
             position relative
             width 25vw
+            @media $screen-phone
+                width 100%
         &-challenge
             width 50vw
+            @media $screen-phone
+                width 100%
         &-icon
             size = 3.6vw
             height size
@@ -160,6 +177,9 @@
         opacity 0
         filter blur(5px)
         transition opacity 0.8s ease, filter 0.8s ease
+
+        @media $screen-phone
+            padding 20px
         & + & 
             margin-top .1vw
         &_loaded

@@ -5,14 +5,21 @@
     display flex
     flex-direction column
     min-height 6.4vw
+    @media $screen-phone
+        padding 16px
     
     &__p 
         & + &
             margin-top 1.2vw
+            @media $screen-phone
+                margin-top 16px
 
     &__corner
         width .3vw
         height .3vw
+        @media $screen-phone
+            width 4px
+            height 4px
         background grey
         position absolute
         
@@ -36,6 +43,12 @@
                 height 6vw
                 width size
                 background url('/blocks/Box/i/tail-challenge.svg') center center / size no-repeat
+
+                @media $screen-phone
+                    size = 160px
+                    height 126px
+                    width size
+                    background url('/blocks/Box/i/tail-challenge.svg') center center / size no-repeat
         &_Solution
             .Box__footer
                 box-sizing border-box
@@ -50,6 +63,8 @@
     &_Size
         &_Small
             height 100%
+            @media $screen-phone
+                height 28%
             .Box
                 &__text
                     max-width initial
