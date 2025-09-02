@@ -113,28 +113,18 @@ Shuffle.animateHoverShuffle = function(element, options) {
         element.isAnimating = true
         element.classList.add('rolling-animation')
         
+        // Store original text content to restore later
+        element.originalTextContent = element.textContent
+        
         // Preserve original font properties during animation
         element.style.fontFamily = originalStyles.fontFamily
         element.style.fontSize = originalStyles.fontSize
         element.style.fontWeight = originalStyles.fontWeight
         
-        // Lock dimensions to prevent layout shifts
-        element.style.width = originalStyles.width + 'px'
-        element.style.height = originalStyles.height + 'px'
-        element.style.minWidth = originalStyles.width + 'px'
-        element.style.maxWidth = originalStyles.width + 'px'
-        element.style.minHeight = originalStyles.height + 'px'
-        element.style.maxHeight = originalStyles.height + 'px'
-        element.style.display = originalStyles.display
+        // Only set minimal constraints to prevent major layout shifts
+        // Use the original text length to estimate minimum width
+        element.style.minWidth = 'fit-content'
         element.style.whiteSpace = 'nowrap'
-        element.style.overflow = 'hidden'
-        element.style.textAlign = 'center'
-        element.style.boxSizing = 'border-box'
-        
-        if (options.centerContent) {
-            element.style.alignItems = 'center'
-            element.style.justifyContent = 'center'
-        }
         
         var currentSwapsRemaining = swapsRemaining
         
@@ -161,20 +151,9 @@ Shuffle.animateHoverShuffle = function(element, options) {
                 element.classList.remove('rolling-animation')
                 element.isAnimating = false
                 
-                // Reset styles
-                element.style.width = ''
-                element.style.height = ''
+                // Reset only the styles we modified
                 element.style.minWidth = ''
-                element.style.maxWidth = ''
-                element.style.minHeight = ''
-                element.style.maxHeight = ''
-                element.style.display = ''
                 element.style.whiteSpace = ''
-                element.style.overflow = ''
-                element.style.textAlign = ''
-                element.style.alignItems = ''
-                element.style.justifyContent = ''
-                element.style.boxSizing = ''
                 element.style.fontFamily = ''
                 element.style.fontSize = ''
                 element.style.fontWeight = ''
@@ -185,24 +164,13 @@ Shuffle.animateHoverShuffle = function(element, options) {
     function stopAnimation() {
         if (element.animationInterval) {
             clearInterval(element.animationInterval)
-            element.textContent = element.originalText
+            element.textContent = originalText
             element.classList.remove('rolling-animation')
             element.isAnimating = false
             
-            // Reset styles
-            element.style.width = ''
-            element.style.height = ''
+            // Reset only the styles we modified
             element.style.minWidth = ''
-            element.style.maxWidth = ''
-            element.style.minHeight = ''
-            element.style.maxHeight = ''
-            element.style.display = ''
             element.style.whiteSpace = ''
-            element.style.overflow = ''
-            element.style.textAlign = ''
-            element.style.alignItems = ''
-            element.style.justifyContent = ''
-            element.style.boxSizing = ''
             element.style.fontFamily = ''
             element.style.fontSize = ''
             element.style.fontWeight = ''
@@ -513,7 +481,10 @@ Shuffle.animateServiceDigit = function(element, finalDigit, options) {
     
     // Create a temporary span to hold the animated digit
     var digitSpan = document.createElement('span')
-    digitSpan.style.cssText = 'position: absolute; top: 0; left: 0; color: #f00; font-size: 4vw; line-height: 4vw; display: block; z-index: 10; text-shadow: 0 0 3px #f00;'
+    var isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
+    var fontSize = isMobile ? '32px' : '4vw'
+    var lineHeight = isMobile ? '32px' : '4vw'
+    digitSpan.style.cssText = 'position: absolute; top: 0; left: 0; color: #f00; font-size: ' + fontSize + '; line-height: ' + lineHeight + '; display: block; z-index: 10; text-shadow: 0 0 3px #f00;'
     
     // Hide the original ::before content during animation
     element.style.position = 'relative'
@@ -544,6 +515,96 @@ Shuffle.animateServiceDigit = function(element, finalDigit, options) {
     return {
         element: element,
         digitSpan: digitSpan
+    }
+}
+
+/**
+ * @method animateFooterTextRolling Footer text rolling animation with character cycling
+ * @arg element {HTMLElement} DOM element to animate
+ * @arg options {object} Animation options
+ */
+Shuffle.animateFooterTextRolling = function(element, options) {
+    options = options || {}
+    
+    const originalText = element.textContent
+    const isJapanese = element.classList.contains('Footer__jp')
+    const randomChars = isJapanese ? charSets.japanese : charSets.chinese
+    
+    // Split text into individual letters
+    element.innerHTML = ''
+    const letterSpans = []
+    
+    for (let i = 0; i < originalText.length; i++) {
+        const span = document.createElement('span')
+        span.textContent = originalText[i]
+        span.style.display = 'inline-block'
+        span.style.width = 'auto'
+        element.appendChild(span)
+        letterSpans.push(span)
+        
+        // Measure the width of the original character and lock it
+        setTimeout(() => {
+            const charWidth = span.offsetWidth
+            span.style.width = charWidth + 'px'
+            span.style.textAlign = 'center'
+        }, 10)
+    }
+    
+    // Function to animate all letters
+    function animateLetters() {
+        letterSpans.forEach((span, index) => {
+            const targetLetter = originalText[index]
+            let rollCount = 0
+            const maxRolls = options.maxRolls || 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+            
+            setTimeout(() => {
+                span.classList.add('rolling-animation')
+                
+                const letterInterval = setInterval(() => {
+                    if (rollCount < maxRolls) {
+                        // Show random character
+                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                        span.textContent = randomChar
+                        rollCount++
+                    } else {
+                        // Show final character
+                        span.textContent = targetLetter
+                        span.classList.remove('rolling-animation')
+                        clearInterval(letterInterval)
+                    }
+                }, options.rollInterval || 80) // 80ms per roll
+                
+            }, index * (options.letterDelay || 100)) // 100ms delay between each letter
+        })
+    }
+    
+    // Function to schedule next animation
+    function scheduleNextAnimation() {
+        const randomDelay = (options.minDelay || 2000) + Math.random() * (options.maxDelay || 2000) // 2-4 seconds
+        setTimeout(() => {
+            animateLetters()
+            scheduleNextAnimation() // Schedule the next one
+        }, randomDelay)
+    }
+    
+    // Start initial animation
+    animateLetters()
+    
+    // Schedule repeating animations after initial completes
+    const initialDelay = options.initialDelay || 1500 // 1.5 seconds buffer
+    setTimeout(() => {
+        scheduleNextAnimation()
+    }, initialDelay)
+    
+    return {
+        element: element,
+        animateLetters: animateLetters,
+        stopAnimation: function() {
+            // Clear any ongoing animations if needed
+            letterSpans.forEach(span => {
+                span.classList.remove('rolling-animation')
+            })
+        }
     }
 }
 
@@ -785,20 +846,38 @@ ScrollFade.setupParallax = function(config) {
                     let blurStart = group.blurStart || 0.15
                     
                     if (isMobile) {
-                        // On mobile, blur later to avoid blurring first sections on page load
-                        blurTrigger = group.mobileBlurTrigger || 0.40  // 40% instead of 20%
-                        blurStart = group.mobileBlurStart || 0.30     // 30% instead of 15%
+                        // On mobile, check if blur should be disabled
+                        if (group.mobileBlurTrigger && group.mobileBlurTrigger > 1.5) {
+                            // Skip blur entirely on mobile for this group
+                            element.style.filter = 'none'
+                        } else {
+                            // On mobile, blur later to avoid blurring first sections on page load
+                            blurTrigger = group.mobileBlurTrigger || 0.40  // 40% instead of 20%
+                            blurStart = group.mobileBlurStart || 0.30     // 30% instead of 15%
+                            
+                            if (elementTop < windowHeight * blurTrigger && elementBottom > 0) {
+                                const triggerPoint = windowHeight * blurStart
+                                const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                                const maxDistance = triggerPoint + elementRect.height
+                                const exitProgress = distanceFromTrigger / maxDistance
+                                blurAmount = Math.min(exitProgress * (group.maxBlur || 8), group.maxBlur || 8)
+                            }
+                            
+                            element.style.filter = `blur(${blurAmount}px)`
+                        }
+                    } else {
+                        // Desktop blur logic
+                        if (elementTop < windowHeight * blurTrigger && elementBottom > 0) {
+                            const triggerPoint = windowHeight * blurStart
+                            const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                            const maxDistance = triggerPoint + elementRect.height
+                            const exitProgress = distanceFromTrigger / maxDistance
+                            blurAmount = Math.min(exitProgress * (group.maxBlur || 8), group.maxBlur || 8)
+                        }
+                        
+                        element.style.filter = `blur(${blurAmount}px)`
                     }
                     
-                    if (elementTop < windowHeight * blurTrigger && elementBottom > 0) {
-                        const triggerPoint = windowHeight * blurStart
-                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
-                        const maxDistance = triggerPoint + elementRect.height
-                        const exitProgress = distanceFromTrigger / maxDistance
-                        blurAmount = Math.min(exitProgress * (group.maxBlur || 8), group.maxBlur || 8)
-                    }
-                    
-                    element.style.filter = `blur(${blurAmount}px)`
                     if (!enableMovement) {
                         element.style.willChange = 'filter'
                     }
@@ -896,10 +975,14 @@ ScrollFade.setupScrollObserver = function(config) {
     if ('ontouchstart' in window) {
         let touchStartY = 0
         let lastTouchY = 0
+        let touchMoveCount = 0
         
         document.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY
             lastTouchY = touchStartY
+            touchMoveCount = 0
+            
+            console.log(`👆 Touch start - Y: ${touchStartY}`)
             
             // Force immediate visibility check
             checkElementsVisibility()
@@ -907,8 +990,9 @@ ScrollFade.setupScrollObserver = function(config) {
             // Start aggressive continuous polling
             if (!scrollPollInterval) {
                 scrollPollInterval = setInterval(() => {
+                    console.log(`🔄 Polling check #${++touchMoveCount}`)
                     checkElementsVisibility()
-                }, 8) // 120fps aggressive checking
+                }, 4) // 250fps ultra-aggressive checking
             }
         }, { passive: true })
         
@@ -917,6 +1001,8 @@ ScrollFade.setupScrollObserver = function(config) {
             const deltaY = Math.abs(currentY - lastTouchY)
             lastTouchY = currentY
             
+            console.log(`👆 Touch move - Delta: ${deltaY}, Current Y: ${currentY}`)
+            
             // Check visibility on EVERY touch move, regardless of distance
             checkElementsVisibility()
             
@@ -924,8 +1010,10 @@ ScrollFade.setupScrollObserver = function(config) {
             if (deltaY > 0) {
                 if (!scrollPollInterval) {
                     scrollPollInterval = setInterval(() => {
+                        console.log(`🔄 Polling check #${++touchMoveCount}`)
                         checkElementsVisibility()
-                    }, 8) // 120fps aggressive checking
+                    }, 4) // 250fps ultra-aggressive checking
+                    console.log(`🚀 Started new polling interval`)
                 }
             }
         }, { passive: true })
@@ -4546,23 +4634,11 @@ Beast.decl({
 Beast.decl({
     App: {
         tag:'body',
-        mod: {
-            platform: '',
-            device: ''
-        },
         expand: function fn () {
-            if (MissEvent.mobile) {
-                this.mix('mobile')
-            }
-            this.append(
-                Beast.node("Noise",{__context:this,"":true}), this.get()
-            )
-
+            if (MissEvent.mobile) { this.mix('mobile') }
+            this.append( Beast.node("Noise",{__context:this,"":true}), this.get() )
         },
         domInit: function fn() {
-
-
-
             // Add ASCII art for ARK studio
             console.log(`
           ++++++*+++++++=+==+==+=++=++=+=+======-=
@@ -4574,226 +4650,24 @@ Beast.decl({
 
 MADE BY ΛRK / www.ark.studio/byld / 2025
             `);
-
-            
-            
-                 
-
-
-
-            // Data__jp and Data__ch letter-by-letter rolling animation on page load and repeating
-            const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
-            const dataChElements = document.querySelectorAll('.Data__ch')
-            const allTextElements = [...dataJpElements, ...dataChElements]
-            
-            allTextElements.forEach(element => {
-                const originalText = element.textContent
-                const isJapanese = element.classList.contains('Data__jp')
-                const randomChars = isJapanese ? 
-                    'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
-                    '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+            // Action elements shuffling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const actionElements = document.querySelectorAll('.Action, .Footer__action, .Button_Type_Action, .CaseAction')
                 
-                // Split text into individual letters
-                element.innerHTML = ''
-                const letterSpans = []
-                
-                for (let i = 0; i < originalText.length; i++) {
-                    const span = document.createElement('span')
-                    span.textContent = originalText[i]
-                    span.style.display = 'inline-block'
-                    
-                    span.style.width = 'auto'
-                    element.appendChild(span)
-                    letterSpans.push(span)
-                    
-                    // Measure the width of the original character and lock it
-                    setTimeout(() => {
-                        const charWidth = span.offsetWidth
-                        span.style.width = charWidth + 'px'
-                        span.style.textAlign = 'center'
-                    }, 10)
-                }
-                
-                // Function to animate all letters
-                function animateLetters() {
-                    letterSpans.forEach((span, index) => {
-                        const targetLetter = originalText[index]
-                        let rollCount = 0
-                        const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
-                        
-                        setTimeout(() => {
-                            span.classList.add('rolling-animation')
-                            
-                            const letterInterval = setInterval(() => {
-                                if (rollCount < maxRolls) {
-                                    // Show random character
-                                    const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                    span.textContent = randomChar
-                                    rollCount++
-                                } else {
-                                    // Show final character
-                                    span.textContent = targetLetter
-                                    span.classList.remove('rolling-animation')
-                                    clearInterval(letterInterval)
-                                }
-                            }, 80) // 80ms per roll
-                            
-                        }, index * 100) // 100ms delay between each letter
+                actionElements.forEach(element => {
+                    Shuffle.animateHoverShuffle(element, {
+                        charSet: Shuffle.charSets.latin,
+                        swapsRemaining: element.textContent.length + 8,
+                        interval: 30
                     })
-                }
-                
-                // Function to schedule next animation
-                function scheduleNextAnimation() {
-                    const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
-                    setTimeout(() => {
-                        animateLetters()
-                        scheduleNextAnimation() // Schedule the next one
-                    }, randomDelay)
-                }
-                
-                // Start initial animation
-                animateLetters()
-                
-                // Schedule repeating animations after initial completes
-                // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
-                setTimeout(() => {
-                    scheduleNextAnimation()
-                }, 1500) // 1.5 seconds buffer
-            })
-
-
-
-            // Action elements shuffling animation
-            const actionElements = document.querySelectorAll('.Action, .Footer__action, .Button_Type_Action, .CaseAction')
-            
-            actionElements.forEach(element => {
-                element.isAnimating = false
-                element.animationInterval = null
-                element.originalText = element.textContent // Store original text
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.originalText
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length + 8  // Animation length based on text length
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    // Ensure stable width during animation
-                    const originalWidth = element.offsetWidth
-                    const originalHeight = element.offsetHeight
-                    const isActionElement = element.classList.contains('Action')
-                    const isCaseActionElement = element.classList.contains('CaseAction')
-                    
-                    // Store original display value
-                    const originalDisplay = window.getComputedStyle(element).display
-                    
-                    // Lock the exact width and height to prevent any changes
-                    element.style.width = originalWidth + 'px'
-                    element.style.height = originalHeight + 'px'
-                    element.style.minWidth = originalWidth + 'px'
-                    element.style.maxWidth = originalWidth + 'px'
-                    element.style.minHeight = originalHeight + 'px'
-                    element.style.maxHeight = originalHeight + 'px'
-                    element.style.display = originalDisplay
-                    element.style.whiteSpace = 'nowrap'
-                    element.style.overflow = 'hidden'
-                    element.style.textAlign = 'center'
-                    element.style.boxSizing = 'border-box'
-                    
-                    // For Action and CaseAction elements, ensure centering
-                    if (isActionElement || isCaseActionElement) {
-                        element.style.alignItems = 'center'
-                        element.style.justifyContent = 'center'
-                    }
-                    
-                    element.animationInterval = setInterval(() => {
-                        let currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i >= originalText.length - swapsRemaining) {
-                                // Characters that are still random
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                // Characters that have resolved to final
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Reset styles
-                            element.style.width = ''
-                            element.style.height = ''
-                            element.style.minWidth = ''
-                            element.style.maxWidth = ''
-                            element.style.minHeight = ''
-                            element.style.maxHeight = ''
-                            element.style.display = ''
-                            element.style.whiteSpace = ''
-                            element.style.overflow = ''
-                            element.style.textAlign = ''
-                            element.style.alignItems = ''
-                            element.style.justifyContent = ''
-                            element.style.boxSizing = ''
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 30)
                 })
                 
-                element.addEventListener('mouseleave', () => {
-                    if (element.animationInterval) {
-                        clearInterval(element.animationInterval)
-                        element.textContent = element.originalText // Restore original text
-                        element.classList.remove('rolling-animation')
-                        element.isAnimating = false
-                        
-                        // Reset styles
-                        element.style.width = ''
-                        element.style.height = ''
-                        element.style.minWidth = ''
-                        element.style.maxWidth = ''
-                        element.style.minHeight = ''
-                        element.style.maxHeight = ''
-                        element.style.display = ''
-                        element.style.whiteSpace = ''
-                        element.style.overflow = ''
-                        element.style.textAlign = ''
-                        element.style.alignItems = ''
-                        element.style.justifyContent = ''
-                        element.style.boxSizing = ''
-                        element.style.fontFamily = ''
-                        element.style.fontSize = ''
-                        element.style.fontWeight = ''
-                    }
-                })
-            })
+                console.log('Action elements shuffling animation initialized using Shuffle helper')
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
 
             // Parallax scrolling for .Data, .Logo, .Case__head, .CaseMeta/.Divider_One, and .Case__image/.About/.Services elements with different speeds
-            const dataElements = document.querySelectorAll('.Data')
-            const logoElements = document.querySelectorAll('.Logo')
             const caseHeadElements = document.querySelectorAll('.Case__head')
             const caseMetaElements = document.querySelectorAll('.CaseMeta')
             const dividerOneElements = document.querySelectorAll('.header.header_top')
@@ -4806,59 +4680,9 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop
                 const windowHeight = window.innerHeight
                 
-                // Data elements - slower parallax with blur
-                dataElements.forEach(element => {
-                    const parallaxSpeed = 0.7 // Slower - more lag effect
-                    const yPos = -(scrollTop * (1 - parallaxSpeed))
-                    
-                    // Calculate blur based on element position relative to viewport
-                    const elementRect = element.getBoundingClientRect()
-                    const elementTop = elementRect.top
-                    const elementBottom = elementRect.bottom
-                    
-                    let blurAmount = 0
-                    
-                    // Blur when element approaches or exits the top of viewport
-                    if (elementTop < windowHeight * 0.20 && elementBottom > 0) {
-                        // Element is in upper 15% of viewport or above
-                        const triggerPoint = windowHeight * 0.15
-                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
-                        const maxDistance = triggerPoint + elementRect.height
-                        const exitProgress = distanceFromTrigger / maxDistance
-                        blurAmount = Math.min(exitProgress * 8, 8) // Max 8px blur
-                    }
-                    
-                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
-                    element.style.filter = `blur(${blurAmount}px)`
-                    element.style.willChange = 'transform, filter'
-                })
+                // Data parallax effects moved to Data.bml domInit using ScrollFade helper
                 
-                // Logo elements - faster parallax with blur
-                logoElements.forEach(element => {
-                    const parallaxSpeed = 0.85 // Faster - less lag effect
-                    const yPos = -(scrollTop * (1 - parallaxSpeed))
-                    
-                    // Calculate blur based on element position relative to viewport
-                    const elementRect = element.getBoundingClientRect()
-                    const elementTop = elementRect.top
-                    const elementBottom = elementRect.bottom
-                    
-                    let blurAmount = 0
-                    
-                    // Blur when element approaches or exits the top of viewport
-                    if (elementTop < windowHeight * 0.15 && elementBottom > 0) {
-                        // Element is in upper 15% of viewport or above
-                        const triggerPoint = windowHeight * 0.15
-                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
-                        const maxDistance = triggerPoint + elementRect.height
-                        const exitProgress = distanceFromTrigger / maxDistance
-                        blurAmount = Math.min(exitProgress * 20, 20) // Max 6px blur (less than data)
-                    }
-                    
-                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
-                    element.style.filter = `blur(${blurAmount}px)`
-                    element.style.willChange = 'transform, filter'
-                })
+                // Logo parallax effects moved to Logo.bml domInit using ScrollFade helper
                 
                 // Case__head elements - same speed as Data elements with blur
                 caseHeadElements.forEach(element => {
@@ -5008,57 +4832,7 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
 
 
 
-            // Services__item scroll-triggered fade/unblur animation
-            const servicesItems = document.querySelectorAll('.Services__item')
-            
-            
-            if (servicesItems.length > 0) {
-                const observerOptions = {
-                    root: null,
-                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
-                    threshold: 0.3
-                }
-                
-                const servicesObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            // Reset and start animation when entering viewport
-                            if (!entry.target.classList.contains('Services__item_loaded')) {
-                                let animatedItemsCount = 0
-                                
-                                // Reset all services items first
-                                servicesItems.forEach(item => {
-                                    item.classList.remove('Services__item_loaded')
-                                })
-                                
-                                // Animate all services items in sequence
-                                servicesItems.forEach((item, index) => {
-                                    setTimeout(() => {
-                                        item.classList.add('Services__item_loaded')
-                                        
-                                        // Animate the digit (::before element content) after fade-in starts
-                                        setTimeout(() => {
-                                            Shuffle.animateServiceDigit(item, index + 1)
-                                        }, 200) // Start digit animation 200ms after fade begins
-                                        
-                                        
-                                    }, index * 200) // 200ms delay between each item
-                                })
-                            }
-                        } else {
-                            // Reset when leaving viewport (scrolling away)
-                            entry.target.classList.remove('Services__item_loaded')
-                        }
-                    })
-                }, observerOptions)
-                
-
-                
-                // Observe all services items
-                servicesItems.forEach(item => {
-                    servicesObserver.observe(item)
-                })
-            }
+            // Services__item scroll-triggered fade/unblur animation moved to Services.bml domInit using helpers
             
             // Card scroll-triggered fade/unblur animation
             const cardItems = document.querySelectorAll('.Card')
@@ -5271,297 +5045,12 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 })
             }, 5000)
 
-            // Footer__jp and Footer__ch letter-by-letter rolling animation - same as Data elements
-            const footerJpElements = document.querySelectorAll('.Footer__jp')
-            const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-            const allFooterTextElements = [...footerJpElements, ...footerChElements]
+            // Footer text animations moved to Footer.bml domInit using helper function
+
             
-            allFooterTextElements.forEach(element => {
-                const originalText = element.textContent
-                const isJapanese = element.classList.contains('Footer__jp')
-                const randomChars = isJapanese ? 
-                    'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
-                    '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
-                
-                // Split text into individual letters
-                element.innerHTML = ''
-                const letterSpans = []
-                
-                for (let i = 0; i < originalText.length; i++) {
-                    const span = document.createElement('span')
-                    span.textContent = originalText[i]
-                    span.style.display = 'inline-block'
-                    
-                    span.style.width = 'auto'
-                    element.appendChild(span)
-                    letterSpans.push(span)
-                    
-                    // Measure the width of the original character and lock it
-                    setTimeout(() => {
-                        const charWidth = span.offsetWidth
-                        span.style.width = charWidth + 'px'
-                        span.style.textAlign = 'center'
-                    }, 10)
-                }
-                
-                // Function to animate all letters
-                function animateLetters() {
-                    letterSpans.forEach((span, index) => {
-                        const targetLetter = originalText[index]
-                        let rollCount = 0
-                        const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
-                        
-                        setTimeout(() => {
-                            span.classList.add('rolling-animation')
-                            
-                            const letterInterval = setInterval(() => {
-                                if (rollCount < maxRolls) {
-                                    // Show random character
-                                    const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                    span.textContent = randomChar
-                                    rollCount++
-                                } else {
-                                    // Show final character
-                                    span.textContent = targetLetter
-                                    span.classList.remove('rolling-animation')
-                                    clearInterval(letterInterval)
-                                }
-                            }, 80) // 80ms per roll
-                            
-                        }, index * 100) // 100ms delay between each letter
-                    })
-                }
-                
-                // Function to schedule next animation
-                function scheduleNextFooterAnimation() {
-                    const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
-                    setTimeout(() => {
-                        animateLetters()
-                        scheduleNextFooterAnimation() // Schedule the next one
-                    }, randomDelay)
-                }
-                
-                // Start initial animation
-                animateLetters()
-                
-                // Schedule repeating animations after initial completes
-                // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
-                setTimeout(() => {
-                    scheduleNextFooterAnimation()
-                }, 1500) // 1.5 seconds buffer
-            })
-
-            // PathOfAwakening scroll-based blur system for headline, text, and cast
-            const pathOfAwakeningHeadline = document.querySelector('.PathOfAwakening__headline');
-            const pathOfAwakeningText = document.querySelector('.PathOfAwakening__text');
-            const pathOfAwakeningCast = document.querySelector('.PathOfAwakening__cast');
-            
-            if (pathOfAwakeningHeadline) {
-                // Fade in and un-blur on page load for headline
-                setTimeout(() => {
-                    pathOfAwakeningHeadline.classList.add('PathOfAwakening__headline_loaded');
-                }, 300); // Small delay for dramatic effect
-                
-                function updateScrollBlurEffects() {
-                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                    const windowHeight = window.innerHeight;
-                    
-                    // Function to calculate blur based on element position
-                    function calculateElementBlur(element, initialBlur = 3, maxBlur = 25, focusZone = 200) {
-                        if (!element) return;
-                        
-                        const rect = element.getBoundingClientRect();
-                        const elementTop = rect.top;
-                        const elementHeight = rect.height;
-                        const elementCenter = elementTop + elementHeight / 2;
-                        
-                        // Distance from element center to screen center
-                        const screenCenter = windowHeight / 2;
-                        const distanceFromCenter = Math.abs(elementCenter - screenCenter);
-                        
-                        let blurAmount;
-                        
-                        if (distanceFromCenter <= focusZone) {
-                            // In focus zone - unblur (clear)
-                            blurAmount = 0;
-                        } else {
-                            // Out of focus zone - blur based on distance
-                            const blurProgress = Math.min(1, (distanceFromCenter - focusZone) / (windowHeight / 2));
-                            blurAmount = initialBlur + (blurProgress * (maxBlur - initialBlur));
-                        }
-                        
-                        element.style.filter = `blur(${blurAmount}px)`;
-                    }
-                    
-                    // Apply blur effects to headline and cast only
-                    if (pathOfAwakeningHeadline.classList.contains('PathOfAwakening__headline_loaded')) {
-                        calculateElementBlur(pathOfAwakeningHeadline, 3, 25, 150);
-                        pathOfAwakeningHeadline.style.opacity = '1'; // Keep visible
-                    }
-                    
-                    calculateElementBlur(pathOfAwakeningCast, 3, 20, 180);
-                }
-                
-                // Add scroll event listener
-                window.addEventListener('scroll', updateScrollBlurEffects);
-                
-                // Initial call to set blur states
-                updateScrollBlurEffects();
-                
-                // Sequential word appearance for PathOfAwakening text triggered by scroll
-                const wordOne = document.querySelector('.PathOfAwakening__word_one');
-                const wordTwo = document.querySelector('.PathOfAwakening__word_two');
-                const wordThree = document.querySelector('.PathOfAwakening__word_three');
-                const wordFour = document.querySelector('.PathOfAwakening__word_four');
-                
-                if (wordOne || wordTwo || wordThree || wordFour) {
-                    let wordOneShown = false;
-                    let wordTwoShown = false;
-                    let wordThreeShown = false;
-                    let wordFourShown = false;
-                    
-                    function checkWordAppearance() {
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        
-                        // Word One: fade in from 200px to 300px
-                        if (wordOne) {
-                            if (scrollTop <= 200) {
-                                wordOne.style.opacity = '0';
-                                wordOne.style.transform = 'translateY(20px)';
-                                wordOneShown = false;
-                            } else if (scrollTop > 200 && scrollTop <= 300) {
-                                const progress = (scrollTop - 200) / 100; // 0 to 1
-                                wordOne.style.opacity = progress;
-                                wordOne.style.transform = `translateY(${20 - (progress * 20)}px)`;
-                                wordOneShown = true;
-                            } else if (scrollTop > 300) {
-                                wordOne.style.opacity = '1';
-                                wordOne.style.transform = 'translateY(0px)';
-                                wordOneShown = true;
-                            }
-                        }
-                        
-                        // Word Two: fade in from 500px to 600px (requires word one)
-                        if (wordTwo && wordOneShown) {
-                            if (scrollTop <= 500) {
-                                wordTwo.style.opacity = '0';
-                                wordTwo.style.transform = 'translateY(20px)';
-                                wordTwoShown = false;
-                            } else if (scrollTop > 500 && scrollTop <= 600) {
-                                const progress = (scrollTop - 500) / 100; // 0 to 1
-                                wordTwo.style.opacity = progress;
-                                wordTwo.style.transform = `translateY(${20 - (progress * 20)}px)`;
-                                wordTwoShown = true;
-                            } else if (scrollTop > 600) {
-                                wordTwo.style.opacity = '1';
-                                wordTwo.style.transform = 'translateY(0px)';
-                                wordTwoShown = true;
-                            }
-                        }
-                        
-                        // Word Three: fade in from 800px to 900px (requires word two)
-                        if (wordThree && wordTwoShown) {
-                            if (scrollTop <= 800) {
-                                wordThree.style.opacity = '0';
-                                wordThree.style.transform = 'translateY(20px)';
-                                wordThreeShown = false;
-                            } else if (scrollTop > 800 && scrollTop <= 900) {
-                                const progress = (scrollTop - 800) / 100; // 0 to 1
-                                wordThree.style.opacity = progress;
-                                wordThree.style.transform = `translateY(${20 - (progress * 20)}px)`;
-                                wordThreeShown = true;
-                            } else if (scrollTop > 900) {
-                                wordThree.style.opacity = '1';
-                                wordThree.style.transform = 'translateY(0px)';
-                                wordThreeShown = true;
-                            }
-                        }
-                        
-                        // Word Four: fade in from 1100px to 1200px (requires word three)
-                        if (wordFour && wordThreeShown) {
-                            if (scrollTop <= 1100) {
-                                wordFour.style.opacity = '0';
-                                wordFour.style.transform = 'translateY(20px)';
-                                wordFourShown = false;
-                            } else if (scrollTop > 1100 && scrollTop <= 1200) {
-                                const progress = (scrollTop - 1100) / 100; // 0 to 1
-                                wordFour.style.opacity = progress;
-                                wordFour.style.transform = `translateY(${20 - (progress * 20)}px)`;
-                                wordFourShown = true;
-                            } else if (scrollTop > 1200) {
-                                wordFour.style.opacity = '1';
-                                wordFour.style.transform = 'translateY(0px)';
-                                wordFourShown = true;
-                            }
-                        }
-                        
-                        // Words One and Two: blur from 1000px to 1100px
-                        if (wordOne && wordOneShown && wordTwo && wordTwoShown) {
-                            if (scrollTop <= 1000) {
-                                wordOne.style.filter = 'blur(0px)';
-                                wordTwo.style.filter = 'blur(0px)';
-                            } else if (scrollTop > 1000 && scrollTop <= 1100) {
-                                const blurProgress = (scrollTop - 1000) / 100; // 0 to 1
-                                const blurAmount = blurProgress * 8; // 0 to 8px
-                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
-                                wordOne.style.filter = `blur(${blurAmount}px)`;
-                                wordOne.style.opacity = opacityAmount;
-                                wordTwo.style.filter = `blur(${blurAmount}px)`;
-                                wordTwo.style.opacity = opacityAmount;
-                            } else if (scrollTop > 1100) {
-                                wordOne.style.filter = 'blur(8px)';
-                                wordOne.style.opacity = '0.6';
-                                wordTwo.style.filter = 'blur(8px)';
-                                wordTwo.style.opacity = '0.6';
-                            }
-                        }
-                        
-                        // Word Three: blur from 1200px to 1300px
-                        if (wordThree && wordThreeShown) {
-                            if (scrollTop <= 1200) {
-                                wordThree.style.filter = 'blur(0px)';
-                            } else if (scrollTop > 1200 && scrollTop <= 1300) {
-                                const blurProgress = (scrollTop - 1200) / 100; // 0 to 1
-                                const blurAmount = blurProgress * 8; // 0 to 8px
-                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
-                                wordThree.style.filter = `blur(${blurAmount}px)`;
-                                wordThree.style.opacity = opacityAmount;
-                            } else if (scrollTop > 1300) {
-                                wordThree.style.filter = 'blur(8px)';
-                                wordThree.style.opacity = '0.6';
-                            }
-                        }
-                        
-                        // Word Four: blur from 1400px to 1500px
-                        if (wordFour && wordFourShown) {
-                            if (scrollTop <= 1400) {
-                                wordFour.style.filter = 'blur(0px)';
-                            } else if (scrollTop > 1400 && scrollTop <= 1500) {
-                                const blurProgress = (scrollTop - 1400) / 100; // 0 to 1
-                                const blurAmount = blurProgress * 8; // 0 to 8px
-                                const opacityAmount = 1 - (blurProgress * 0.4); // 1 to 0.6
-                                wordFour.style.filter = `blur(${blurAmount}px)`;
-                                wordFour.style.opacity = opacityAmount;
-                            } else if (scrollTop > 1500) {
-                                wordFour.style.filter = 'blur(8px)';
-                                wordFour.style.opacity = '0.6';
-                            }
-                        }
-                    }
-                    
-                    // Add to existing scroll listener
-                    const originalScrollHandler = window.onscroll;
-                    window.addEventListener('scroll', () => {
-                        checkWordAppearance();
-                    });
-                    
-                    // Initial check
-                    checkWordAppearance();
-                }
-            }
 
 
-2            // Process step background image fade-in animation
+            // Process step background image fade-in animation
             
             
             // Wait for DOM to be fully loaded
@@ -5704,24 +5193,6 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Button: {
         expand: function () {
 
@@ -5754,93 +5225,6 @@ Beast.decl({
                 }
             }   
         }       
-    }   
-})
-Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
     }   
 })
 Beast.decl({
@@ -5940,8 +5324,8 @@ Beast.decl({
                                 speed: 0.7,
                                 blur: true,
                                 movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
                                 mobileBlurTrigger: 1.3,
                                 mobileBlurStart: 1.3,
                                 maxBlur: 8
@@ -5951,8 +5335,8 @@ Beast.decl({
                                 speed: 0.8,
                                 blur: true,
                                 movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
                                 mobileBlurTrigger: 0.95,
                                 mobileBlurStart: 0.90,
                                 maxBlur: 8
@@ -5961,8 +5345,8 @@ Beast.decl({
                                 selector: '.Case__image, .case__descr',
                                 blur: true,
                                 movement: false,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
                                 mobileBlurTrigger: 0.95,
                                 mobileBlurStart: 0.90,
                                 maxBlur: 8
@@ -6058,6 +5442,111 @@ Beast.decl({
     },
 })
 Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
+        }      
+    }   
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Case__meta: {
         expand: function () {
             this.append(
@@ -6072,6 +5561,51 @@ Beast.decl({
     
     
 })
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+        domInit: function fn() {
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
+                    })
+                })
+                
+                console.log('Footer text animations initialized successfully using Shuffle helper')
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
+        }
+            
+    }   
+})
+
 Beast.decl({
     Cassette: {
         
@@ -6191,27 +5725,126 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+    Data: {
+        
+        domInit: function fn() {
+            // Initialize Data parallax effects using the ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const dataEffects = ScrollFade.initScrollEffects({
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Data',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 1.95,
+                                mobileBlurStart: 1.90,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
                 
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                // Store reference for cleanup if needed
+                this.dataEffects = dataEffects
                 
-            )
-
+                console.log('Data parallax effects initialized successfully using ScrollFade helper')
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
             
-        },
+            // Data__jp and Data__ch letter-by-letter rolling animation helper
+            function setupDataTextAnimation() {
+                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
+                const dataChElements = document.querySelectorAll('.Data__ch')
+                const allTextElements = [...dataJpElements, ...dataChElements]
+                
+                allTextElements.forEach(element => {
+                    const originalText = element.textContent
+                    const isJapanese = element.classList.contains('Data__jp')
+                    const randomChars = isJapanese ? 
+                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                    
+                    // Split text into individual letters
+                    element.innerHTML = ''
+                    const letterSpans = []
+                    
+                    for (let i = 0; i < originalText.length; i++) {
+                        const span = document.createElement('span')
+                        span.textContent = originalText[i]
+                        span.style.display = 'inline-block'
+                        
+                        span.style.width = 'auto'
+                        element.appendChild(span)
+                        letterSpans.push(span)
+                        
+                        // Measure the width of the original character and lock it
+                        setTimeout(() => {
+                            const charWidth = span.offsetWidth
+                            span.style.width = charWidth + 'px'
+                            span.style.textAlign = 'center'
+                        }, 10)
+                    }
+                    
+                    // Function to animate all letters
+                    function animateLetters() {
+                        letterSpans.forEach((span, index) => {
+                            const targetLetter = originalText[index]
+                            let rollCount = 0
+                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                            
+                            setTimeout(() => {
+                                span.classList.add('rolling-animation')
+                                
+                                const letterInterval = setInterval(() => {
+                                    if (rollCount < maxRolls) {
+                                        // Show random character
+                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                        span.textContent = randomChar
+                                        rollCount++
+                                    } else {
+                                        // Show final character
+                                        span.textContent = targetLetter
+                                        span.classList.remove('rolling-animation')
+                                        clearInterval(letterInterval)
+                                    }
+                                }, 80) // 80ms per roll
+                                
+                            }, index * 100) // 100ms delay between each letter
+                        })
+                    }
+                    
+                    // Function to schedule next animation
+                    function scheduleNextAnimation() {
+                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                        setTimeout(() => {
+                            animateLetters()
+                            scheduleNextAnimation() // Schedule the next one
+                        }, randomDelay)
+                    }
+                    
+                    // Start initial animation
+                    animateLetters()
+                    
+                    // Schedule repeating animations after initial completes
+                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                    setTimeout(() => {
+                        scheduleNextAnimation()
+                    }, 1500) // 1.5 seconds buffer
+                })
+            }
             
-    }   
+            // Initialize Data text animations
+            setupDataTextAnimation()
+            
+            console.log('Data text animations initialized successfully')
+        }       
+    }
 })
-
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -6368,18 +6001,16 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
     }
 })
 /**
@@ -6414,16 +6045,18 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
     }
 })
 Beast
@@ -6431,13 +6064,60 @@ Beast
     expand: function() {
         this.append(
 			
-			Beast.node("image",{__context:this})
+			Beast.node("image",{__context:this,"":true})
         );
     },
     
+    domInit: function fn() {
+        // Initialize Logo parallax effects using the ScrollFade helper
+        if (typeof ScrollFade !== 'undefined') {
+            const logoEffects = ScrollFade.initScrollEffects({
+                parallax: {
+                    groups: [
+                        {
+                            selector: '.Logo',
+                            speed: 0.85,
+                            blur: true,
+                            movement: true,
+                            blurTrigger: 0.15,
+                            blurStart: 0.15,
+                            mobileBlurTrigger: 999,
+                            mobileBlurStart: 999,
+                            maxBlur: 20
+                        }
+                    ]
+                }
+            })
+            
+            // Store reference for cleanup if needed
+            this.logoEffects = logoEffects
+            
+            console.log('Logo parallax effects initialized successfully using ScrollFade helper')
+        } else {
+            console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+        }
+    }
 });
 
 
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 Beast.decl({
     Menu: {
         
@@ -6469,24 +6149,6 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 
 Beast.decl({
     Review: {
@@ -6540,6 +6202,84 @@ Beast.decl({
             
     },
     
+})
+Beast.decl({
+    Services: {
+        tag: 'div',
+        mod: {
+            Size: 'M'
+        },
+        expand: function fn() {
+            this.append(
+                Beast.node("item",{__context:this},"End-to-end product development"),
+                Beast.node("item",{__context:this},"Engineering support for early-stage teams"),
+                Beast.node("item",{__context:this},"Rescue missions for broken products or missed deadlines"),
+                Beast.node("item",{__context:this},"Long-term technical partnerships")
+            )
+        },
+        domInit: function fn() {
+            // Services__item scroll-triggered fade/unblur animation using helpers
+            const servicesItems = document.querySelectorAll('.Services__item')
+            
+            if (servicesItems.length > 0) {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
+                    threshold: 0.3
+                }
+                
+                const servicesObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Reset and start animation when entering viewport
+                            if (!entry.target.classList.contains('Services__item_loaded')) {
+                                let animatedItemsCount = 0
+                                
+                                // Reset all services items first
+                                servicesItems.forEach(item => {
+                                    item.classList.remove('Services__item_loaded')
+                                })
+                                
+                                // Animate all services items in sequence
+                                servicesItems.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        item.classList.add('Services__item_loaded')
+                                        
+                                        // Animate the digit (::before element content) after fade-in starts
+                                        setTimeout(() => {
+                                            if (typeof Shuffle !== 'undefined') {
+                                                Shuffle.animateServiceDigit(item, index + 1)
+                                            }
+                                        }, 200) // Start digit animation 200ms after fade begins
+                                        
+                                    }, index * 200) // 200ms delay between each item
+                                })
+                            }
+                        } else {
+                            // Reset when leaving viewport (scrolling away)
+                            entry.target.classList.remove('Services__item_loaded')
+                        }
+                    })
+                }, observerOptions)
+                
+                // Observe all services items
+                servicesItems.forEach(item => {
+                    servicesObserver.observe(item)
+                })
+            }
+        }
+    }
+})
+
+Beast.decl({
+    Reviews: {
+        expand: function fn() {
+            
+        },
+        domInit: function fn() {
+            
+        }
+    }
 })
 
 /**

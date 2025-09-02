@@ -1,0 +1,67 @@
+Beast.decl({
+    Services: {
+        tag: 'div',
+        mod: {
+            Size: 'M'
+        },
+        expand: function fn() {
+            this.append(
+                <item>End-to-end product development</item>,
+                <item>Engineering support for early-stage teams</item>,
+                <item>Rescue missions for broken products or missed deadlines</item>,
+                <item>Long-term technical partnerships</item>
+            )
+        },
+        domInit: function fn() {
+            // Services__item scroll-triggered fade/unblur animation using helpers
+            const servicesItems = document.querySelectorAll('.Services__item')
+            
+            if (servicesItems.length > 0) {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
+                    threshold: 0.3
+                }
+                
+                const servicesObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Reset and start animation when entering viewport
+                            if (!entry.target.classList.contains('Services__item_loaded')) {
+                                let animatedItemsCount = 0
+                                
+                                // Reset all services items first
+                                servicesItems.forEach(item => {
+                                    item.classList.remove('Services__item_loaded')
+                                })
+                                
+                                // Animate all services items in sequence
+                                servicesItems.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        item.classList.add('Services__item_loaded')
+                                        
+                                        // Animate the digit (::before element content) after fade-in starts
+                                        setTimeout(() => {
+                                            if (typeof Shuffle !== 'undefined') {
+                                                Shuffle.animateServiceDigit(item, index + 1)
+                                            }
+                                        }, 200) // Start digit animation 200ms after fade begins
+                                        
+                                    }, index * 200) // 200ms delay between each item
+                                })
+                            }
+                        } else {
+                            // Reset when leaving viewport (scrolling away)
+                            entry.target.classList.remove('Services__item_loaded')
+                        }
+                    })
+                }, observerOptions)
+                
+                // Observe all services items
+                servicesItems.forEach(item => {
+                    servicesObserver.observe(item)
+                })
+            }
+        }
+    }
+})

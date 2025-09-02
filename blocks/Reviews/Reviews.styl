@@ -1,0 +1,53 @@
+.Reviews
+    display table
+    flex-wrap wrap
+    gap 0vw
+    justify-content space-between
+    align-items flex-start
+
+    &__plus
+        size = 3.6vw
+        height size
+        width size
+        background url('/assets/i/Plus.svg') center center / size no-repeat
+        margin 0 auto
+        position absolute
+        top 50%
+        left 50%
+        transform translate(-50%, -50%)
+
+        @media $screen-phone
+            size = 40px
+            height size
+            width size
+            background url('/assets/i/Plus.svg') center center / size no-repeat
+    
+    @media $screen-phone
+        flex-direction column
+        gap 32px
+    
+    &__item 
+        position relative
+        flex 1
+        width 25%
+        display inline-block
+        vertical-align middle
+        margin-bottom 4vw
+        @media $screen-phone
+            margin-bottom 20px
+            margin-top 20px
+
+        
+        
+        @media $screen-phone
+            width 100%
+
+            &_Icon
+                height 120px
+                display none
+            
+        
+        // Ensure each Review takes equal space
+        .Review
+            width 100%
+            height 100%

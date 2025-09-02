@@ -6,6 +6,9 @@
     color white
     filter blur(5px)
     transition opacity 0.8s ease, filter 0.8s ease, background 0.2s ease
+
+    @media $screen-phone
+        padding 12px 4px
     &:hover
         background white
         cursor()
@@ -13,20 +16,32 @@
         .Card
             &__title, &__text
                 color black
+    &__title, &__text
+        margin-left 2.3vw
+        @media $screen-phone
+            margin-left 34px
     &__title
-        font-size 1.8vw
+        header()
         &::before
-            font-size 1.3vw
+            @media $screen-phone
+                left 6px
+            left 1vw
+            body()
             content ' /// '
             display inline
             text-transform none
             color blue-dark
+            position absolute
     &__text
         &::before
+            left 1vw
+            @media $screen-phone
+                left 6px
             content ' [i] '
             display inline
             text-transform none
             color blue-dark
+            position absolute
     &_loaded
         opacity 1
         filter blur(0px)

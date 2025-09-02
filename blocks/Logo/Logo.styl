@@ -33,6 +33,7 @@
 	filter blur(2px)
 	@media $screen-phone
 		margin-top -7vw
+		filter blur(0.5px) // Reduced blur on mobile
 
 	
 	&__image
@@ -48,8 +49,13 @@
 		position relative
 		z-index 5
 		opacity 0
+
+
 		filter blur(20px) drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
 		animation logo-entrance 3s ease-out forwards, analog-shimmer 8s linear infinite 3s
+
+		@media $screen-phone
+			filter blur(20px) drop-shadow(0 0 8px #0015FF) drop-shadow(0 0 20px #0015FF)
 
 @keyframes analog-shimmer
 	0%

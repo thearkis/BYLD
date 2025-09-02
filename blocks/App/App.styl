@@ -95,38 +95,26 @@
     &_loaded
         opacity 1
         filter blur(0px)
-    
-        
-            
-
-
-
-
-
-
-
-    
-
-
-
-
-
-            
-
-
-
-
-        
         
 
 .Clients
-    font-size 1.3vw
-    line-height 1.5vw
+    body()
     display flex
+    @media $screen-phone
+        display block
     gap .1vw
     &__column
+        & + &
+            margin-top 1px
+        .link
+            display block
+        @media $screen-phone
+            .link + .link
+                margin-top 1px
         flex 1
         display flex
+        @media $screen-phone
+            display block
         flex-direction column
         gap .1vw
 
@@ -176,40 +164,5 @@
         &_loaded
             opacity 1
             filter blur(0px)
-
-
-.Data
-    font-size 1vw
-    height 3.3vw
-    margin 4vw 30px 0 30px
-    position relative
-    font-family 'Ticketing'
-    border-bottom 1px solid blue
-    vertical-align bottom
-    &__left, &__mid, &__right
-        position absolute
-    &__jp, &__ch
-        line-height 1vw
-        color red
-        display inline
-        font-size 3vw
-        font-weight bold
-        font-family Arial
-        text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
-        animation text-glow 4s ease-in-out infinite alternate
-    &__jp
-        letter-spacing -.6vw
-        margin-right 20px
-        &_Hide
-            opacity 0
-    &__text
-        display inline-block
-        color blue
-    &__right
-        right 0
-    &__mid
-        right 20vw
-        color blue
-
 
 

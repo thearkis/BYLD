@@ -5,6 +5,15 @@
     gap 6vw
     counter-reset services-counter
     
+    @media $screen-phone
+        margin-top 18px
+        display grid
+        grid-template-columns 1fr 1fr
+        grid-template-rows auto auto
+        gap 4vw
+        font-size 16px
+        line-height 18px
+    
     &__item
         flex 1
         display flex
@@ -13,12 +22,22 @@
         opacity 0
         filter blur(5px)
         transition opacity 0.8s ease, filter 0.8s ease
+        
+        @media $screen-phone
+            flex none
+            text-align left
+        
         &::before
             content counter(services-counter)
             display block
             color blue
             font-size 4vw
             line-height 4vw
+            
+            @media $screen-phone
+                font-size 32px
+                line-height 32px
+        
         &_loaded
             opacity 1
             filter blur(0px)

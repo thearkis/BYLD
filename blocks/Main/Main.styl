@@ -1,7 +1,13 @@
 .Main
     position relative
     padding-top 11vw
+    overflow hidden
+    @media $screen-phone
+        .Logo
+            margin-bottom 60px
     &__menu
         position absolute
         left 30px
         top 30px
+        @media $screen-phone
+            display none

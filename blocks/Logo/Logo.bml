@@ -3,8 +3,37 @@ Beast
     expand: function() {
         this.append(
 			
-			<image></image>
+			<image />
         );
     },
     
+    domInit: function fn() {
+        // Initialize Logo parallax effects using the ScrollFade helper
+        if (typeof ScrollFade !== 'undefined') {
+            const logoEffects = ScrollFade.initScrollEffects({
+                parallax: {
+                    groups: [
+                        {
+                            selector: '.Logo',
+                            speed: 0.85,
+                            blur: true,
+                            movement: true,
+                            blurTrigger: 0.15,
+                            blurStart: 0.15,
+                            mobileBlurTrigger: 999,
+                            mobileBlurStart: 999,
+                            maxBlur: 20
+                        }
+                    ]
+                }
+            })
+            
+            // Store reference for cleanup if needed
+            this.logoEffects = logoEffects
+            
+            console.log('Logo parallax effects initialized successfully using ScrollFade helper')
+        } else {
+            console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+        }
+    }
 });

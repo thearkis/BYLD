@@ -1,0 +1,121 @@
+Beast.decl({
+    Data: {
+        
+        domInit: function fn() {
+            // Initialize Data parallax effects using the ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const dataEffects = ScrollFade.initScrollEffects({
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Data',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 1.95,
+                                mobileBlurStart: 1.90,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
+                
+                // Store reference for cleanup if needed
+                this.dataEffects = dataEffects
+                
+                console.log('Data parallax effects initialized successfully using ScrollFade helper')
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
+            
+            // Data__jp and Data__ch letter-by-letter rolling animation helper
+            function setupDataTextAnimation() {
+                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
+                const dataChElements = document.querySelectorAll('.Data__ch')
+                const allTextElements = [...dataJpElements, ...dataChElements]
+                
+                allTextElements.forEach(element => {
+                    const originalText = element.textContent
+                    const isJapanese = element.classList.contains('Data__jp')
+                    const randomChars = isJapanese ? 
+                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                    
+                    // Split text into individual letters
+                    element.innerHTML = ''
+                    const letterSpans = []
+                    
+                    for (let i = 0; i < originalText.length; i++) {
+                        const span = document.createElement('span')
+                        span.textContent = originalText[i]
+                        span.style.display = 'inline-block'
+                        
+                        span.style.width = 'auto'
+                        element.appendChild(span)
+                        letterSpans.push(span)
+                        
+                        // Measure the width of the original character and lock it
+                        setTimeout(() => {
+                            const charWidth = span.offsetWidth
+                            span.style.width = charWidth + 'px'
+                            span.style.textAlign = 'center'
+                        }, 10)
+                    }
+                    
+                    // Function to animate all letters
+                    function animateLetters() {
+                        letterSpans.forEach((span, index) => {
+                            const targetLetter = originalText[index]
+                            let rollCount = 0
+                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                            
+                            setTimeout(() => {
+                                span.classList.add('rolling-animation')
+                                
+                                const letterInterval = setInterval(() => {
+                                    if (rollCount < maxRolls) {
+                                        // Show random character
+                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                        span.textContent = randomChar
+                                        rollCount++
+                                    } else {
+                                        // Show final character
+                                        span.textContent = targetLetter
+                                        span.classList.remove('rolling-animation')
+                                        clearInterval(letterInterval)
+                                    }
+                                }, 80) // 80ms per roll
+                                
+                            }, index * 100) // 100ms delay between each letter
+                        })
+                    }
+                    
+                    // Function to schedule next animation
+                    function scheduleNextAnimation() {
+                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                        setTimeout(() => {
+                            animateLetters()
+                            scheduleNextAnimation() // Schedule the next one
+                        }, randomDelay)
+                    }
+                    
+                    // Start initial animation
+                    animateLetters()
+                    
+                    // Schedule repeating animations after initial completes
+                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                    setTimeout(() => {
+                        scheduleNextAnimation()
+                    }, 1500) // 1.5 seconds buffer
+                })
+            }
+            
+            // Initialize Data text animations
+            setupDataTextAnimation()
+            
+            console.log('Data text animations initialized successfully')
+        }       
+    }
+})
