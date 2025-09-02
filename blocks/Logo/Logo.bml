@@ -31,7 +31,7 @@ Beast
             // Store reference for cleanup if needed
             this.logoEffects = logoEffects
             
-            console.log('Logo parallax effects initialized successfully using ScrollFade helper')
+            
         } else {
             console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
         }

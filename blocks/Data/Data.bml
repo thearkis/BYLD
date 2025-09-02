@@ -25,7 +25,7 @@ Beast.decl({
                 // Store reference for cleanup if needed
                 this.dataEffects = dataEffects
                 
-                console.log('Data parallax effects initialized successfully using ScrollFade helper')
+    
             } else {
                 console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
             }
@@ -115,7 +115,7 @@ Beast.decl({
             // Initialize Data text animations
             setupDataTextAnimation()
             
-            console.log('Data text animations initialized successfully')
+
         }       
     }
 })

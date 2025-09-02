@@ -962,7 +962,7 @@ ScrollFade.setupScrollObserver = function(config) {
         const currentScrollTop = window.pageYOffset
         const scrollDirection = currentScrollTop > lastScrollTop ? 'DOWN' : 'UP'
         
-        console.log(`📜 Scroll event - Direction: ${scrollDirection}, Position: ${currentScrollTop}`)
+
         
         // Always check elements on every scroll event
         checkElementsVisibility()
@@ -982,7 +982,7 @@ ScrollFade.setupScrollObserver = function(config) {
             lastTouchY = touchStartY
             touchMoveCount = 0
             
-            console.log(`👆 Touch start - Y: ${touchStartY}`)
+    
             
             // Force immediate visibility check
             checkElementsVisibility()
@@ -990,7 +990,6 @@ ScrollFade.setupScrollObserver = function(config) {
             // Start aggressive continuous polling
             if (!scrollPollInterval) {
                 scrollPollInterval = setInterval(() => {
-                    console.log(`🔄 Polling check #${++touchMoveCount}`)
                     checkElementsVisibility()
                 }, 4) // 250fps ultra-aggressive checking
             }
@@ -1001,7 +1000,7 @@ ScrollFade.setupScrollObserver = function(config) {
             const deltaY = Math.abs(currentY - lastTouchY)
             lastTouchY = currentY
             
-            console.log(`👆 Touch move - Delta: ${deltaY}, Current Y: ${currentY}`)
+
             
             // Check visibility on EVERY touch move, regardless of distance
             checkElementsVisibility()
@@ -1010,10 +1009,8 @@ ScrollFade.setupScrollObserver = function(config) {
             if (deltaY > 0) {
                 if (!scrollPollInterval) {
                     scrollPollInterval = setInterval(() => {
-                        console.log(`🔄 Polling check #${++touchMoveCount}`)
                         checkElementsVisibility()
                     }, 4) // 250fps ultra-aggressive checking
-                    console.log(`🚀 Started new polling interval`)
                 }
             }
         }, { passive: true })
@@ -1054,7 +1051,7 @@ ScrollFade.setupScrollObserver = function(config) {
     
     // Add scroll event listener - check on every scroll event
     window.addEventListener('scroll', handleScroll, { passive: true })
-    console.log('📜 Scroll event listener added to window')
+
     
     // Also check on window resize and orientation change
     window.addEventListener('resize', checkElementsVisibility, { passive: true })
@@ -1064,13 +1061,13 @@ ScrollFade.setupScrollObserver = function(config) {
     
     // Initial check
     setTimeout(checkElementsVisibility, 100)
-    console.log('🔍 Initial visibility check scheduled')
+
     
     return {
         observer: observer,
         elements: elements,
         destroy: function() {
-            console.log('🗑️ Destroying scroll observer')
+
             observer.disconnect()
             window.removeEventListener('scroll', handleScroll)
             window.removeEventListener('resize', checkElementsVisibility)
@@ -4583,8 +4580,14 @@ Beast.decl({
                 this.append(
                     Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
                 )
-                
             }
+            
+            // Add click handler to show form
+            this.on('click', function () {
+                if (typeof window.showForm === 'function') {
+                    window.showForm()
+                }
+            })
         },
         domInit: function fn() {
             // Initialize shuffle animation for Action component
@@ -4633,10 +4636,12 @@ Beast.decl({
 
 Beast.decl({
     App: {
+        
         tag:'body',
+        
         expand: function fn () {
             if (MissEvent.mobile) { this.mix('mobile') }
-            this.append( Beast.node("Noise",{__context:this,"":true}), this.get() )
+            this.append( Beast.node("Noise",{__context:this,"":true}), Beast.node("Form",{__context:this,"":true}), this.get() )
         },
         domInit: function fn() {
             // Add ASCII art for ARK studio
@@ -4662,7 +4667,7 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                     })
                 })
                 
-                console.log('Action elements shuffling animation initialized using Shuffle helper')
+
             } else {
                 console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
             }
@@ -5193,6 +5198,24 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Button: {
         expand: function () {
 
@@ -5226,220 +5249,6 @@ Beast.decl({
             }   
         }       
     }   
-})
-Beast.decl({
-    Case: {
-        expand: function () {
-            this.append(
-                Beast.node("head",{__context:this},"\n                    ",Beast.node("client-card",undefined,"\n                        ",Beast.node("tail",{"":true}),"\n                        ",Beast.node("wrap",undefined,"\n                            ",Beast.node("hint",undefined,"Client"),"\n                            ",this.get('client'),"\n                        "),"\n                    "),"\n                    ",this.get('title'),"\n                "),
-
-
-                this.get('impact', 'image', 'descr'),
-
-                Beast.node("descr",{__context:this},"\n                    \n                    ",Beast.node("descr-about",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"About",Beast.node("br")," the project"),"\n                            ",Beast.node("glyph",undefined,"プロジェクト"),"\n                        "),"\n                        ",this.get('description'),"\n                    "),"\n\n                    ",Beast.node("descr-plus",undefined,"\n                        ",Beast.node("descr-icon"),"\n                    "),"\n\n                    ",Beast.node("descr-challenge",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"The",Beast.node("br")," challenge"),"\n                            ",Beast.node("glyph",undefined,"挑戦"),"\n                        "),"\n                        ",Beast.node("Box",{"Type":"Challenge"},"\n                            ",Beast.node("title",undefined,"ID.5.001"),"\n                            ",Beast.node("text",{"Size":"L"},"\n                                ",this.get('challenge'),"\n                            "),"    \n                        "),"\n                        \n                    "),"\n                    \n                "),
-
-                this.get('solution'),
-
-                Beast.node("impact-bottom",{__context:this},"\n                    ",Beast.node("Header",undefined,"\n                        ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                        ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                    "),"\n                    ",Beast.node("impact-items",undefined,"\n                        ",this.get('impact-meta-item'),"\n                    "),"\n                "),
-
-                this.get('review', 'link'),
-
-                
-            )
-        },
-        domInit: function fn() {
-            // Mobile layout adjustment: move Header before CaseResult on mobile
-            if (MissEvent.mobile) {
-                // Find the case__impact container
-                const caseImpact = document.querySelector('.case__impact')
-                if (caseImpact) {
-                    // Find the Header and CaseResult elements within case__impact
-                    const header = caseImpact.querySelector('.Header')
-                    const caseResult = caseImpact.querySelector('.CaseResult')
-                    
-                    if (header && caseResult) {
-                        // Move the Header to appear before CaseResult
-                        caseResult.parentNode.insertBefore(header, caseResult)
-                        console.log('Moved Header before CaseResult on mobile')
-                    }
-                }
-                
-                // Add header__line div before Case__impact on mobile
-                const caseImpactElement = document.querySelector('.case__impact')
-                if (caseImpactElement) {
-                    // Create header__line div
-                    const headerLine = document.createElement('div')
-                    headerLine.className = 'header__line'
-                    
-                    // Insert header__line before case__impact
-                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
-                    console.log('Added header__line before Case__impact on mobile')
-                }
-            }
-            
-            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
-            if (typeof ScrollFade !== 'undefined') {
-                const caseEffects = ScrollFade.initScrollEffects({
-                    animations: [
-                        {
-                            selector: '.Case__client-card',
-                            className: 'Case__client-card_loaded',
-                            delay: 300
-                        },
-                        {
-                            selector: '.Case__title',
-                            className: 'Case__title_loaded',
-                            delay: 300,
-                            offset: 200
-                        },
-                        {
-                            selector: '.CaseMeta__item',
-                            className: 'CaseMeta__item_loaded',
-                            delay: 200,
-                            offset: 200
-                        },
-                        {
-                            selector: '.Caseresult__item',
-                            className: 'Caseresult__item_loaded',
-                            delay: 100,
-                            offset: 200
-                        }
-                    ],
-                    textShuffle: [
-                        {
-                            selector: '.caseresult__title, .caseresult__text',
-                            afterSelector: '.Caseresult__item',
-                            options: {
-                                letterDelay: 30,
-                                maxRolls: 15,
-                                rollInterval: 50
-                            },
-                            offset: 100
-                        }
-                    ],
-                    parallax: {
-                        groups: [
-                            {
-                                selector: '.Case__head',
-                                speed: 0.7,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.40,
-                                blurStart: 0.35,
-                                mobileBlurTrigger: 1.3,
-                                mobileBlurStart: 1.3,
-                                maxBlur: 8
-                            },
-                            {
-                                selector: '.CaseMeta',
-                                speed: 0.8,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.40,
-                                blurStart: 0.35,
-                                mobileBlurTrigger: 0.95,
-                                mobileBlurStart: 0.90,
-                                maxBlur: 8
-                            },
-                            {
-                                selector: '.Case__image, .case__descr',
-                                blur: true,
-                                movement: false,
-                                blurTrigger: 0.40,
-                                blurStart: 0.35,
-                                mobileBlurTrigger: 0.95,
-                                mobileBlurStart: 0.90,
-                                maxBlur: 8
-                            }
-                        ]
-                    },
-                    observers: [
-                        {
-                            selector: '.Case__head, .CaseMeta, .case__descr, .Case__image',
-                            rootMargin: '-20% 0px -20% 0px',
-                            threshold: 0.3,
-                            onIntersect: function(element, entry) {
-                                console.log(`🎯 Element intersected: ${element.className}`)
-                                // Add a class to make the element visible
-                                element.classList.add('visible')
-                            }
-                        }
-                    ]
-                })
-                
-                // Store reference for cleanup if needed
-                this.caseEffects = caseEffects
-                
-                console.log('Case scroll effects initialized successfully using ScrollFade helper')
-            } else {
-                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
-            }
-        }       
-    },
-
-    Case__link: {
-        expand: function () {
-            var text = this.text()
-            var href = 'http://' + text
-            this.append(
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Link",{"New":true,"href":href},"\n                        ",Beast.node("Action",{"Size":"L","Wide":true,"Type":"Red"},text),"\n                    "),"\n                ")
-            )
-        },
-    },
-
-    Case__impact: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this,"Top":true},"\n                    ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                    ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                "),
-
-                Beast.node("CaseMeta",{__context:this},"\n                    ",this.get('item'),"\n                ")
-            )
-        },
-    },
-
-    Case__solution: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"The",Beast.node("br")," solution"),"\n                    ",Beast.node("glyph",undefined,"解決策"),"\n                "),
-                Beast.node("Solution",{__context:this},"\n                    ",this.get('item','descr'),"\n                ")
-            )
-        },
-    },
-
-    Case__review: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"Client",Beast.node("br")," feedback"),"\n                    ",Beast.node("glyph",undefined,"人々が言うこと"),"\n                "),
-                Beast.node("Review",{__context:this,"Size":"L"},"\n                    ",this.get('text'),"\n                    ",Beast.node("person",undefined,"\n                        ",this.get('photo', 'name'),"\n                    "),"\n                ") 
-                
-            )
-        },
-            
-    },
-
-    Case__image: {
-        
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        },
-            
-    },
-
-    
-
-    
-
-    'Case__impact-meta-item': {
-        
-        expand: function () {
-            this.append(
-                Beast.node("CaseResult",{__context:this},"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("title",undefined,this.get('impact-meta-title')),"\n                        ",Beast.node("text",undefined,this.get('impact-meta-text')),"\n                    "),"\n                ")
-            )
-        }
-            
-    },
 })
 Beast.decl({
     Card: {
@@ -5529,22 +5338,218 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Box: {
+    Case: {
         expand: function () {
             this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+                Beast.node("head",{__context:this},"\n                    ",Beast.node("client-card",undefined,"\n                        ",Beast.node("tail",{"":true}),"\n                        ",Beast.node("wrap",undefined,"\n                            ",Beast.node("hint",undefined,"Client"),"\n                            ",this.get('client'),"\n                        "),"\n                    "),"\n                    ",this.get('title'),"\n                "),
 
+
+                this.get('impact', 'image', 'descr'),
+
+                Beast.node("descr",{__context:this},"\n                    \n                    ",Beast.node("descr-about",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"About",Beast.node("br")," the project"),"\n                            ",Beast.node("glyph",undefined,"プロジェクト"),"\n                        "),"\n                        ",this.get('description'),"\n                    "),"\n\n                    ",Beast.node("descr-plus",undefined,"\n                        ",Beast.node("descr-icon"),"\n                    "),"\n\n                    ",Beast.node("descr-challenge",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"The",Beast.node("br")," challenge"),"\n                            ",Beast.node("glyph",undefined,"挑戦"),"\n                        "),"\n                        ",Beast.node("Box",{"Type":"Challenge"},"\n                            ",Beast.node("title",undefined,"ID.5.001"),"\n                            ",Beast.node("text",{"Size":"L"},"\n                                ",this.get('challenge'),"\n                            "),"    \n                        "),"\n                        \n                    "),"\n                    \n                "),
+
+                this.get('solution'),
+
+                Beast.node("impact-bottom",{__context:this},"\n                    ",Beast.node("Header",undefined,"\n                        ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                        ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                    "),"\n                    ",Beast.node("impact-items",undefined,"\n                        ",this.get('impact-meta-item'),"\n                    "),"\n                "),
+
+                this.get('review', 'link'),
+
+                
             )
         },
         domInit: function fn() {
+            // Mobile layout adjustment: move Header before CaseResult on mobile
+            if (MissEvent.mobile) {
+                // Find the case__impact container
+                const caseImpact = document.querySelector('.case__impact')
+                if (caseImpact) {
+                    // Find the Header and CaseResult elements within case__impact
+                    const header = caseImpact.querySelector('.Header')
+                    const caseResult = caseImpact.querySelector('.CaseResult')
+                    
+                    if (header && caseResult) {
+                        // Move the Header to appear before CaseResult
+                        caseResult.parentNode.insertBefore(header, caseResult)
             
+                    }
+                }
+                
+                // Add header__line div before Case__impact on mobile
+                const caseImpactElement = document.querySelector('.case__impact')
+                if (caseImpactElement) {
+                    // Create header__line div
+                    const headerLine = document.createElement('div')
+                    headerLine.className = 'header__line'
+                    
+                    // Insert header__line before case__impact
+                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
+        
+                }
+            }
+            
+            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const caseEffects = ScrollFade.initScrollEffects({
+                    animations: [
+                        {
+                            selector: '.Case__client-card',
+                            className: 'Case__client-card_loaded',
+                            delay: 300
+                        },
+                        {
+                            selector: '.Case__title',
+                            className: 'Case__title_loaded',
+                            delay: 300,
+                            offset: 200
+                        },
+                        {
+                            selector: '.CaseMeta__item',
+                            className: 'CaseMeta__item_loaded',
+                            delay: 200,
+                            offset: 200
+                        },
+                        {
+                            selector: '.Caseresult__item',
+                            className: 'Caseresult__item_loaded',
+                            delay: 100,
+                            offset: 200
+                        }
+                    ],
+                    textShuffle: [
+                        {
+                            selector: '.caseresult__title, .caseresult__text',
+                            afterSelector: '.Caseresult__item',
+                            options: {
+                                letterDelay: 30,
+                                maxRolls: 15,
+                                rollInterval: 50
+                            },
+                            offset: 100
+                        }
+                    ],
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Case__head',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
+                                mobileBlurTrigger: 1.3,
+                                mobileBlurStart: 1.3,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.CaseMeta',
+                                speed: 0.8,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.Case__image, .case__descr',
+                                blur: true,
+                                movement: false,
+                                blurTrigger: 0.40,
+                                blurStart: 0.35,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
+                                maxBlur: 8
+                            }
+                        ]
+                    },
+                    observers: [
+                        {
+                            selector: '.Case__head, .CaseMeta, .case__descr, .Case__image',
+                            rootMargin: '-20% 0px -20% 0px',
+                            threshold: 0.3,
+                            onIntersect: function(element, entry) {
+    
+                                // Add a class to make the element visible
+                                element.classList.add('visible')
+                            }
+                        }
+                    ]
+                })
+                
+                // Store reference for cleanup if needed
+                this.caseEffects = caseEffects
+                
+    
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
         }       
-    }
+    },
+
+    Case__link: {
+        expand: function () {
+            var text = this.text()
+            var href = 'http://' + text
+            this.append(
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Link",{"New":true,"href":href},"\n                        ",Beast.node("Action",{"Size":"L","Wide":true,"Type":"Red"},text),"\n                    "),"\n                ")
+            )
+        },
+    },
+
+    Case__impact: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this,"Top":true},"\n                    ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                    ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                "),
+
+                Beast.node("CaseMeta",{__context:this},"\n                    ",this.get('item'),"\n                ")
+            )
+        },
+    },
+
+    Case__solution: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"The",Beast.node("br")," solution"),"\n                    ",Beast.node("glyph",undefined,"解決策"),"\n                "),
+                Beast.node("Solution",{__context:this},"\n                    ",this.get('item','descr'),"\n                ")
+            )
+        },
+    },
+
+    Case__review: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"Client",Beast.node("br")," feedback"),"\n                    ",Beast.node("glyph",undefined,"人々が言うこと"),"\n                "),
+                Beast.node("Review",{__context:this,"Size":"L"},"\n                    ",this.get('text'),"\n                    ",Beast.node("person",undefined,"\n                        ",this.get('photo', 'name'),"\n                    "),"\n                ") 
+                
+            )
+        },
+            
+    },
+
+    Case__image: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        },
+            
+    },
+
+    
+
+    
+
+    'Case__impact-meta-item': {
+        
+        expand: function () {
+            this.append(
+                Beast.node("CaseResult",{__context:this},"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("title",undefined,this.get('impact-meta-title')),"\n                        ",Beast.node("text",undefined,this.get('impact-meta-text')),"\n                    "),"\n                ")
+            )
+        }
+            
+    },
 })
 Beast.decl({
     Case__meta: {
@@ -5562,53 +5567,7 @@ Beast.decl({
     
 })
 Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-        domInit: function fn() {
-            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
-            if (typeof Shuffle !== 'undefined') {
-                const footerJpElements = document.querySelectorAll('.Footer__jp')
-                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-                const allFooterTextElements = [...footerJpElements, ...footerChElements]
-                
-                allFooterTextElements.forEach(element => {
-                    Shuffle.animateFooterTextRolling(element, {
-                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                        rollInterval: 80, // 80ms per roll
-                        letterDelay: 100, // 100ms delay between each letter
-                        minDelay: 2000, // 2 seconds minimum between animations
-                        maxDelay: 2000, // 4 seconds maximum between animations
-                        initialDelay: 1500 // 1.5 seconds buffer before repeating
-                    })
-                })
-                
-                console.log('Footer text animations initialized successfully using Shuffle helper')
-            } else {
-                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
-            }
-        }
-            
-    }   
-})
-
-Beast.decl({
     Cassette: {
-        
         domInit: function fn() {
             // Cassette pieces scroll detection for fixed positioning
             const cassettePieces = []
@@ -5624,23 +5583,27 @@ Beast.decl({
                         isFixed: false,
                         triggerPoint: piece.getBoundingClientRect().top + window.scrollY
                     })
-                    console.log(`Found cassette piece ${i}`)
+    
                 }
             }
             
             if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+    
                 
-                // Debounce function to limit scroll handler calls
-                let scrollTimeout
-                function debouncedCheckCassettePositions() {
-                    clearTimeout(scrollTimeout)
-                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                // Throttled scroll handler for better performance
+                let ticking = false
+                function throttledCheckCassettePositions() {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            checkCassettePositions()
+                            ticking = false
+                        })
+                        ticking = true
+                    }
                 }
                 
                 function checkCassettePositions() {
                     const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
                     
                     // Check if we've reached the last piece (piece 5)
                     const lastPiece = cassettePieces[cassettePieces.length - 1]
@@ -5650,46 +5613,37 @@ Beast.decl({
                         // All pieces should lose their fixed position and move together
                         atLastPiece = true
                         cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
                             if (piece.isFixed) {
                                 piece.element.classList.remove('Cassette_fixed')
                                 piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
                             }
                         })
-                        console.log('Reached last piece - all pieces unfixed')
+                        return // Exit early when at last piece
                     }
                     
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
+                    if (!reachedLastPiece && atLastPiece) {
                         // Reset flag when not at last piece
                         atLastPiece = false
-                        // Normal fixed behavior for individual pieces
+                    }
+                    
+                    // Only process individual pieces when not at last piece
+                    if (!atLastPiece) {
                         cassettePieces.forEach(piece => {
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            const shouldBeFixed = scrollY >= piece.triggerPoint - 100
                             
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
+                            if (shouldBeFixed && !piece.isFixed) {
+                                piece.element.classList.add('Cassette_fixed')
+                                piece.isFixed = true
+                            } else if (!shouldBeFixed && piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
                             }
                         })
                     }
                 }
                 
-                // Add scroll event listener with debouncing
-                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                // Add scroll event listener with throttling for better performance
+                window.addEventListener('scroll', throttledCheckCassettePositions, { passive: true })
                 
                 // Add resize listener to recalculate trigger points
                 window.addEventListener('resize', () => {
@@ -5709,7 +5663,7 @@ Beast.decl({
                         piece.element.style.transform = ''
                     })
                     atLastPiece = false
-                    console.log('Reset all cassette pieces to default state')
+        
                 }
                 
                 // Expose reset function globally for debugging
@@ -5717,9 +5671,9 @@ Beast.decl({
                 
                 // Initial check
                 checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
+    
             } else {
-                console.log('No cassette pieces found')
+
             }
         }       
     }
@@ -5751,7 +5705,7 @@ Beast.decl({
                 // Store reference for cleanup if needed
                 this.dataEffects = dataEffects
                 
-                console.log('Data parallax effects initialized successfully using ScrollFade helper')
+    
             } else {
                 console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
             }
@@ -5841,10 +5795,174 @@ Beast.decl({
             // Initialize Data text animations
             setupDataTextAnimation()
             
-            console.log('Data text animations initialized successfully')
+
         }       
     }
 })
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+        domInit: function fn() {
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
+                    })
+                })
+                
+    
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
+        }
+            
+    }   
+})
+
+Beast.decl({
+    Form: {
+        expand: function fn() {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            // Initially hide the form using Beast.js css method
+            this.css({
+                visibility: 'hidden',
+                transform: 'translateX(100%)'
+            })
+            
+            // Add close functionality
+            const closeBtn = this.domNode().querySelector('.form-close')
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('Close button clicked')
+                    this.hideForm()
+                })
+            } else {
+                console.warn('Close button not found')
+            }
+            
+            // Close on escape key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    this.hideForm()
+                }
+            }
+            document.addEventListener('keydown', escapeHandler)
+            
+            // Close when clicking outside the form
+            const outsideClickHandler = (e) => {
+                const formElement = this.domNode()
+                // Only close if click is outside the form AND not on the close button
+                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
+                    this.hideForm()
+                }
+            }
+            // Don't add the outside click handler immediately - wait for form to be shown
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Store handlers for cleanup
+            this.escapeHandler = escapeHandler
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Expose show/hide methods globally
+            window.showForm = () => this.showForm()
+            window.hideForm = () => this.hideForm()
+        },
+        
+        showForm: function() {
+            console.log('showForm called')
+            
+            // Block page scrolling
+            document.body.style.overflow = 'hidden'
+            
+            // Show form using Beast.js css method
+            this.css({
+                visibility: 'visible'
+            })
+            
+            // Trigger slide animation
+            requestAnimationFrame(() => {
+                this.css({
+                    transform: 'translateX(0)'
+                })
+            })
+            
+            // Re-add event listeners if they were removed
+            if (this.escapeHandler && !this.listenersActive) {
+                document.addEventListener('keydown', this.escapeHandler)
+                this.listenersActive = true
+            }
+            
+            // Add outside click handler with a delay to prevent immediate closing
+            setTimeout(() => {
+                if (this.outsideClickHandler && !this.outsideClickActive) {
+                    document.addEventListener('click', this.outsideClickHandler)
+                    this.outsideClickActive = true
+                }
+            }, 100) // Small delay to prevent immediate triggering
+        },
+        
+        hideForm: function() {
+            console.log('hideForm called')
+            
+            // Slide out using Beast.js css method
+            this.css({
+                transform: 'translateX(100%)'
+            })
+            
+            // Wait for animation to complete, then hide
+            setTimeout(() => {
+                console.log('Animation complete, hiding form')
+                this.css({
+                    visibility: 'hidden'
+                })
+                // Restore page scrolling
+                document.body.style.overflow = ''
+                
+                // Remove event listeners when form is hidden
+                if (this.escapeHandler) {
+                    document.removeEventListener('keydown', this.escapeHandler)
+                }
+                if (this.outsideClickHandler) {
+                    document.removeEventListener('click', this.outsideClickHandler)
+                }
+                this.listenersActive = false
+                this.outsideClickActive = false
+            }, 300) // Match CSS transition duration
+        }
+    }
+})
+
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -5964,6 +6082,52 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
+/**
+ * @block Icon Иконка
+ * @tag icon
+ */
+
+Beast.decl({
+    Icon: {
+        mod: {
+            Name: '',   // @mod Name {string} Имя глифа
+            Size: '24',  // @mod Size {S M! L} Размер
+            Color: '',  // @mod Color {string} Имя цвета
+        },
+        param: {
+            color: '', // @param Color {string} hex-код цвета иконки
+        },
+        expand: function () {
+            if (this.param('color')) {
+                this.setColor(this.param('color'))
+            }
+        },
+        setColor: function (color) {
+            if (color[0] === '#') {
+                this.css('background-color', color)
+            } else {
+                this.mod('color', color)
+            }
+        },
+    }
+})
+
+// @example <Icon Name="Attention"/>
+
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 Beast.decl({
     Head: {
         expand: function () {
@@ -6013,52 +6177,38 @@ Beast
         }
     }
 })
-/**
- * @block Icon Иконка
- * @tag icon
- */
 
 Beast.decl({
-    Icon: {
-        mod: {
-            Name: '',   // @mod Name {string} Имя глифа
-            Size: '24',  // @mod Size {S M! L} Размер
-            Color: '',  // @mod Color {string} Имя цвета
-        },
-        param: {
-            color: '', // @param Color {string} hex-код цвета иконки
-        },
-        expand: function () {
-            if (this.param('color')) {
-                this.setColor(this.param('color'))
-            }
-        },
-        setColor: function (color) {
-            if (color[0] === '#') {
-                this.css('background-color', color)
-            } else {
-                this.mod('color', color)
-            }
-        },
-    }
-})
+    Menu: {
+        
 
-// @example <Icon Name="Attention"/>
-
-Beast.decl({
-    Header: {
         expand: function () {
             this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[01]"),"\n                    ",Beast.node("text",undefined,"About"),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[02]"),"\n                    ",Beast.node("text",undefined,"What we do"),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[03]"),"\n                    ",Beast.node("text",undefined,"What we've built"),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[04]"),"\n                    ",Beast.node("text",undefined,"How we build"),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[05]"),"\n                    ",Beast.node("text",undefined,"What people say"),"\n                ")
             )
         },
-        domInit: function fn() {
             
-        }       
-    }
+        domInit: function fn() {
+            // Menu text hover animation using the existing helper function
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                Shuffle.animateMenuText(element, {
+                    swapsRemaining: 20,
+                    interval: 40
+                })
+            })
+        }
+    },
+    
+     
 })
+
+
 Beast
 .decl('logo', {
     expand: function() {
@@ -6092,13 +6242,12 @@ Beast
             // Store reference for cleanup if needed
             this.logoEffects = logoEffects
             
-            console.log('Logo parallax effects initialized successfully using ScrollFade helper')
+            
         } else {
             console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
         }
     }
 });
-
 
 Beast.decl({
     Box: {
@@ -6118,36 +6267,301 @@ Beast.decl({
         }       
     }
 })
+/**
+ * @block Overlay Интерфейс модальных окон
+ * @dep UINavigation grid Typo Control
+ * @tag base
+ * @ext UINavigation grid
+ */
 Beast.decl({
-    Menu: {
-        
+    Overlay: {
+        inherits: ['UINavigation', 'Grid'],
+        mod: {
+            Type: 'side', // modal, partsideleft, bottom, top, expand, custom
+        },
+        onMod: {
+            State: {
+                active: function (callback) {
+                    if (this.mod('Type') === 'expand') {
+                        this.moveContextInside()
+                    }
 
+                    this.param('activeCallback', callback)
+                },
+                release: function (callback) {
+                    if (this.mod('Type') === 'expand') {
+                        this.moveContextOutside()
+                    }
+
+                    this.param('releaseCallback', callback)
+                },
+            }
+        },
+        param: {
+            activeCallback: function () {},
+            releaseCallback: function () {},
+            title: '',
+            subtitle: '',
+            theme: {
+                backgroundColor: '',
+                titleColor: '',
+                textColor: '',
+                content: false,
+            },
+            topBar: true,
+            background: true,
+            margin: true,
+        },
         expand: function () {
+            if (this.param('topBar')) {
+                this.append(Beast.node("topBar",{__context:this}))
+                    .mod('HasTopBar', true)
+            }
+
+            if (this.param('background')) {
+                this.append(Beast.node("background",{__context:this}))
+            }
+
+            if (this.mod('Type') === 'partsideleft') {
+                this.mod('Col', '1LeftMargins')
+            }
+
             this.append(
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[01]"),"\n                    ",Beast.node("text",undefined,"About"),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[02]"),"\n                    ",Beast.node("text",undefined,"What we do"),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[03]"),"\n                    ",Beast.node("text",undefined,"What we've built"),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[04]"),"\n                    ",Beast.node("text",undefined,"How we build"),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("digit",undefined,"[05]"),"\n                    ",Beast.node("text",undefined,"What people say"),"\n                ")
+                Beast.node("content",{__context:this},this.get())
             )
         },
-            
-        domInit: function fn() {
-            // Menu text hover animation using the existing helper function
-            const menuTextElements = document.querySelectorAll('.Menu__text')
-            
-            menuTextElements.forEach(element => {
-                Shuffle.animateMenuText(element, {
-                    swapsRemaining: 20,
-                    interval: 40
+        on: {
+            animationstart: function () {
+                if (this.mod('Type') === 'modal') {
+                    var overlayHeight = this.domNode().offsetHeight
+                    var parentHeight = this.parentNode().domNode().offsetHeight
+                    var marginTop = overlayHeight < (parentHeight - 200)
+                        ? this.domNode().offsetHeight / -2
+                        : undefined
+
+                    this.css({
+                        marginLeft: this.domNode().offsetWidth / -2
+                    })
+
+                    if (marginTop !== undefined) {
+                        this.css({
+                            marginTop: marginTop,
+                            marginBottom: 0,
+                            top: '50%',
+                        })
+                    }
+                }
+            },
+            animationend: function () {
+                if (this.mod('Type') === 'expand' && this.param('scrollContent')) {
+                    requestAnimationFrame(function () {
+                        if (this.elem('content')[0].domNode().scrollTop === 0) {
+                            this.param('options').context.css('transform', 'translate3d(0px,0px,0px)')
+                            this.elem('content')[0].domNode().scrollTop = -this.param('scrollContent')
+                            this.param('scrollContent', false)
+                        }
+                    }.bind(this))
+                }
+
+                if (this.mod('State') === 'release') {
+                    this.param('releaseCallback')()
+                } else {
+                    this.param('activeCallback')()
+                }
+            }
+        },
+        moveContextInside: function () {
+            var context = this.param('options').context
+
+            // Calculate Global Offset
+            var offsetParent = context.domNode()
+            var offsetTop = offsetParent.offsetTop
+            while (offsetParent = offsetParent.offsetParent) {
+                offsetTop += offsetParent.offsetTop
+            }
+
+            // Placeholder
+            var placeholder = Beast.node("OverlayPlaceholder",{__context:this})
+            this.param('placeholder', placeholder)
+            context.parentNode().insertChild([placeholder], context.index(true))
+            placeholder
+                .css('height', context.domNode().offsetHeight)
+                .domNode().className = context.domNode().className
+
+            context.appendTo(
+                this.elem('content')[0]
+            )
+
+            offsetTop -= 44
+            context.css({
+                transform: 'translate3d(0px,' + offsetTop + 'px, 0px)'
+            })
+
+            // Context is under of the screen top
+            if (offsetTop > 0) {
+                requestAnimationFrame(function () {
+                    context.css({
+                        transition: 'transform 300ms',
+                        transform: 'translate3d(0px,0px,0px)',
+                    })
                 })
+            }
+            // Context is above of the screen top
+            else {
+                this.param({
+                    scrollContent: offsetTop
+                })
+            }
+        },
+        moveContextOutside: function () {
+            this.param('placeholder').parentNode().insertChild(
+                [this.param('options').context], this.param('placeholder').index(true)
+            )
+            this.param('placeholder').remove()
+
+            this.param('options').context.css({
+                transition: ''
+            })
+        },
+        pushToStackNavigation: function fn (options) {
+            if (this.mod('Type') === 'expand') {
+                options.fog = false
+            }
+
+            // Ensure proper initialization before calling inherited method
+            if (this.inherited && typeof this.inherited === 'function') {
+                this.inherited(fn, options)
+            } else {
+                // Fallback if inherited method is not available
+                console.warn('UINavigation methods not available, using fallback navigation')
+                this.show()
+            }
+        }
+    },
+    Overlay__topBar: {
+        expand: function () {
+            this.css({
+                backgroundColor: this.parentBlock().param('theme').backgroundColor,
+                color: this.parentBlock().param('theme').titleColor,
+                boxShadow: this.parentBlock().param('theme').titleColor && 'none',
+            })
+
+            var layerIndex = this.parentBlock().parentNode().index()
+
+            this.append(
+                Beast.node("topBarActionBack",{__context:this}),
+                layerIndex > 1 && Beast.node("topBarActionClose",{__context:this})
+            )
+
+            var title = this.parentBlock().param('title')
+            var subtitle = this.parentBlock().param('subtitle')
+
+            if (title) {
+                var titles = Beast.node("topBarTitles",{__context:this}).append(
+                    Beast.node("topBarTitle",{__context:this},title)
+                )
+
+                if (subtitle) {
+                    titles.append(
+                        Beast.node("topBarSubtitle",{__context:this},subtitle)
+                    )
+                }
+
+                this.append(titles)
+            }
+        }
+    },
+    Overlay__topBarTitle: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'M',
+            Line: 'M',
+            Bold: true,
+        },
+        expand: function () {
+            this.css({
+                color: this.parentBlock().param('theme').titleColor
             })
         }
     },
-    
-     
-})
+    Overlay__topBarSubtitle: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'S',
+        },
+        expand: function () {
+            this.css({
+                color: this.parentBlock().param('theme').textColor
+            })
+        }
+    },
+    Overlay__topBarAction: {
+        inherits: ['Control', 'Typo'],
+        mod: {
+            Text: 'M',
+            Medium: true,
+        },
+        expand: function () {
+            this.css({
+                color: this.parentBlock().param('theme').titleColor
+            })
+        }
+    },
+    Overlay__topBarActionBack: {
+        inherits: 'Overlay__topBarAction',
+        expand: function fn () {
+            this.inherited(fn)
 
+            this.append(
+                Beast.node("Icon",{__context:this,"Name":"CornerArrowLeft"}).param({
+                    color: this.parentBlock().param('theme').titleColor
+                }),
+                Beast.node("topBarActionLabel",{__context:this},"Назад")
+            )
+        },
+        on: {
+            Release: function () {
+                this.parentBlock().popFromStackNavigation()
+            }
+        }
+    },
+    Overlay__topBarActionClose: {
+        inherits: 'Overlay__topBarAction',
+        expand: function fn () {
+            this.inherited(fn)
+
+            this.append(
+                Beast.node("Icon",{__context:this,"Name":"Cross"}).param({
+                    color: this.parentBlock().param('theme').titleColor
+                })
+            )
+        },
+        on: {
+            Release: function () {
+                this.parentBlock().popAllFromStackNavigation()
+            }
+        }
+    },
+    Overlay__content: {
+        inherits: 'Grid',
+        expand: function () {
+            if (this.parentBlock().param('theme').content) {
+                this.css({
+                    backgroundColor: this.parentBlock().param('theme').backgroundColor,
+                    color: this.parentBlock().param('theme').titleColor,
+                    boxShadow: this.parentBlock().param('theme').titleColor && 'none',
+                })
+            }
+
+            if (this.parentBlock().param('margin')) {
+                this.mod({
+                    MarginX: true,
+                    Wrap: !this.parentBlock().mod('Col'),
+                })
+            }
+        }
+    }
+})
 
 
 Beast.decl({
@@ -6172,37 +6586,16 @@ Beast.decl({
     },
 })
 Beast.decl({
-    Solution: {
-        expand: function () {
-            this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
-            )
+    Reviews: {
+        expand: function fn() {
+            
         },
         domInit: function fn() {
             
-        }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
         }
-            
-    },
-    
+    }
 })
+
 Beast.decl({
     Services: {
         tag: 'div',
@@ -6272,16 +6665,37 @@ Beast.decl({
 })
 
 Beast.decl({
-    Reviews: {
-        expand: function fn() {
-            
+    Solution: {
+        expand: function () {
+            this.append(
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+            )
         },
         domInit: function fn() {
             
-        }
-    }
-})
+        }       
+    },
 
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
+})
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
@@ -6589,3 +7003,321 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+
+    /**
+     * @block UINavigation Компонент паттерна навигации
+     * @tag base
+     */
+    UINavigation: {
+        mod: {
+            State: '', // active, release
+        },
+        onMod: {
+            State: {
+                active: function (callback) {
+                    callback && callback()
+                },
+                release: function (callback) {
+                    callback && callback()
+                }
+            }
+        },
+        activate: function(callback) {
+            this.mod('state', 'active', callback)
+        },
+        release: function(callback) {
+            this.mod('state', 'release', callback)
+        },
+
+        /**
+         * Pushes itself to StackNavigation
+         * @options {context:BemNode, onDidPush:function, onDidPop:function, onWillPush:function, onWillPop:function, fog:boolean}
+         */
+        pushToStackNavigation: function(options) {
+            if (options.fog === undefined) {
+                options.fog = true
+            }
+
+            this.param('options', options)
+            this._parentContextOfKind('UIStackNavigation', options.context).push(this)
+            return this
+        },
+
+        /**
+         * Pops itself from StackNavigation
+         */
+        popFromStackNavigation: function() {
+            this._parentContextOfKind('UIStackNavigation', this).pop()
+            return this
+        },
+
+        /**
+         * Pops all NavigationItems from StackNavigation
+         */
+        popAllFromStackNavigation: function() {
+            this._parentContextOfKind('UIStackNavigation', this).popAll()
+            return this
+        },
+
+        /**
+         * Gets parent node for @context of @kind
+         */
+        _parentContextOfKind: function(kind, context) {
+            var node = context._parentNode
+            while (!node.isKindOf(kind)) node = node._parentNode
+            return node
+        },
+    },
+
+    /**
+     * @block UIStackNavigation Паттерн стэковой навигации
+     * @tag base
+     */
+    UIStackNavigation: {
+        inherits: 'UINavigation',
+        param: {
+            storedScrollPosition: 0,
+        },
+        expand: function() {
+            this.append(Beast.node("layer",{__context:this},this.get('/')))
+            this.topLayer().mod('Root', true)
+            
+            // Apply any pending scroll position that was stored before the layer was ready
+            var pendingScrollPosition = this.param('pendingScrollPosition')
+            if (pendingScrollPosition !== undefined) {
+                this.topLayer().css('margin-top', -pendingScrollPosition)
+                this.param('pendingScrollPosition', undefined) // Clear pending position
+            }
+        },
+        onMod: {
+            Pushing: {
+                true: function () {
+                    this.mod('HasFog', this.topNavigationItem().param('options').fog)
+                }
+            },
+            Popping: {
+                false: function () {
+                    var topItemOptions = this.topNavigationItem().param('options')
+                    if (topItemOptions) {
+                        this.mod('HasFog', topItemOptions.fog)
+                    }
+                }
+            }
+        },
+        onWin: {
+            popstate: function (e) {
+                var item = this.topNavigationItem()
+                item && item.popFromStackNavigation && item.popFromStackNavigation()
+            }
+        },
+
+        /**
+         * Pushes @navigationItem to stack
+         */
+        push: function(navigationItem) {
+            this.storeRootScrollPosition()
+
+            this.append(Beast.node("layer",{__context:this},navigationItem))
+
+            this.mod('Pushed', !this.topLayer().mod('Root'))
+                .mod('Pushing', true)
+
+            var onDidPush = this.topNavigationItem().param('options').onDidPush
+            var onWillPush = this.topNavigationItem().param('options').onWillPush
+
+            this.topNavigationItem().activate(function() {
+                this.mod('Pushing', false)
+                onDidPush && onDidPush()
+            }.bind(this))
+
+            // history.pushState({UIStackNavigation: true}, '', '#')
+            this.updateFogSize(navigationItem)
+
+            onWillPush && onWillPush()
+        },
+
+        /**
+         * Pops @navigationItem from stack
+         */
+        pop: function(index) {
+            this.mod('Popping', true)
+
+            var navigationItem = index === undefined
+                ? this.topNavigationItem()
+                : this.navigationItemByIndex(index)
+
+            var onWillPop = navigationItem.param('options').onWillPop
+            var onDidPop = navigationItem.param('options').onDidPop
+
+            var onRelease = function() {
+                onDidPop && onDidPop()
+                this.topLayer().remove()
+                this.mod('Pushed', !this.topLayer().mod('Root'))
+                this.restoreRootScrollPosition()
+                this.mod('Popping', false)
+            }.bind(this)
+
+            navigationItem.release(onRelease)
+
+            onWillPop && onWillPop()
+        },
+
+        /**
+         * Pops all @navigationItem's from stack
+         */
+        popAll: function () {
+            this.elem('layer').forEach(function(layer, index) {
+                if (index !== 0) {
+                    layer.parentBlock().pop(index)
+                }
+            })
+        },
+
+        /**
+         * Gets top layer from stack
+         */
+        topLayer: function() {
+            return this.elem('layer').pop()
+        },
+
+        /**
+         * Gets NavigationItem of top layer
+         */
+        topNavigationItem: function() {
+            return this.topLayer().get('/')[0]
+        },
+
+        /**
+         * Gets NavigationItem by layer index
+         */
+        navigationItemByIndex: function (index) {
+            return this.elem('layer')[index].get('/')[0]
+        },
+
+        /**
+         * Stores scroll position
+         */
+        storeRootScrollPosition: function() {
+            // Always store the current scroll position
+            var currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
+            this.param('scrollPosition', currentScrollPosition)
+            
+            // Try to apply margin to root layer if it exists
+            var topLayer = this.topLayer()
+            if (topLayer && topLayer.mod && topLayer.mod('Root')) {
+                topLayer.css('margin-top', -currentScrollPosition)
+            } else {
+                // If no root layer yet, store the position for later use
+                this.param('pendingScrollPosition', currentScrollPosition)
+            }
+        },
+
+        /**
+         * Resores scroll position
+         */
+        restoreRootScrollPosition: function() {
+            var topLayer = this.topLayer()
+            if (topLayer && topLayer.mod && topLayer.mod('Root')) {
+                topLayer.css('margin-top', '')
+                
+                // Restore scroll position if we have one stored
+                var scrollPosition = this.param('scrollPosition')
+                if (scrollPosition !== undefined) {
+                    window.scrollTo(0, scrollPosition)
+                }
+            }
+        },
+
+        /**
+         * Set fog size by navigationItem size
+         */
+        updateFogSize: function (navigationItem) {
+            var topLayer = this.topLayer()
+            if (topLayer && navigationItem && navigationItem.domNode) {
+                var itemHeight = navigationItem.domNode().offsetHeight + 200
+                var parentHeight = this.domNode().offsetHeight
+
+                if (itemHeight > parentHeight && topLayer.get('fog')[0]) {
+                    topLayer.get('fog')[0].css('height', itemHeight)
+                }
+            }
+        },
+    },
+
+    UIStackNavigation__layer: {
+        expand: function () {
+            this.append(
+                this.get('/'), Beast.node("fog",{__context:this,"Active":true})
+            )
+
+            if (!this.mod('root')) {
+                this.on('mousedown', function (e) {
+                    var PointedDom = document.elementFromPoint(e.clientX, e.clientY)
+                    if (PointedDom === this.domNode()) {
+                        this.parentBlock().popAll()
+                    }
+                })
+            }
+        }
+    },
+
+    UIStackNavigation__fog: {
+        inherits: 'Control',
+        mod: {
+            Active: false,
+        },
+        on: {
+            Release: function () {
+                this.parentBlock().popAll()
+            }
+        }
+    },
+
+    /**
+     * @block UISwitchNavigation Паттерн табовой навигации
+     * @tag base
+     */
+    UISwitchNavigation: {
+        inherits: 'UINavigation',
+        expand: function() {
+            this.append(
+                this.get('/').map(function(item, index) {
+                    return Beast.node("layer",{__context:this},item)
+                })
+            )
+        },
+
+        /**
+         * Switches to item element with @index
+         */
+        switchToIndex: function (index) {
+            if (this.elem('layer').length !== 0) {
+                this.elem('layer').forEach(function(layer, layerIndex) {
+                    var navigationItem = layer.get('/')[0]
+                    if (layerIndex === index) {
+                        layer.activate()
+                    } else {
+                        layer.release()
+                    }
+                })
+            } else {
+                this.param('switchToIndex', index)
+            }
+        }
+    },
+    UISwitchNavigation__layer: {
+        inherits: 'UINavigation',
+        noElems: true,
+        mod: {
+            State: 'release'
+        },
+        expand: function () {
+            if (this.parentBlock().param('switchToIndex') === this.index()) {
+                this.activate()
+            }
+
+            this.append(this.get('/'))
+        }
+    }
+})

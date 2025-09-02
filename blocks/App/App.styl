@@ -83,7 +83,70 @@
 
     
 
-
+.Form
+    background #fff
+    width 40vw
+    height 100vh
+    position fixed
+    top 0
+    right 0
+    z-index 11000
+    visibility hidden
+    transform translateX(100%)
+    transition transform 0.3s ease
+    box-shadow -2px 0 20px rgba(0, 0, 0, 0.1)
+    
+    @media $screen-phone
+        width 100vw
+    
+    .form-content
+        height 100%
+        display flex
+        flex-direction column
+        overflow hidden
+    
+    .form-header
+        padding 24px
+        border-bottom 1px solid #eee
+        display flex
+        justify-content space-between
+        align-items center
+        background #fafafa
+        
+        h3
+            margin 0
+            font-size 18px
+            font-weight 600
+            color #333
+        
+        .form-close
+            background none
+            border none
+            font-size 24px
+            cursor pointer
+            color #666
+            padding 0
+            width 32px
+            height 32px
+            display flex
+            align-items center
+            justify-content center
+            border-radius 4px
+            transition all 0.2s ease
+            
+            &:hover
+                background #eee
+                color #333
+    
+    .form-body
+        flex 1
+        padding 24px
+        overflow-y auto
+        
+        p
+            margin 0 0 16px 0
+            color #666
+            line-height 1.6
 
 
 

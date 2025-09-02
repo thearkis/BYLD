@@ -76,7 +76,7 @@ Beast.decl({
                     if (header && caseResult) {
                         // Move the Header to appear before CaseResult
                         caseResult.parentNode.insertBefore(header, caseResult)
-                        console.log('Moved Header before CaseResult on mobile')
+            
                     }
                 }
                 
@@ -89,7 +89,7 @@ Beast.decl({
                     
                     // Insert header__line before case__impact
                     caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
-                    console.log('Added header__line before Case__impact on mobile')
+        
                 }
             }
             
@@ -175,7 +175,7 @@ Beast.decl({
                             rootMargin: '-20% 0px -20% 0px',
                             threshold: 0.3,
                             onIntersect: function(element, entry) {
-                                console.log(`🎯 Element intersected: ${element.className}`)
+    
                                 // Add a class to make the element visible
                                 element.classList.add('visible')
                             }
@@ -186,7 +186,7 @@ Beast.decl({
                 // Store reference for cleanup if needed
                 this.caseEffects = caseEffects
                 
-                console.log('Case scroll effects initialized successfully using ScrollFade helper')
+    
             } else {
                 console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
             }

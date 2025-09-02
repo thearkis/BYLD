@@ -1,9 +1,11 @@
 Beast.decl({
     App: {
+        
         tag:'body',
+        
         expand: function fn () {
             if (MissEvent.mobile) { this.mix('mobile') }
-            this.append( <Noise />, this.get() )
+            this.append( <Noise />, <Form />, this.get() )
         },
         domInit: function fn() {
             // Add ASCII art for ARK studio
@@ -29,7 +31,7 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                     })
                 })
                 
-                console.log('Action elements shuffling animation initialized using Shuffle helper')
+
             } else {
                 console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
             }

@@ -11,8 +11,14 @@ Beast.decl({
                 this.append(
                     <Link href="this.param('href')"> 1 </link>
                 )
-                
             }
+            
+            // Add click handler to show form
+            this.on('click', function () {
+                if (typeof window.showForm === 'function') {
+                    window.showForm()
+                }
+            })
         },
         domInit: function fn() {
             // Initialize shuffle animation for Action component

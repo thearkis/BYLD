@@ -1,0 +1,118 @@
+Beast.decl({
+    Form: {
+        expand: function fn() {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            // Initially hide the form using Beast.js css method
+            this.css({
+                visibility: 'hidden',
+                transform: 'translateX(100%)'
+            })
+            
+            // Add close functionality
+            const closeBtn = this.domNode().querySelector('.form-close')
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('Close button clicked')
+                    this.hideForm()
+                })
+            } else {
+                console.warn('Close button not found')
+            }
+            
+            // Close on escape key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    this.hideForm()
+                }
+            }
+            document.addEventListener('keydown', escapeHandler)
+            
+            // Close when clicking outside the form
+            const outsideClickHandler = (e) => {
+                const formElement = this.domNode()
+                // Only close if click is outside the form AND not on the close button
+                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
+                    this.hideForm()
+                }
+            }
+            // Don't add the outside click handler immediately - wait for form to be shown
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Store handlers for cleanup
+            this.escapeHandler = escapeHandler
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Expose show/hide methods globally
+            window.showForm = () => this.showForm()
+            window.hideForm = () => this.hideForm()
+        },
+        
+        showForm: function() {
+            console.log('showForm called')
+            
+            // Block page scrolling
+            document.body.style.overflow = 'hidden'
+            
+            // Show form using Beast.js css method
+            this.css({
+                visibility: 'visible'
+            })
+            
+            // Trigger slide animation
+            requestAnimationFrame(() => {
+                this.css({
+                    transform: 'translateX(0)'
+                })
+            })
+            
+            // Re-add event listeners if they were removed
+            if (this.escapeHandler && !this.listenersActive) {
+                document.addEventListener('keydown', this.escapeHandler)
+                this.listenersActive = true
+            }
+            
+            // Add outside click handler with a delay to prevent immediate closing
+            setTimeout(() => {
+                if (this.outsideClickHandler && !this.outsideClickActive) {
+                    document.addEventListener('click', this.outsideClickHandler)
+                    this.outsideClickActive = true
+                }
+            }, 100) // Small delay to prevent immediate triggering
+        },
+        
+        hideForm: function() {
+            console.log('hideForm called')
+            
+            // Slide out using Beast.js css method
+            this.css({
+                transform: 'translateX(100%)'
+            })
+            
+            // Wait for animation to complete, then hide
+            setTimeout(() => {
+                console.log('Animation complete, hiding form')
+                this.css({
+                    visibility: 'hidden'
+                })
+                // Restore page scrolling
+                document.body.style.overflow = ''
+                
+                // Remove event listeners when form is hidden
+                if (this.escapeHandler) {
+                    document.removeEventListener('keydown', this.escapeHandler)
+                }
+                if (this.outsideClickHandler) {
+                    document.removeEventListener('click', this.outsideClickHandler)
+                }
+                this.listenersActive = false
+                this.outsideClickActive = false
+            }, 300) // Match CSS transition duration
+        }
+    }
+})

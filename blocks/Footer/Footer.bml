@@ -64,7 +64,7 @@ Beast.decl({
                     })
                 })
                 
-                console.log('Footer text animations initialized successfully using Shuffle helper')
+    
             } else {
                 console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
             }
