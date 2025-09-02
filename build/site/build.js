@@ -614,6 +614,296 @@ Shuffle.initAllAnimations = function(options) {
 })();
 
 /**
+ * @lib Scroll Fade
+ * @ver 1.0.0
+ * @description Generic helper functions for scroll effects, fade-ins, and parallax animations
+ */
+
+'use strict';
+
+;(function () {
+
+if (typeof window !== 'undefined') {
+    window.ScrollFade = {}
+} else {
+    global.ScrollFade = {}
+}
+
+var ScrollFade = typeof window !== 'undefined' ? window.ScrollFade : global.ScrollFade
+
+/**
+ * @method animateElements Element fade-in animations on page load
+ * @arg selector {string} CSS selector for elements to animate
+ * @arg className {string} CSS class to add when element is loaded
+ * @arg options {object} Animation options
+ */
+ScrollFade.animateElements = function(selector, className, options) {
+    options = options || {}
+    
+    const elements = document.querySelectorAll(selector)
+    
+    elements.forEach((element, index) => {
+        setTimeout(() => {
+            element.classList.add(className)
+        }, index * (options.delay || 300))
+    })
+    
+    return {
+        elements: elements,
+        finishTime: elements.length * (options.delay || 300) + (options.finishOffset || 0)
+    }
+}
+
+/**
+ * @method animateElementsSequential Animate elements in sequence with staggered timing
+ * @arg selectors {array} Array of {selector, className, delay} objects
+ * @arg options {object} Global animation options
+ */
+ScrollFade.animateElementsSequential = function(selectors, options) {
+    options = options || {}
+    
+    let currentTime = 0
+    const results = []
+    
+    selectors.forEach((config, index) => {
+        const elements = document.querySelectorAll(config.selector)
+        const delay = config.delay || options.defaultDelay || 300
+        const className = config.className
+        
+        elements.forEach((element, elementIndex) => {
+            setTimeout(() => {
+                element.classList.add(className)
+            }, currentTime + (elementIndex * delay))
+        })
+        
+        const finishTime = currentTime + (elements.length * delay)
+        currentTime = finishTime + (config.offset || 200)
+        
+        results.push({
+            selector: config.selector,
+            elements: elements,
+            className: className,
+            finishTime: finishTime
+        })
+    })
+    
+    return {
+        results: results,
+        totalTime: currentTime
+    }
+}
+
+/**
+ * @method animateTextShuffle Character swapping animation for text elements
+ * @arg selector {string} CSS selector for text elements
+ * @arg options {object} Animation options
+ * @arg startTime {number} When to start animations
+ */
+ScrollFade.animateTextShuffle = function(selector, options, startTime) {
+    options = options || {}
+    
+    const textElements = document.querySelectorAll(selector)
+    
+    textElements.forEach(element => {
+        const text = element.textContent.trim()
+        if (text.length === 0) return
+        
+        // Split text into individual character spans
+        element.innerHTML = text.split('').map(char => '<span>' + char + '</span>').join('')
+        
+        const spans = element.querySelectorAll('span')
+        const originalText = text.split('')
+        
+        function animateLetters() {
+            spans.forEach((span, index) => {
+                const delay = index * (options.letterDelay || 30)
+                setTimeout(() => {
+                    let rollCount = 0
+                    const maxRolls = options.maxRolls || 15
+                    
+                    const rollInterval = setInterval(() => {
+                        if (rollCount < maxRolls) {
+                            const randomChar = String.fromCharCode(33 + Math.floor(Math.random() * 94))
+                            span.textContent = randomChar
+                            rollCount++
+                        } else {
+                            span.textContent = originalText[index]
+                            clearInterval(rollInterval)
+                        }
+                    }, options.rollInterval || 50)
+                }, delay)
+            })
+        }
+        
+        if (startTime !== undefined) {
+            setTimeout(animateLetters, startTime)
+        } else {
+            animateLetters()
+        }
+    })
+}
+
+/**
+ * @method setupParallax Setup parallax scrolling for elements
+ * @arg config {object} Parallax configuration
+ */
+ScrollFade.setupParallax = function(config) {
+    config = config || {}
+    
+    let ticking = false
+    
+    function updateParallax() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const windowHeight = window.innerHeight
+        
+        // Process each parallax group
+        config.groups.forEach(group => {
+            const elements = document.querySelectorAll(group.selector)
+            const parallaxSpeed = group.speed || 0.8
+            const enableBlur = group.blur !== false
+            const enableMovement = group.movement !== false
+            
+            elements.forEach(element => {
+                let yPos = 0
+                
+                if (enableMovement) {
+                    yPos = -(scrollTop * (1 - parallaxSpeed))
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`
+                    element.style.willChange = 'transform, filter'
+                }
+                
+                if (enableBlur) {
+                    const elementRect = element.getBoundingClientRect()
+                    const elementTop = elementRect.top
+                    const elementBottom = elementRect.bottom
+                    
+                    let blurAmount = 0
+                    
+                    if (elementTop < windowHeight * (group.blurTrigger || 0.20) && elementBottom > 0) {
+                        const triggerPoint = windowHeight * (group.blurStart || 0.15)
+                        const distanceFromTrigger = Math.max(0, triggerPoint - elementTop)
+                        const maxDistance = triggerPoint + elementRect.height
+                        const exitProgress = distanceFromTrigger / maxDistance
+                        blurAmount = Math.min(exitProgress * (group.maxBlur || 8), group.maxBlur || 8)
+                    }
+                    
+                    element.style.filter = `blur(${blurAmount}px)`
+                    if (!enableMovement) {
+                        element.style.willChange = 'filter'
+                    }
+                }
+            })
+        })
+        
+        ticking = false
+    }
+    
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(updateParallax)
+            ticking = true
+        }
+    }
+    
+    window.addEventListener('scroll', requestTick, { passive: true })
+    
+    return {
+        update: updateParallax,
+        destroy: function() {
+            window.removeEventListener('scroll', requestTick)
+        }
+    }
+}
+
+/**
+ * @method setupScrollObserver Setup intersection observer for scroll-triggered effects
+ * @arg config {object} Observer configuration
+ */
+ScrollFade.setupScrollObserver = function(config) {
+    config = config || {}
+    
+    const observerOptions = {
+        root: null,
+        rootMargin: config.rootMargin || '-20% 0px -20% 0px',
+        threshold: config.threshold || 0.3
+    }
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (config.onIntersect) {
+                    config.onIntersect(entry.target, entry)
+                }
+            }
+        })
+    }, observerOptions)
+    
+    // Observe all elements matching the selector
+    const elements = document.querySelectorAll(config.selector)
+    elements.forEach(element => observer.observe(element))
+    
+    return {
+        observer: observer,
+        elements: elements,
+        destroy: function() {
+            observer.disconnect()
+        }
+    }
+}
+
+/**
+ * @method initScrollEffects Initialize all scroll effects with a single configuration
+ * @arg config {object} Global configuration for all effects
+ */
+ScrollFade.initScrollEffects = function(config) {
+    config = config || {}
+    
+    const effects = {}
+    
+    // Initialize element animations
+    if (config.animations) {
+        effects.animations = ScrollFade.animateElementsSequential(config.animations, config.animationOptions || {})
+    }
+    
+    // Initialize text shuffle animations
+    if (config.textShuffle) {
+        config.textShuffle.forEach(textConfig => {
+            if (effects.animations) {
+                // Find the relevant animation result to get timing
+                const animationResult = effects.animations.results.find(r => r.selector === textConfig.afterSelector)
+                if (animationResult) {
+                    ScrollFade.animateTextShuffle(textConfig.selector, textConfig.options, animationResult.finishTime + (textConfig.offset || 0))
+                }
+            } else {
+                ScrollFade.animateTextShuffle(textConfig.selector, textConfig.options, textConfig.startTime)
+            }
+        })
+    }
+    
+    // Initialize parallax effects
+    if (config.parallax) {
+        effects.parallax = ScrollFade.setupParallax(config.parallax)
+    }
+    
+    // Initialize scroll observers
+    if (config.observers) {
+        effects.observers = config.observers.map(observerConfig => 
+            ScrollFade.setupScrollObserver(observerConfig)
+        )
+    }
+    
+    return {
+        ...effects,
+        destroy: function() {
+            if (effects.parallax) effects.parallax.destroy()
+            if (effects.observers) effects.observers.forEach(obs => obs.destroy())
+        }
+    }
+}
+
+})()
+
+/**
  * @lib MissEvent Расширение методов работы с DOM
  * @ver 0.8.0
  */
@@ -4042,19 +4332,6 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Action: {
         mod: {
             Size: 'M',
@@ -4115,146 +4392,6 @@ Beast.decl({
 
 
 
-Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
-    }   
-})
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
-})
 Beast.decl({
     App: {
         tag:'body',
@@ -4707,142 +4844,13 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 }, index * 1000) // 1 second delay between each item
             })
 
-            // Case__client and Case__title fade-in on page load
-            const caseClientElements = document.querySelectorAll('.Case__client-card')
-            const caseTitleElements = document.querySelectorAll('.Case__title')
-            
-            
-            // Animate Case__client first
-            caseClientElements.forEach((element, index) => {
-                setTimeout(() => {
-                    element.classList.add('Case__client-card_loaded')
-                    
-                }, index * 300) // 300ms delay between each client element
-            })
-            
-            // Animate Case__title after client elements (with additional delay)
-            caseTitleElements.forEach((element, index) => {
-                setTimeout(() => {
-                    element.classList.add('Case__title_loaded')
-                    
-                }, (caseClientElements.length * 300) + (index * 300) + 200) // Start after clients finish + 200ms
-            })
 
-            // CaseMeta__meta-item fade-in on page load (after Case elements)
-            const caseMetaItems = document.querySelectorAll('.CaseMeta__item')
-            
-            
-            // Calculate when Case elements will finish (minimum 800ms even if no elements)
-            const caseElementsFinishTime = Math.max(
-                (caseClientElements.length * 300) + (caseTitleElements.length * 300) + 400,
-                800
-            )
-            
-            
-            
-            // Animate CaseMeta__meta-item elements after Case elements finish
-            caseMetaItems.forEach((element, index) => {
-                setTimeout(() => {
-                    element.classList.add('CaseMeta__item_loaded')
-                    
-                }, caseElementsFinishTime + (index * 200)) // Start after Case elements + 200ms delay between each
-            })
-            
-            // Fallback: ensure all meta items are visible after 5 seconds
-            setTimeout(() => {
-                caseMetaItems.forEach((element, index) => {
-                    if (!element.classList.contains('CaseMeta__meta-item_loaded')) {
-                        
-                        element.classList.add('CaseMeta__item_loaded')
-                    }
-                })
-            }, 5000)
 
-            // Caseresult__item fade-in on page load (after CaseMeta items finish)
-            const caseresultItems = document.querySelectorAll('.Caseresult__item')
-            
-            
-            // Calculate when CaseMeta items will finish
-            const caseMetaFinishTime = caseElementsFinishTime + (caseMetaItems.length * 200) + 200
-            
-            
-            // Animate Caseresult__item elements earlier, overlapping with CaseMeta items
-            caseresultItems.forEach((element, index) => {
-                const earlierStartTime = caseMetaFinishTime - 300 // Start 300ms earlier
-                setTimeout(() => {
-                    element.classList.add('Caseresult__item_loaded')
-                    
-                }, earlierStartTime + (index * 100)) // Faster sequence: 100ms delay between each
-            })
 
-            // caseresult__title and caseresult__text character swapping animation on load
-            const caseresultTitleElements = document.querySelectorAll('.caseresult__title')
-            const caseresultTextElements = document.querySelectorAll('.caseresult__text')
-            
-            const allCaseresultTextElements = [...caseresultTitleElements, ...caseresultTextElements]
-            
-            allCaseresultTextElements.forEach(element => {
-                const text = element.textContent.trim()
-                if (text.length === 0) return
-                
-                
-                
-                // Split text into individual character spans
-                element.innerHTML = text.split('').map(char => '<span>' + char + '</span>').join('')
-                
-                const spans = element.querySelectorAll('span')
-                const originalText = text.split('')
-                
-                function animateCaseresultLetters() {
-                    
-                    spans.forEach((span, index) => {
-                        const delay = index * 30 // 30ms delay between letters (same as other animations)
-                        setTimeout(() => {
-                            let rollCount = 0
-                            const maxRolls = 15 // More character swaps for longer rolling effect
-                            
-                            const rollInterval = setInterval(() => {
-                                if (rollCount < maxRolls) {
-                                    // Random character from ASCII 33-126 (visible characters)
-                                    const randomChar = String.fromCharCode(33 + Math.floor(Math.random() * 94))
-                                    span.textContent = randomChar
-                                    rollCount++
-                                } else {
-                                    // Animation complete - restore original character
-                                    span.textContent = originalText[index]
-                                    clearInterval(rollInterval)
-                                }
-                            }, 50) // 50ms between character swaps (same as other animations)
-                        }, delay)
-                    })
-                }
-                
-                // Determine timing based on element type
-                const isTitleElement = element.classList.contains('caseresult__title')
-                const isTextElement = element.classList.contains('caseresult__text')
-                
-                // Find which caseresult__item this element belongs to
-                const parentItem = element.closest('.caseresult__item')
-                if (parentItem) {
-                    // Find the index of this item among all caseresult items
-                    const allItems = document.querySelectorAll('.caseresult__item')
-                    const itemIndex = Array.from(allItems).indexOf(parentItem)
-                    
-                    // Calculate when this specific item will fade in (using new earlier timing)
-                    const earlierStartTime = caseMetaFinishTime - 300 // Start 300ms earlier
-                    const itemFadeInTime = earlierStartTime + (itemIndex * 100) // Faster sequence: 100ms delay
-                    
-                    // Start character animation almost immediately with the fade-in
-                    const characterAnimationDelay = isTitleElement ? 30 : 100 // Even earlier: Title first, then text with delay
-                    const totalDelay = itemFadeInTime + characterAnimationDelay
-                    
-                    
-                    setTimeout(() => {
-                        
-                        animateCaseresultLetters()
-                    }, totalDelay)
-                }
-            })
+
+
+
+
 
             // Services__item scroll-triggered fade/unblur animation
             const servicesItems = document.querySelectorAll('.Services__item')
@@ -5527,6 +5535,159 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
+    Ark: {
+        expand: function () {
+            this.append(
+                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
+Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
+        }      
+    }   
+})
+Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5574,6 +5735,86 @@ Beast.decl({
                     caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
                     console.log('Added header__line before Case__impact on mobile')
                 }
+            }
+            
+            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const caseEffects = ScrollFade.initScrollEffects({
+                    animations: [
+                        {
+                            selector: '.Case__client-card',
+                            className: 'Case__client-card_loaded',
+                            delay: 300
+                        },
+                        {
+                            selector: '.Case__title',
+                            className: 'Case__title_loaded',
+                            delay: 300,
+                            offset: 200
+                        },
+                        {
+                            selector: '.CaseMeta__item',
+                            className: 'CaseMeta__item_loaded',
+                            delay: 200,
+                            offset: 200
+                        },
+                        {
+                            selector: '.Caseresult__item',
+                            className: 'Caseresult__item_loaded',
+                            delay: 100,
+                            offset: 200
+                        }
+                    ],
+                    textShuffle: [
+                        {
+                            selector: '.caseresult__title, .caseresult__text',
+                            afterSelector: '.Caseresult__item',
+                            options: {
+                                letterDelay: 30,
+                                maxRolls: 15,
+                                rollInterval: 50
+                            },
+                            offset: 100
+                        }
+                    ],
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Case__head',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.CaseMeta',
+                                speed: 0.8,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.Case__image, .case__descr',
+                                blur: true,
+                                movement: false,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
+                
+                // Store reference for cleanup if needed
+                this.caseEffects = caseEffects
+                
+                console.log('Case scroll effects initialized successfully using ScrollFade helper')
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
             }
         }       
     },
@@ -5797,41 +6038,6 @@ Beast.decl({
     }   
 })
 
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",undefined,"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
-
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
-                
-            )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
-            
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
-            
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
-    }
-})
-
-
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -5951,6 +6157,55 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
+Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",undefined,"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
+                
+            )
+        },
+        domInit: function fn() {
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+            
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
+                })
+            })
+            
+        }       
+    }
+})
+
+
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -5995,31 +6250,6 @@ Beast
         }
     }
 })
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
-    },
-    
-});
-
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 
 Beast.decl({
     Menu: {
@@ -6051,6 +6281,17 @@ Beast.decl({
      
 })
 
+
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
+    },
+    
+});
 
 Beast.decl({
     Box: {

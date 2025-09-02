@@ -92,6 +92,86 @@ Beast.decl({
                     console.log('Added header__line before Case__impact on mobile')
                 }
             }
+            
+            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const caseEffects = ScrollFade.initScrollEffects({
+                    animations: [
+                        {
+                            selector: '.Case__client-card',
+                            className: 'Case__client-card_loaded',
+                            delay: 300
+                        },
+                        {
+                            selector: '.Case__title',
+                            className: 'Case__title_loaded',
+                            delay: 300,
+                            offset: 200
+                        },
+                        {
+                            selector: '.CaseMeta__item',
+                            className: 'CaseMeta__item_loaded',
+                            delay: 200,
+                            offset: 200
+                        },
+                        {
+                            selector: '.Caseresult__item',
+                            className: 'Caseresult__item_loaded',
+                            delay: 100,
+                            offset: 200
+                        }
+                    ],
+                    textShuffle: [
+                        {
+                            selector: '.caseresult__title, .caseresult__text',
+                            afterSelector: '.Caseresult__item',
+                            options: {
+                                letterDelay: 30,
+                                maxRolls: 15,
+                                rollInterval: 50
+                            },
+                            offset: 100
+                        }
+                    ],
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Case__head',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.CaseMeta',
+                                speed: 0.8,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.Case__image, .case__descr',
+                                blur: true,
+                                movement: false,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
+                
+                // Store reference for cleanup if needed
+                this.caseEffects = caseEffects
+                
+                console.log('Case scroll effects initialized successfully using ScrollFade helper')
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
         }       
     },
 
