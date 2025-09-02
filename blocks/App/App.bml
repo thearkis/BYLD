@@ -345,6 +345,11 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 // CaseMeta and Divider_One elements - different speed than Case__head, move together
                 const caseMetaGroupElements = [...caseMetaElements, ...dividerOneElements]
                 caseMetaGroupElements.forEach(element => {
+                    // Skip .header.header_top animation on mobile
+                    if (MissEvent.mobile && element.classList.contains('header') && element.classList.contains('header_top')) {
+                        return
+                    }
+                    
                     const parallaxSpeed = 0.8 // Faster than Data/Case__head (0.7) - less lag effect
                     const yPos = -(scrollTop * (1 - parallaxSpeed))
                     

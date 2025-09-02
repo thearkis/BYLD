@@ -868,18 +868,9 @@ ScrollFade.setupScrollObserver = function(config) {
             const isVisible = rect.top < window.innerHeight * visibilityThreshold && rect.bottom > 0
             
             if (isVisible && config.onIntersect) {
-                // Check if element already has the animation class to avoid duplicates
-                const hasAnimationClass = element.classList.contains('loaded') || 
-                                        element.classList.contains('fade-in') ||
-                                        element.classList.contains('visible') ||
-                                        element.classList.contains('Case__client-card_loaded') ||
-                                        element.classList.contains('Case__title_loaded') ||
-                                        element.classList.contains('CaseMeta__item_loaded') ||
-                                        element.classList.contains('Caseresult__item_loaded')
-                
-                if (!hasAnimationClass) {
-                    config.onIntersect(element, { isIntersecting: true })
-                }
+                // Always call onIntersect when element is visible, regardless of existing classes
+                // This ensures elements fade in both when scrolling down AND up
+                config.onIntersect(element, { isIntersecting: true })
             }
         })
     }
@@ -4467,67 +4458,6 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-                
-            }
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
     App: {
         tag:'body',
         mod: {
@@ -4874,6 +4804,11 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 // CaseMeta and Divider_One elements - different speed than Case__head, move together
                 const caseMetaGroupElements = [...caseMetaElements, ...dividerOneElements]
                 caseMetaGroupElements.forEach(element => {
+                    // Skip .header.header_top animation on mobile
+                    if (MissEvent.mobile && element.classList.contains('header') && element.classList.contains('header_top')) {
+                        return
+                    }
+                    
                     const parallaxSpeed = 0.8 // Faster than Data/Case__head (0.7) - less lag effect
                     const yPos = -(scrollTop * (1 - parallaxSpeed))
                     
@@ -5683,6 +5618,67 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+                
+            }
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
     Box: {
         expand: function () {
             this.append(
@@ -6040,28 +6036,6 @@ Beast.decl({
     
 })
 Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-            
-    }   
-})
-
-Beast.decl({
     Cassette: {
         
         domInit: function fn() {
@@ -6180,108 +6154,26 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Head: {
+    Footer: {
         expand: function () {
+            
             this.append(
 
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
 
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
 
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
                 
             )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+
             
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+        },
             
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
-    }
+    }   
 })
-
-
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-/**
- * @block Icon Иконка
- * @tag icon
- */
-
-Beast.decl({
-    Icon: {
-        mod: {
-            Name: '',   // @mod Name {string} Имя глифа
-            Size: '24',  // @mod Size {S M! L} Размер
-            Color: '',  // @mod Color {string} Имя цвета
-        },
-        param: {
-            color: '', // @param Color {string} hex-код цвета иконки
-        },
-        expand: function () {
-            if (this.param('color')) {
-                this.setColor(this.param('color'))
-            }
-        },
-        setColor: function (color) {
-            if (color[0] === '#') {
-                this.css('background-color', color)
-            } else {
-                this.mod('color', color)
-            }
-        },
-    }
-})
-
-// @example <Icon Name="Attention"/>
-
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
-    },
-    
-});
 
 /**
  * @block Grid Динамическая сетка
@@ -6402,6 +6294,110 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
+Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
+                
+            )
+        },
+        domInit: function fn() {
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+            
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
+                })
+            })
+            
+        }       
+    }
+})
+
+
+/**
+ * @block Icon Иконка
+ * @tag icon
+ */
+
+Beast.decl({
+    Icon: {
+        mod: {
+            Name: '',   // @mod Name {string} Имя глифа
+            Size: '24',  // @mod Size {S M! L} Размер
+            Color: '',  // @mod Color {string} Имя цвета
+        },
+        param: {
+            color: '', // @param Color {string} hex-код цвета иконки
+        },
+        expand: function () {
+            if (this.param('color')) {
+                this.setColor(this.param('color'))
+            }
+        },
+        setColor: function (color) {
+            if (color[0] === '#') {
+                this.css('background-color', color)
+            } else {
+                this.mod('color', color)
+            }
+        },
+    }
+})
+
+// @example <Icon Name="Attention"/>
+
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
+    },
+    
+});
+
 
 Beast.decl({
     Menu: {
@@ -6452,6 +6448,7 @@ Beast.decl({
         }       
     }
 })
+
 Beast.decl({
     Review: {
         expand: function () {
@@ -6473,7 +6470,6 @@ Beast.decl({
             
     },
 })
-
 
 Beast.decl({
     Solution: {
