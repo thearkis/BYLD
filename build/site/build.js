@@ -5757,6 +5757,93 @@ Beast.decl({
     }   
 })
 Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
+        }      
+    }   
+})
+Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5969,93 +6056,6 @@ Beast.decl({
         }
             
     },
-})
-Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
 })
 Beast.decl({
     Case__meta: {
@@ -6382,18 +6382,6 @@ Beast.decl({
         }       
     }
 })
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6426,6 +6414,18 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 Beast
 .decl('logo', {
     expand: function() {
@@ -6470,6 +6470,25 @@ Beast.decl({
 
 
 Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+
+Beast.decl({
     Review: {
         expand: function () {
             this.append(
@@ -6491,24 +6510,37 @@ Beast.decl({
     },
 })
 Beast.decl({
-    Box: {
+    Solution: {
         expand: function () {
             this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
             )
         },
         domInit: function fn() {
             
         }       
-    }
-})
+    },
 
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
+})
 
 /**
  * @block Thumb Тумбнеил
@@ -6817,35 +6849,3 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-Beast.decl({
-    Solution: {
-        expand: function () {
-            this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
-        }
-            
-    },
-    
-})

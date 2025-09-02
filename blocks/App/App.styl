@@ -133,6 +133,8 @@
 
 .Section
     margin 5vw 30px 0 30px
+    @media $screen-phone
+        margin 20px 20px 0 20px
     position relative
     &_Services
         margin-top 21vw
@@ -153,12 +155,14 @@
 
 .Text
     position relative
-    font-size 1.6vw
-    line-height 1.8vw
+    header()
     &__s
         color red
         display inline
     &__item
+        @media $screen-phone
+            position relative
+            max-width 100%
         max-width 40vw
         position absolute
         opacity 0
