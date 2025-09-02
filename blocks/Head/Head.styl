@@ -32,12 +32,18 @@
         z-index 9999
         right 30px
         top 1.3vw
+        @media $screen-phone
+            top 24px
+            right 20px
 
 .CaseData
     font-size 1vw
     margin-right 19vw
     height 3.3vw
     margin-left 30px
+    @media $screen-phone
+        margin-left 20px
+        margin-right 20px
     position absolute
     top 1.3vw
     right 0
@@ -47,10 +53,14 @@
     vertical-align bottom
     z-index 88
 
-    
-        
-    &__item_two
-        left 12vw
+    &__item
+        &_Logo
+            @media $screen-phone
+                display none
+        &_two
+            left 12vw
+            @media $screen-phone
+                left 0
         
     &__mid, &__item_two, &__right
         top .5vw
