@@ -5598,41 +5598,6 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
-    }   
-})
-Beast.decl({
     Action: {
         mod: {
             Size: 'M',
@@ -5693,6 +5658,54 @@ Beast.decl({
 
 
 
+Beast.decl({
+    Ark: {
+        expand: function () {
+            this.append(
+                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
 Beast.decl({
     Case: {
         expand: function () {
@@ -5792,8 +5805,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.80,
-                                mobileBlurStart: 0.70,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
                                 maxBlur: 8
                             },
                             {
@@ -5803,8 +5816,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.80,
-                                mobileBlurStart: 0.70,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
                                 maxBlur: 8
                             },
                             {
@@ -5813,8 +5826,8 @@ Beast.decl({
                                 movement: false,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.80,
-                                mobileBlurStart: 0.70,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
                                 maxBlur: 8
                             }
                         ]
@@ -5983,6 +5996,21 @@ Beast.decl({
     }   
 })
 Beast.decl({
+    Case__meta: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    
+    
+})
+Beast.decl({
     Box: {
         expand: function () {
             this.append(
@@ -5997,6 +6025,124 @@ Beast.decl({
         },
         domInit: function fn() {
             
+        }       
+    }
+})
+Beast.decl({
+    Cassette: {
+        
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            let atLastPiece = false
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                    })
+                    console.log(`Found cassette piece ${i}`)
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+                
+                // Debounce function to limit scroll handler calls
+                let scrollTimeout
+                function debouncedCheckCassettePositions() {
+                    clearTimeout(scrollTimeout)
+                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                }
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    
+                    // Check if we've reached the last piece (piece 5)
+                    const lastPiece = cassettePieces[cassettePieces.length - 1]
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    
+                    if (reachedLastPiece && !atLastPiece) {
+                        // All pieces should lose their fixed position and move together
+                        atLastPiece = true
+                        cassettePieces.forEach(piece => {
+                            // Remove fixed class from all pieces when reaching piece 5
+                            if (piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
+                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
+                            }
+                        })
+                        console.log('Reached last piece - all pieces unfixed')
+                    }
+                    
+                    if (reachedLastPiece) {
+                        // All pieces stay in their natural positions when unfixed
+                        // No transform needed - they'll move naturally with the page
+                    } else {
+                        // Reset flag when not at last piece
+                        atLastPiece = false
+                        // Normal fixed behavior for individual pieces
+                        cassettePieces.forEach(piece => {
+                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            
+                            // Only add fixed class if not at last piece
+                            if (!atLastPiece) {
+                                // Add fixed class when we scroll past the trigger point
+                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
+                                    piece.element.classList.add('Cassette_fixed')
+                                    piece.isFixed = true
+                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
+                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
+                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
+                                    piece.element.classList.remove('Cassette_fixed')
+                                    piece.isFixed = false
+                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
+                                }
+                            }
+                        })
+                    }
+                }
+                
+                // Add scroll event listener with debouncing
+                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                
+                // Add resize listener to recalculate trigger points
+                window.addEventListener('resize', () => {
+                    // Recalculate trigger points after resize
+                    cassettePieces.forEach(piece => {
+                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
+                    })
+                    // Force a check after resize
+                    checkCassettePositions()
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                    atLastPiece = false
+                    console.log('Reset all cassette pieces to default state')
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+                console.log('Scroll listener set up for all cassette pieces')
+            } else {
+                console.log('No cassette pieces found')
+            }
         }       
     }
 })
@@ -6177,34 +6323,6 @@ Beast.decl({
 
 
 Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Case__meta: {
-        expand: function () {
-            this.append(
-                
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-
-    
-    
-})
-Beast.decl({
     Header: {
         expand: function () {
             this.append(
@@ -6218,147 +6336,6 @@ Beast.decl({
         }       
     }
 })
-Beast.decl({
-    Cassette: {
-        
-        domInit: function fn() {
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            let atLastPiece = false
-            
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
-                    })
-                    console.log(`Found cassette piece ${i}`)
-                }
-            }
-            
-            if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
-                
-                // Debounce function to limit scroll handler calls
-                let scrollTimeout
-                function debouncedCheckCassettePositions() {
-                    clearTimeout(scrollTimeout)
-                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
-                }
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
-                    
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
-                        cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
-                            }
-                        })
-                        console.log('Reached last piece - all pieces unfixed')
-                    }
-                    
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
-                        // Normal fixed behavior for individual pieces
-                        cassettePieces.forEach(piece => {
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
-                            
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
-                            }
-                        })
-                    }
-                }
-                
-                // Add scroll event listener with debouncing
-                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
-                
-                // Add resize listener to recalculate trigger points
-                window.addEventListener('resize', () => {
-                    // Recalculate trigger points after resize
-                    cassettePieces.forEach(piece => {
-                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
-                    })
-                    // Force a check after resize
-                    checkCassettePositions()
-                })
-                
-                // Cleanup function to reset all pieces
-                function resetAllCassettePieces() {
-                    cassettePieces.forEach(piece => {
-                        piece.element.classList.remove('Cassette_fixed')
-                        piece.isFixed = false
-                        piece.element.style.transform = ''
-                    })
-                    atLastPiece = false
-                    console.log('Reset all cassette pieces to default state')
-                }
-                
-                // Expose reset function globally for debugging
-                window.resetCassettePieces = resetAllCassettePieces
-                
-                // Initial check
-                checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
-            } else {
-                console.log('No cassette pieces found')
-            }
-        }       
-    }
-})
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
-    },
-    
-});
-
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6390,6 +6367,29 @@ Beast.decl({
 })
 
 // @example <Icon Name="Attention"/>
+
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
+    },
+    
+});
 
 
 Beast.decl({
@@ -6463,6 +6463,7 @@ Beast.decl({
             
     },
 })
+
 Beast.decl({
     Solution: {
         expand: function () {
@@ -6495,7 +6496,6 @@ Beast.decl({
     },
     
 })
-
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
