@@ -662,7 +662,7 @@ html {
 }
 @media screen and (max-width: 767px) {
   .Case__title {
-    font-size: 47px;
+    font-size: 49px;
     line-height: 44px;
     max-width: 100%;
   }
@@ -1165,7 +1165,7 @@ html {
 }
 @media screen and (max-width: 767px) {
   .Footer__items .Footer__text {
-    font-size: 47px;
+    font-size: 49px;
     line-height: 44px;
     max-width: 100%;
   }
