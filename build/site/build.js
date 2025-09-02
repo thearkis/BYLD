@@ -5668,6 +5668,24 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Button: {
         expand: function () {
 
@@ -6007,6 +6025,43 @@ Beast.decl({
     
 })
 Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("item",{__context:this,"LogoMobile":true},"\n                    ",Beast.node("Logos",{"":true}),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
+                
+            )
+        },
+        domInit: function fn() {
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+            
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
+                })
+            })
+            
+        }       
+    }
+})
+
+
+Beast.decl({
     Cassette: {
         
         domInit: function fn() {
@@ -6266,41 +6321,6 @@ function grid (num, col, gap, margin) {
     return gridWidth
 }
 Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
-
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
-                
-            )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
-            
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
-            
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
-    }
-})
-
-
-Beast.decl({
     Header: {
         expand: function () {
             this.append(
@@ -6442,24 +6462,6 @@ Beast.decl({
     },
 })
 
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 Beast.decl({
     Solution: {
         expand: function () {

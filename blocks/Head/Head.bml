@@ -25,6 +25,10 @@ Beast.decl({
                     </right>
                 </CaseData>,
 
+                <item LogoMobile>
+                    <Logos />
+                </item>,
+
                 <action>
                     <Action>Tell us about your project</Action>
                 </action>,

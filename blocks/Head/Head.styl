@@ -7,6 +7,15 @@
     top 0
     z-index 100
 
+    &__item
+        &_Logomobile
+            display none
+            @media $screen-phone
+                display block
+                position absolute
+                top 20px
+                left 20px
+
     @media $screen-phone
         display block
 
@@ -35,6 +44,9 @@
         @media $screen-phone
             top 24px
             right 20px
+            .Action
+                padding 4vw 3.6vw
+                font-size 3.2vw
 
 .CaseData
     font-size 1vw
@@ -57,6 +69,7 @@
         &_Logo
             @media $screen-phone
                 display none
+        
         &_two
             left 12vw
             @media $screen-phone
