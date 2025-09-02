@@ -888,19 +888,13 @@ ScrollFade.setupScrollObserver = function(config) {
     // Enhanced touch handling for mobile - continuous checking during active scroll
     if ('ontouchstart' in window) {
         let touchStartY = 0
-        let isScrolling = false
         
         document.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY
-            isScrolling = false
             
             // Start continuous polling immediately on touch start
             if (!scrollPollInterval) {
-                scrollPollInterval = setInterval(() => {
-                    if (isScrolling) {
-                        checkElementsVisibility() // Check during active scrolling
-                    }
-                }, 16) // 60fps continuous checking during scroll
+                scrollPollInterval = setInterval(checkElementsVisibility, 16) // 60fps continuous checking
             }
         }, { passive: true })
         
@@ -908,16 +902,13 @@ ScrollFade.setupScrollObserver = function(config) {
             const currentY = e.touches[0].clientY
             const deltaY = Math.abs(currentY - touchStartY)
             
-            // If there's significant movement, mark as scrolling and check visibility
-            if (deltaY > 5) {
-                isScrolling = true
-                checkElementsVisibility() // Check immediately on touch move
+            // Check visibility immediately on any touch movement
+            if (deltaY > 2) { // Reduced threshold for more responsiveness
+                checkElementsVisibility()
             }
         }, { passive: true })
         
         document.addEventListener('touchend', () => {
-            isScrolling = false
-            
             // Keep continuous checking active for a bit after touch ends
             setTimeout(() => {
                 if (scrollPollInterval) {
@@ -927,12 +918,10 @@ ScrollFade.setupScrollObserver = function(config) {
                 
                 // Final check
                 checkElementsVisibility()
-            }, 200) // Keep checking for 200ms after touch ends
+            }, 300) // Keep checking for 300ms after touch ends
         }, { passive: true })
         
         document.addEventListener('touchcancel', () => {
-            isScrolling = false
-            
             if (scrollPollInterval) {
                 clearInterval(scrollPollInterval)
                 scrollPollInterval = null
@@ -4458,6 +4447,67 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+                
+            }
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
     App: {
         tag:'body',
         mod: {
@@ -5618,85 +5668,6 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-                
-            }
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Button: {
         expand: function () {
 
@@ -5917,8 +5888,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.95,
-                                mobileBlurStart: 0.90,
+                                mobileBlurTrigger: 0.75,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             },
                             {
@@ -6329,6 +6300,20 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6361,20 +6346,6 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 Beast
 .decl('Link', {
     tag:'a',
@@ -6471,6 +6442,24 @@ Beast.decl({
     },
 })
 
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 Beast.decl({
     Solution: {
         expand: function () {
