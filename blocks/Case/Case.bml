@@ -142,8 +142,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             },
                             {
@@ -153,8 +153,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             },
                             {
@@ -163,8 +163,8 @@ Beast.decl({
                                 movement: false,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             }
                         ]

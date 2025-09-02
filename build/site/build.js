@@ -4456,67 +4456,6 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-                
-            }
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
     App: {
         tag:'body',
         mod: {
@@ -5659,37 +5598,6 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Button: {
         expand: function () {
 
@@ -5725,107 +5633,66 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Card: {
-        expand: function () {
-
-            
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
         },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
                 
             }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
-})
-Beast.decl({
-    Case__meta: {
-        expand: function () {
-            this.append(
-                
-            )
         },
         domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
             
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
         }       
-    },
-
-    
-    
+    }
 })
+
+
+
 Beast.decl({
     Case: {
         expand: function () {
@@ -5925,8 +5792,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             },
                             {
@@ -5936,8 +5803,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             },
                             {
@@ -5946,8 +5813,8 @@ Beast.decl({
                                 movement: false,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 0.40,
-                                mobileBlurStart: 0.30,
+                                mobileBlurTrigger: 0.80,
+                                mobileBlurStart: 0.70,
                                 maxBlur: 8
                             }
                         ]
@@ -6029,120 +5896,107 @@ Beast.decl({
     },
 })
 Beast.decl({
-    Cassette: {
-        
+    Card: {
+        expand: function () {
+
+            
+        },
         domInit: function fn() {
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            let atLastPiece = false
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
             
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
-                    })
-                    console.log(`Found cassette piece ${i}`)
-                }
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
             }
             
-            if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+            cardTextElements.forEach(element => {
                 
-                // Debounce function to limit scroll handler calls
-                let scrollTimeout
-                function debouncedCheckCassettePositions() {
-                    clearTimeout(scrollTimeout)
-                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
-                }
+                element.animationInterval = null
                 
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
                     
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
                     
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
-                        cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
                             }
-                        })
-                        console.log('Reached last piece - all pieces unfixed')
-                    }
-                    
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
-                        // Normal fixed behavior for individual pieces
-                        cassettePieces.forEach(piece => {
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
                             
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
-                            }
-                        })
-                    }
-                }
-                
-                // Add scroll event listener with debouncing
-                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
-                
-                // Add resize listener to recalculate trigger points
-                window.addEventListener('resize', () => {
-                    // Recalculate trigger points after resize
-                    cassettePieces.forEach(piece => {
-                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
-                    })
-                    // Force a check after resize
-                    checkCassettePositions()
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
                 })
-                
-                // Cleanup function to reset all pieces
-                function resetAllCassettePieces() {
-                    cassettePieces.forEach(piece => {
-                        piece.element.classList.remove('Cassette_fixed')
-                        piece.isFixed = false
-                        piece.element.style.transform = ''
-                    })
-                    atLastPiece = false
-                    console.log('Reset all cassette pieces to default state')
-                }
-                
-                // Expose reset function globally for debugging
-                window.resetCassettePieces = resetAllCassettePieces
-                
-                // Initial check
-                checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
-            } else {
-                console.log('No cassette pieces found')
-            }
+            })
+
+        }      
+    }   
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
         }       
     }
 })
@@ -6322,6 +6176,189 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Ark: {
+        expand: function () {
+            this.append(
+                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Case__meta: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    
+    
+})
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Cassette: {
+        
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            let atLastPiece = false
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                    })
+                    console.log(`Found cassette piece ${i}`)
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+                
+                // Debounce function to limit scroll handler calls
+                let scrollTimeout
+                function debouncedCheckCassettePositions() {
+                    clearTimeout(scrollTimeout)
+                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                }
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    
+                    // Check if we've reached the last piece (piece 5)
+                    const lastPiece = cassettePieces[cassettePieces.length - 1]
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    
+                    if (reachedLastPiece && !atLastPiece) {
+                        // All pieces should lose their fixed position and move together
+                        atLastPiece = true
+                        cassettePieces.forEach(piece => {
+                            // Remove fixed class from all pieces when reaching piece 5
+                            if (piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
+                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
+                            }
+                        })
+                        console.log('Reached last piece - all pieces unfixed')
+                    }
+                    
+                    if (reachedLastPiece) {
+                        // All pieces stay in their natural positions when unfixed
+                        // No transform needed - they'll move naturally with the page
+                    } else {
+                        // Reset flag when not at last piece
+                        atLastPiece = false
+                        // Normal fixed behavior for individual pieces
+                        cassettePieces.forEach(piece => {
+                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            
+                            // Only add fixed class if not at last piece
+                            if (!atLastPiece) {
+                                // Add fixed class when we scroll past the trigger point
+                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
+                                    piece.element.classList.add('Cassette_fixed')
+                                    piece.isFixed = true
+                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
+                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
+                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
+                                    piece.element.classList.remove('Cassette_fixed')
+                                    piece.isFixed = false
+                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
+                                }
+                            }
+                        })
+                    }
+                }
+                
+                // Add scroll event listener with debouncing
+                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                
+                // Add resize listener to recalculate trigger points
+                window.addEventListener('resize', () => {
+                    // Recalculate trigger points after resize
+                    cassettePieces.forEach(piece => {
+                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
+                    })
+                    // Force a check after resize
+                    checkCassettePositions()
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                    atLastPiece = false
+                    console.log('Reset all cassette pieces to default state')
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+                console.log('Scroll listener set up for all cassette pieces')
+            } else {
+                console.log('No cassette pieces found')
+            }
+        }       
+    }
+})
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+Beast
+.decl('logo', {
+    expand: function() {
+        this.append(
+			
+			Beast.node("image",{__context:this})
+        );
+    },
+    
+});
+
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6353,43 +6390,6 @@ Beast.decl({
 })
 
 // @example <Icon Name="Attention"/>
-
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
-Beast
-.decl('logo', {
-    expand: function() {
-        this.append(
-			
-			Beast.node("image",{__context:this})
-        );
-    },
-    
-});
 
 
 Beast.decl({
@@ -6463,7 +6463,6 @@ Beast.decl({
             
     },
 })
-
 Beast.decl({
     Solution: {
         expand: function () {
@@ -6496,6 +6495,7 @@ Beast.decl({
     },
     
 })
+
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
