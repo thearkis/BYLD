@@ -881,6 +881,9 @@ ScrollFade.setupScrollObserver = function(config) {
     
     function handleScroll() {
         const currentScrollTop = window.pageYOffset
+        const scrollDirection = currentScrollTop > lastScrollTop ? 'DOWN' : 'UP'
+        
+        console.log(`📜 Scroll event - Direction: ${scrollDirection}, Position: ${currentScrollTop}`)
         
         // Always check elements on every scroll event
         checkElementsVisibility()
@@ -963,6 +966,7 @@ ScrollFade.setupScrollObserver = function(config) {
     
     // Add scroll event listener - check on every scroll event
     window.addEventListener('scroll', handleScroll, { passive: true })
+    console.log('📜 Scroll event listener added to window')
     
     // Also check on window resize and orientation change
     window.addEventListener('resize', checkElementsVisibility, { passive: true })
@@ -972,11 +976,13 @@ ScrollFade.setupScrollObserver = function(config) {
     
     // Initial check
     setTimeout(checkElementsVisibility, 100)
+    console.log('🔍 Initial visibility check scheduled')
     
     return {
         observer: observer,
         elements: elements,
         destroy: function() {
+            console.log('🗑️ Destroying scroll observer')
             observer.disconnect()
             window.removeEventListener('scroll', handleScroll)
             window.removeEventListener('resize', checkElementsVisibility)
@@ -5698,6 +5704,59 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
+Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5822,7 +5881,19 @@ Beast.decl({
                                 maxBlur: 8
                             }
                         ]
-                    }
+                    },
+                    observers: [
+                        {
+                            selector: '.Case__head, .CaseMeta, .case__descr, .Case__image',
+                            rootMargin: '-20% 0px -20% 0px',
+                            threshold: 0.3,
+                            onIntersect: function(element, entry) {
+                                console.log(`🎯 Element intersected: ${element.className}`)
+                                // Add a class to make the element visible
+                                element.classList.add('visible')
+                            }
+                        }
+                    ]
                 })
                 
                 // Store reference for cleanup if needed
@@ -5898,59 +5969,6 @@ Beast.decl({
         }
             
     },
-})
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
-    }   
 })
 Beast.decl({
     Card: {
@@ -6364,6 +6382,18 @@ Beast.decl({
         }       
     }
 })
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6396,18 +6426,6 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
 Beast
 .decl('logo', {
     expand: function() {
@@ -6452,25 +6470,6 @@ Beast.decl({
 
 
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-
-Beast.decl({
     Review: {
         expand: function () {
             this.append(
@@ -6491,39 +6490,26 @@ Beast.decl({
             
     },
 })
-
 Beast.decl({
-    Solution: {
+    Box: {
         expand: function () {
             this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
             )
         },
         domInit: function fn() {
             
         }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
-        }
-            
-    },
-    
+    }
 })
+
+
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
@@ -6831,3 +6817,35 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    Solution: {
+        expand: function () {
+            this.append(
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
+})
