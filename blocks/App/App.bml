@@ -6,6 +6,9 @@ Beast.decl({
             device: ''
         },
         expand: function fn () {
+            if (MissEvent.mobile) {
+                this.mix('mobile')
+            }
             this.append(
                 <Noise />, this.get()
             )
@@ -19,7 +22,7 @@ Beast.decl({
             console.log(`
           ++++++*+++++++=+==+==+=++=++=+=+======-=
         =+++++*+++*+++=+==+==+=++=++=++=+=====-=--
-      =++++++++*++++++=+=+=+=+=+=+=++=+======-=---
+      =++++++++*++++++=+=+=+=+=+=+=+=++=+======-=---
     =+=++++++*+++++++=+=+===+=+=+++=+==+====-=----
   ==+=++++++*++*+++++=+==+=  =++=+=++=+====-=-----
 ===+=++++++*++*++++=+=+==    +=++++==+====-=------
@@ -27,163 +30,11 @@ Beast.decl({
 MADE BY ΛRK / www.ark.studio/byld / 2025
             `);
 
-            // Text animation for phone, email, and X links
-            const linkElements = document.querySelectorAll('.cols__text_phone a, .cols__text_email a, .cols__text_x a')
             
             
-            linkElements.forEach(element => {
-                const originalText = element.textContent
-                let hoverText = ''
-                let originalHref = ''
-                
-                // Set hover text based on parent element class
-                const parentElement = element.closest('.cols__text_phone, .cols__text_email, .cols__text_x')
-                
-                if (parentElement.classList.contains('cols__text_phone')) {
-                    hoverText = '+1 833 359 6777'
-                    originalHref = 'tel:+1 833 359 6777'
-                } else if (parentElement.classList.contains('cols__text_email')) {
-                    hoverText = 'a@ark.studio'
-                    originalHref = 'mailto:a@ark.studio'
-                } else if (parentElement.classList.contains('cols__text_x')) {
-                    hoverText = '@ARKconclave'
-                    originalHref = 'http://x.com/arkconclave'
-                }
-                
-                // Each element gets its own animation state
-                element.isAnimating = false
-                element.animationInterval = null
-                
-                element.style.cursor = 'pointer'
-                
-                // Store original link
-                element.originalHref = element.href
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.animationInterval) {
-                        clearInterval(element.animationInterval)
-                    }
-                    element.isAnimating = true
-                    animatePhoneText(element, originalText, hoverText)
-                    
-                    // Update href
-                    element.href = originalHref
-                })
-                
-                element.addEventListener('mouseleave', () => {
-                    if (element.animationInterval) {
-                        clearInterval(element.animationInterval)
-                    }
-                    element.isAnimating = true
-                    animatePhoneText(element, element.textContent, originalText)
-                    
-                    // Restore original href
-                    element.href = element.originalHref
-                })
-            })
-            
-                         function animatePhoneText(element, originalText, finalText) {
-                 const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                 let swapsRemaining = 14
-                 const maxLength = Math.max(originalText.length, finalText.length)
                  
-                 element.classList.add('rolling-animation')
-                 
-                 element.animationInterval = setInterval(() => {
-                     let currentDisplayText = ''
-                     
-                     for (let i = 0; i < maxLength; i++) {
-                         if (i < swapsRemaining) {
-                             const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                             currentDisplayText += randomChar
-                         } else if (i < finalText.length) {
-                             currentDisplayText += finalText[i]
-                         }
-                     }
-                     
-                     element.textContent = currentDisplayText
-                     swapsRemaining--
-                     
-                     if (swapsRemaining <= 0) {
-                         clearInterval(element.animationInterval)
-                         element.textContent = finalText
-                         element.classList.remove('rolling-animation')
-                         element.isAnimating = false
-                         
-                         // If we're returning to original text, reset cursor
-                         if (finalText === originalText) {
-                             element.style.cursor = 'pointer'
-                         }
-                     }
-                 }, 20)
-             }
 
-            // Menu text hover animation - same rolling effect but text doesn't change
-            const menuTextElements = document.querySelectorAll('.Menu__text')
-            
-            menuTextElements.forEach(element => {
-                element.isAnimating = false
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = 20  // Longer animation
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    // Ensure enough width to prevent line wrapping
-                    const originalWidth = element.offsetWidth
-                    const extraWidth = Math.max(20, originalWidth * 0.2) // Add 20% or minimum 20px
-                    element.style.width = (originalWidth + extraWidth) + 'px'
-                    element.style.display = 'inline-block'
-                    element.style.whiteSpace = 'nowrap'
-                    
-                    element.animationInterval = setInterval(() => {
-                        let currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                            element.style.width = ''
-                            element.style.display = ''
-                            element.style.whiteSpace = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
+
 
             // Data__jp and Data__ch letter-by-letter rolling animation on page load and repeating
             const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
@@ -1288,89 +1139,7 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 }
             }
 
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            let atLastPiece = false
-            
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
-                    })
-                    console.log(`Found cassette piece ${i}`)
-                }
-            }
-            
-            if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
-                    
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
-                        cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
-                            }
-                        })
-                        console.log('Reached last piece - all pieces unfixed')
-                    }
-                    
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
-                        // Normal fixed behavior for individual pieces
-                        cassettePieces.forEach(piece => {
-                            // Reset transform when not at last piece
-                            piece.element.style.transform = ''
-                            
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
-                            
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 100 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
-                            }
-                        })
-                    }
-                }
-                
-                // Add scroll event listener
-                window.addEventListener('scroll', checkCassettePositions, { passive: true })
-                
-                // Initial check
-                checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
-            } else {
-                console.log('No cassette pieces found')
-            }
+
 2            // Process step background image fade-in animation
             
             

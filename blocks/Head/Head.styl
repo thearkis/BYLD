@@ -8,9 +8,11 @@
     z-index 100
 
     @media $screen-phone
-        display none
+        display block
 
     &__menu
+        @media $screen-phone
+            display none
         position absolute
         top 6vw
         right 30px

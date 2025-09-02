@@ -3,24 +3,43 @@
     gap 0
     @media $screen-phone
         display initial
+        .Header
+            margin-top 32px
     &__text
         superheader()
         margin-bottom 2vw
         color grey
         max-width 21vw
+        @media $screen-phone
+            max-width 50%
+            width 50%
+            display inline-block
+            text-align right
+            vertical-align top
     &__title
         caption()
         color red
         margin-bottom .4vw
+        @media $screen-phone
+            max-width 50%
+            width 50%
+            display inline-block
+            vertical-align top
     &__item
         width 25vw
-        display inline-block
-        @media $screen-phone
-            display block
+        display inline-block    
         vertical-align top
         opacity 0
         filter blur(5px)
         transition opacity 0.8s ease, filter 0.8s ease
+
+        & + &
+            margin-top 8px
+        @media $screen-phone
+            .Caseresult
+                margin-top 8px
+            display table
+            width 100%
         &:last-child
             width 30vw
             @media $screen-phone

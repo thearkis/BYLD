@@ -1,0 +1,118 @@
+Beast.decl({
+    Cassette: {
+        
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            let atLastPiece = false
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                    })
+                    console.log(`Found cassette piece ${i}`)
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+                
+                // Debounce function to limit scroll handler calls
+                let scrollTimeout
+                function debouncedCheckCassettePositions() {
+                    clearTimeout(scrollTimeout)
+                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                }
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    
+                    // Check if we've reached the last piece (piece 5)
+                    const lastPiece = cassettePieces[cassettePieces.length - 1]
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    
+                    if (reachedLastPiece && !atLastPiece) {
+                        // All pieces should lose their fixed position and move together
+                        atLastPiece = true
+                        cassettePieces.forEach(piece => {
+                            // Remove fixed class from all pieces when reaching piece 5
+                            if (piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
+                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
+                            }
+                        })
+                        console.log('Reached last piece - all pieces unfixed')
+                    }
+                    
+                    if (reachedLastPiece) {
+                        // All pieces stay in their natural positions when unfixed
+                        // No transform needed - they'll move naturally with the page
+                    } else {
+                        // Reset flag when not at last piece
+                        atLastPiece = false
+                        // Normal fixed behavior for individual pieces
+                        cassettePieces.forEach(piece => {
+                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            
+                            // Only add fixed class if not at last piece
+                            if (!atLastPiece) {
+                                // Add fixed class when we scroll past the trigger point
+                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
+                                    piece.element.classList.add('Cassette_fixed')
+                                    piece.isFixed = true
+                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
+                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
+                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
+                                    piece.element.classList.remove('Cassette_fixed')
+                                    piece.isFixed = false
+                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
+                                }
+                            }
+                        })
+                    }
+                }
+                
+                // Add scroll event listener with debouncing
+                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                
+                // Add resize listener to recalculate trigger points
+                window.addEventListener('resize', () => {
+                    // Recalculate trigger points after resize
+                    cassettePieces.forEach(piece => {
+                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
+                    })
+                    // Force a check after resize
+                    checkCassettePositions()
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                    atLastPiece = false
+                    console.log('Reset all cassette pieces to default state')
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+                console.log('Scroll listener set up for all cassette pieces')
+            } else {
+                console.log('No cassette pieces found')
+            }
+        }       
+    }
+})

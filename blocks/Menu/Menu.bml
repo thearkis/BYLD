@@ -27,6 +27,17 @@ Beast.decl({
             )
         },
             
+        domInit: function fn() {
+            // Menu text hover animation using the existing helper function
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                Shuffle.animateMenuText(element, {
+                    swapsRemaining: 20,
+                    interval: 40
+                })
+            })
+        }
     },
     
      

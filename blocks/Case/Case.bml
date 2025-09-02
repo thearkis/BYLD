@@ -64,7 +64,34 @@ Beast.decl({
             )
         },
         domInit: function fn() {
-            
+            // Mobile layout adjustment: move Header before CaseResult on mobile
+            if (MissEvent.mobile) {
+                // Find the case__impact container
+                const caseImpact = document.querySelector('.case__impact')
+                if (caseImpact) {
+                    // Find the Header and CaseResult elements within case__impact
+                    const header = caseImpact.querySelector('.Header')
+                    const caseResult = caseImpact.querySelector('.CaseResult')
+                    
+                    if (header && caseResult) {
+                        // Move the Header to appear before CaseResult
+                        caseResult.parentNode.insertBefore(header, caseResult)
+                        console.log('Moved Header before CaseResult on mobile')
+                    }
+                }
+                
+                // Add header__line div before Case__impact on mobile
+                const caseImpactElement = document.querySelector('.case__impact')
+                if (caseImpactElement) {
+                    // Create header__line div
+                    const headerLine = document.createElement('div')
+                    headerLine.className = 'header__line'
+                    
+                    // Insert header__line before case__impact
+                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
+                    console.log('Added header__line before Case__impact on mobile')
+                }
+            }
         }       
     },
 

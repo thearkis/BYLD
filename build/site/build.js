@@ -614,6 +614,343 @@ Shuffle.initAllAnimations = function(options) {
 })();
 
 /**
+ * @lib MissEvent Расширение методов работы с DOM
+ * @ver 0.8.0
+ */
+;(function () {
+
+var ua = navigator.userAgent
+
+var opera = ua.toLowerCase().indexOf("op") > -1
+var chrome = ua.indexOf('Chrome') > -1 && !opera
+var explorer = ua.indexOf('MSIE') > -1
+var firefox = ua.indexOf('Firefox') > -1
+var safari = ua.indexOf("Safari") > -1 && !chrome
+
+var mobile = ua.match(/Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i) !== null
+var android = ua.match(/Android/i) !== null
+
+var href = window.location.href
+var qsIndex = href.indexOf('?')
+var qs = {}
+
+if (qsIndex !== -1) {
+    href.substring(qsIndex + 1).split('&').forEach(function (pair) {
+        pair = pair.split('=')
+        qs[pair[0]] = pair[1] === undefined ? '' : decodeURIComponent(pair[1])
+    })
+
+}
+
+window.MissEvent = {
+    /**
+     * If mobile platform
+     */
+    mobile: mobile,
+    android: android,
+    ios: !android,
+
+    /**
+     * Current browser
+     */
+    chrome: chrome,
+    explorer: explorer,
+    firefox: firefox,
+    safari: safari,
+    opera: opera,
+
+    /**
+     * query string
+     */
+    qs: function (key, value) {
+        if (value === undefined && typeof key === 'string') {
+            return qs[key]
+        } else {
+
+            if (typeof key === 'string') {
+                qs[key] = value
+            } else {
+                for (var i in key) qs[i] = key[i]
+            }
+
+            qsString = ''
+            for (var key in qs) {
+                if (qs[key] !== undefined && qs[key] !== '') {
+                    qsString +=  '&' + key + '=' + qs[key]
+                }
+            }
+            history.pushState(qs, document.title, window.location.pathname + '?' + qsString.substr(1))
+        }
+    },
+
+    /**
+     * Finger tap
+     * @event tap
+     * @domNode target
+     */
+    tap: function (domNode) {
+        if (domNode.missEventTap) {
+            return
+        } else {
+            domNode.missEventTap = true
+        }
+
+        if (!MissEvent.mobile) {
+            return domNode.addEventListener('click', function (e) {
+                this.dispatchEvent(new Event('tap'))
+            })
+        }
+
+        var didTouch = false
+        var didMove = false
+
+        domNode.addEventListener('touchstart', function () {
+            didTouch = true
+            didMove = false
+        })
+        domNode.addEventListener('touchmove', function () {
+            didTouch = false
+            didMove = true
+        })
+        domNode.addEventListener('touchend', function (e) {
+            if (didTouch && !didMove) {
+                this.dispatchEvent(new Event('tap'))
+                e.preventDefault()
+            }
+        })
+    },
+
+    /**
+     * Horizontal swipe
+     * @event     swipe    {delta: number, elasticDelta: number}
+     * @event     didswipe {delta: number, elasticDelta: number, isFast: boolean}
+     *
+     * @domNode   target
+     * @direction string   'horizontal', 'vertical'
+     */
+    swipe: function (domNode, direction, conditionCallback, fastSwipeTimeout, fastSwipeOffset) {
+        if (domNode.missEventSwipe) {
+            return
+        } else {
+            domNode.missEventSwipe = true
+        }
+
+        if (fastSwipeTimeout === undefined) fastSwipeTimeout = 500
+        if (fastSwipeOffset === undefined) fastSwipeOffset = 15
+
+        var didTouch = false
+        var didFastSwipe = false
+        var touchMoveDirection = ''
+        var swipeTimeout = false
+        var holdTime
+        var elasticFactor = .2
+        var fromX, fromY, toX, toY, deltaX, deltaY, delta, elasticDelta
+        var willSwipe = false
+
+        var parentWidth = domNode.offsetWidth
+        var parentHeight = domNode.offsetHeight
+        var parentOffsetLeft = domNode.offsetLeft
+        var parentOffsetTop = domNode.offsetTop
+        var parent = domNode
+
+        while (parent = parent.offsetParent) {
+            parentOffsetLeft += parent.offsetLeft
+            parentOffsetTop += parent.offsetTop
+        }
+
+        domNode.addEventListener(MissEvent.mobile ? 'touchstart' : 'mousedown', function (e) {
+            if (conditionCallback && !conditionCallback()) {
+                return
+            }
+
+            didTouch = true
+            fromX = e.touches ? e.touches[0].clientX : e.clientX
+            fromY = e.touches ? e.touches[0].clientY : e.clientY
+            delta = 0
+            touchMoveDirection = ''
+            holdTime = new Date
+        })
+
+        function move (e) {
+            if (!didTouch) return
+
+            holdTime = new Date
+
+            toX = e.touches ? e.touches[0].clientX : e.clientX
+            toY = e.touches ? e.touches[0].clientY : e.clientY
+
+            deltaX = toX - fromX
+            deltaY = toY - fromY
+
+            if (touchMoveDirection === '') {
+                touchMoveDirection = Math.abs(deltaX) < Math.abs(deltaY) ? 'vertical' : 'horizontal'
+            }
+
+            if (touchMoveDirection === direction) {
+                e.preventDefault()
+
+                if (willSwipe === false) {
+                    willSwipe = true
+                    domNode.dispatchEvent(
+                        new CustomEvent('willswipe')
+                    )
+                }
+
+                if (!swipeTimeout) {
+                    didFastSwipe = true
+                    swipeTimeout = setTimeout(function () {didFastSwipe = false}, fastSwipeTimeout)
+                }
+
+                delta = direction === 'horizontal' ?  deltaX : deltaY
+
+                domNode.dispatchEvent(
+                    new CustomEvent(
+                        'swipe', {
+                            detail: {
+                                x: toX - parentOffsetLeft,
+                                y: toY - parentOffsetTop,
+                                delta: delta,
+                                width: parentWidth,
+                                height: parentHeight,
+                                elasticFactor: elasticFactor
+                            }
+                        }
+                    )
+                )
+            }
+        }
+
+        if (MissEvent.mobile) {
+            domNode.addEventListener('touchmove', move)
+        } else {
+            window.addEventListener('mousemove', move)
+        }
+
+        function end (e) {
+            if (!didTouch) return
+
+            if (didTouch && !touchMoveDirection) {
+                domNode.dispatchEvent(
+                    new CustomEvent(
+                         'swipefail', {
+                            detail: {
+                                x: fromX - parentOffsetLeft,
+                                y: fromY - parentOffsetTop,
+                                width: parentWidth,
+                                height: parentHeight,
+                            }
+                        }
+                    )
+                )
+            } else if (didTouch && touchMoveDirection === direction) {
+                domNode.dispatchEvent(
+                    new CustomEvent(
+                         'didswipe', {
+                            detail: {
+                                x: toX - parentOffsetLeft,
+                                y: toY - parentOffsetTop,
+                                width: parentWidth,
+                                height: parentHeight,
+                                delta: delta,
+                                elasticFactor: elasticFactor,
+                                holdTime: new Date - holdTime,
+                                isFast: didFastSwipe && Math.abs(delta) >= fastSwipeOffset,
+                            }
+                        }
+                    )
+                )
+            }
+
+            if (swipeTimeout) clearTimeout(swipeTimeout)
+
+            didTouch = false
+            didFastSwipe = false
+            touchMoveDirection = false
+            swipeTimeout = false
+            willSwipe = false
+        }
+
+        if (MissEvent.mobile) {
+            domNode.addEventListener('touchend', end)
+        } else {
+            window.addEventListener('mouseup', end)
+        }
+    },
+
+    horizontalSwipe: function (domNode, conditionCallback, fastSwipeTimeout, fastSwipeOffset) {
+        this.swipe(domNode, 'horizontal', conditionCallback, fastSwipeTimeout, fastSwipeOffset)
+    },
+    verticalSwipe: function (domNode, conditionCallback, fastSwipeTimeout, fastSwipeOffset) {
+        this.swipe(domNode, 'vertical', conditionCallback, fastSwipeTimeout, fastSwipeOffset)
+    },
+
+    /**
+     * Horizontal scroll visibility
+     * @events visible, invisible
+     * @domNode target
+     * @parent container to scroll (window is default)
+     */
+    visible: function (domNode, conditionCallback, parent) {
+        if (parent === undefined) {
+            parent = window
+        }
+
+        var offsetTop = MissEvent.offset(domNode).top
+        var offsetBottom = offsetTop + domNode.offsetHeight
+        var visible
+
+        function checkVisibility () {
+            if (conditionCallback && !conditionCallback()) {
+                if (visible !== false) {
+                    domNode.dispatchEvent(new Event('invisible'))
+                    visible = false
+                }
+                return
+            }
+
+            var scrollTop = (parent === window ? document.body : parent).scrollTop
+            var scrollBottom = scrollTop + parent.innerHeight
+
+            if (scrollBottom > offsetTop && scrollTop < offsetBottom) {
+                if (visible !== true) {
+                    domNode.dispatchEvent(new Event('visible'))
+                    visible = true
+                }
+            } else {
+                if (visible !== false) {
+                    domNode.dispatchEvent(new Event('invisible'))
+                    visible = false
+                }
+            }
+        }
+
+        parent.addEventListener('scroll', checkVisibility)
+        checkVisibility()
+    },
+
+    offset: function (domNode) {
+        if (domNode.offsetParent === null) {
+            return undefined
+        }
+
+        var offsetTop = 0
+        var offsetLeft = 0
+
+        while (domNode.offsetParent !== null) {
+            offsetTop += domNode.offsetTop
+            offsetLeft += domNode.offsetLeft
+            domNode = domNode.offsetParent
+        }
+
+        return {
+            top: offsetTop,
+            left: offsetLeft
+        }
+    },
+}
+
+})();
+/**
  * @lib Beast
  * @ver 0.39.4
  * @url github.com/arkconclave/beast
@@ -3705,130 +4042,163 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
-    App: {
-        tag:'body',
-        mod: {
-            platform: '',
-            device: ''
-        },
-        expand: function fn () {
+    Ark: {
+        expand: function () {
             this.append(
-                Beast.node("Noise",{__context:this,"":true}), this.get()
-            )
+                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
 
+            )
         },
         domInit: function fn() {
-
-
-
-            // Add ASCII art for ARK studio
-            console.log(`
-          ++++++*+++++++=+==+==+=++=++=+=+======-=
-        =+++++*+++*+++=+==+==+=++=++=++=+=====-=--
-      =++++++++*++++++=+=+=+=+=+=+=++=+======-=---
-    =+=++++++*+++++++=+=+===+=+=+++=+==+====-=----
-  ==+=++++++*++*+++++=+==+=  =++=+=++=+====-=-----
-===+=++++++*++*++++=+=+==    +=++++==+====-=------
-
-MADE BY ΛRK / www.ark.studio/byld / 2025
-            `);
-
-            // Text animation for phone, email, and X links
-            const linkElements = document.querySelectorAll('.cols__text_phone a, .cols__text_email a, .cols__text_x a')
             
+        }       
+    }
+})
+Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+                
+            }
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
             
-            linkElements.forEach(element => {
-                const originalText = element.textContent
-                let hoverText = ''
-                let originalHref = ''
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
                 
-                // Set hover text based on parent element class
-                const parentElement = element.closest('.cols__text_phone, .cols__text_email, .cols__text_x')
-                
-                if (parentElement.classList.contains('cols__text_phone')) {
-                    hoverText = '+1 833 359 6777'
-                    originalHref = 'tel:+1 833 359 6777'
-                } else if (parentElement.classList.contains('cols__text_email')) {
-                    hoverText = 'a@ark.studio'
-                    originalHref = 'mailto:a@ark.studio'
-                } else if (parentElement.classList.contains('cols__text_x')) {
-                    hoverText = '@ARKconclave'
-                    originalHref = 'http://x.com/arkconclave'
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
                 }
-                
-                // Each element gets its own animation state
-                element.isAnimating = false
-                element.animationInterval = null
-                
-                element.style.cursor = 'pointer'
-                
-                // Store original link
-                element.originalHref = element.href
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.animationInterval) {
-                        clearInterval(element.animationInterval)
-                    }
-                    element.isAnimating = true
-                    animatePhoneText(element, originalText, hoverText)
-                    
-                    // Update href
-                    element.href = originalHref
-                })
-                
-                element.addEventListener('mouseleave', () => {
-                    if (element.animationInterval) {
-                        clearInterval(element.animationInterval)
-                    }
-                    element.isAnimating = true
-                    animatePhoneText(element, element.textContent, originalText)
-                    
-                    // Restore original href
-                    element.href = element.originalHref
-                })
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
             })
             
-                         function animatePhoneText(element, originalText, finalText) {
-                 const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                 let swapsRemaining = 14
-                 const maxLength = Math.max(originalText.length, finalText.length)
-                 
-                 element.classList.add('rolling-animation')
-                 
-                 element.animationInterval = setInterval(() => {
-                     let currentDisplayText = ''
-                     
-                     for (let i = 0; i < maxLength; i++) {
-                         if (i < swapsRemaining) {
-                             const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                             currentDisplayText += randomChar
-                         } else if (i < finalText.length) {
-                             currentDisplayText += finalText[i]
-                         }
-                     }
-                     
-                     element.textContent = currentDisplayText
-                     swapsRemaining--
-                     
-                     if (swapsRemaining <= 0) {
-                         clearInterval(element.animationInterval)
-                         element.textContent = finalText
-                         element.classList.remove('rolling-animation')
-                         element.isAnimating = false
-                         
-                         // If we're returning to original text, reset cursor
-                         if (finalText === originalText) {
-                             element.style.cursor = 'pointer'
-                         }
-                     }
-                 }, 20)
-             }
-
-            // Menu text hover animation - same rolling effect but text doesn't change
-            const menuTextElements = document.querySelectorAll('.Menu__text')
             
-            menuTextElements.forEach(element => {
-                element.isAnimating = false
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
                 element.animationInterval = null
                 
                 // Store original font properties to prevent jumping
@@ -3841,7 +4211,8 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                     
                     const originalText = element.textContent
                     const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = 20  // Longer animation
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
                     
                     element.isAnimating = true
                     element.classList.add('rolling-animation')
@@ -3851,15 +4222,8 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                     element.style.fontSize = originalFontSize
                     element.style.fontWeight = originalFontWeight
                     
-                    // Ensure enough width to prevent line wrapping
-                    const originalWidth = element.offsetWidth
-                    const extraWidth = Math.max(20, originalWidth * 0.2) // Add 20% or minimum 20px
-                    element.style.width = (originalWidth + extraWidth) + 'px'
-                    element.style.display = 'inline-block'
-                    element.style.whiteSpace = 'nowrap'
-                    
                     element.animationInterval = setInterval(() => {
-                        let currentDisplayText = ''
+                        currentDisplayText = ''
                         
                         for (let i = 0; i < originalText.length; i++) {
                             if (i < swapsRemaining) {
@@ -3883,13 +4247,51 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                             element.style.fontFamily = ''
                             element.style.fontSize = ''
                             element.style.fontWeight = ''
-                            element.style.width = ''
-                            element.style.display = ''
-                            element.style.whiteSpace = ''
                         }
                     }, 40)  // Slower interval for longer effect
                 })
             })
+
+        }      
+    }   
+})
+Beast.decl({
+    App: {
+        tag:'body',
+        mod: {
+            platform: '',
+            device: ''
+        },
+        expand: function fn () {
+            if (MissEvent.mobile) {
+                this.mix('mobile')
+            }
+            this.append(
+                Beast.node("Noise",{__context:this,"":true}), this.get()
+            )
+
+        },
+        domInit: function fn() {
+
+
+
+            // Add ASCII art for ARK studio
+            console.log(`
+          ++++++*+++++++=+==+==+=++=++=+=+======-=
+        =+++++*+++*+++=+==+==+=++=++=++=+=====-=--
+      =++++++++*++++++=+=+=+=+=+=+=+=++=+======-=---
+    =+=++++++*+++++++=+=+===+=+=+++=+==+====-=----
+  ==+=++++++*++*+++++=+==+=  =++=+=++=+====-=-----
+===+=++++++*++*++++=+=+==    +=++++==+====-=------
+
+MADE BY ΛRK / www.ark.studio/byld / 2025
+            `);
+
+            
+            
+                 
+
+
 
             // Data__jp and Data__ch letter-by-letter rolling animation on page load and repeating
             const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
@@ -4994,89 +5396,7 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
                 }
             }
 
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            let atLastPiece = false
-            
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
-                    })
-                    console.log(`Found cassette piece ${i}`)
-                }
-            }
-            
-            if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
-                    
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
-                        cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
-                            }
-                        })
-                        console.log('Reached last piece - all pieces unfixed')
-                    }
-                    
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
-                        // Normal fixed behavior for individual pieces
-                        cassettePieces.forEach(piece => {
-                            // Reset transform when not at last piece
-                            piece.element.style.transform = ''
-                            
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
-                            
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 100 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
-                            }
-                        })
-                    }
-                }
-                
-                // Add scroll event listener
-                window.addEventListener('scroll', checkCassettePositions, { passive: true })
-                
-                // Initial check
-                checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
-            } else {
-                console.log('No cassette pieces found')
-            }
+
 2            // Process step background image fade-in animation
             
             
@@ -5207,220 +5527,6 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-                
-            }
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
-    }   
-})
-Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
-})
-Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5441,7 +5547,34 @@ Beast.decl({
             )
         },
         domInit: function fn() {
-            
+            // Mobile layout adjustment: move Header before CaseResult on mobile
+            if (MissEvent.mobile) {
+                // Find the case__impact container
+                const caseImpact = document.querySelector('.case__impact')
+                if (caseImpact) {
+                    // Find the Header and CaseResult elements within case__impact
+                    const header = caseImpact.querySelector('.Header')
+                    const caseResult = caseImpact.querySelector('.CaseResult')
+                    
+                    if (header && caseResult) {
+                        // Move the Header to appear before CaseResult
+                        caseResult.parentNode.insertBefore(header, caseResult)
+                        console.log('Moved Header before CaseResult on mobile')
+                    }
+                }
+                
+                // Add header__line div before Case__impact on mobile
+                const caseImpactElement = document.querySelector('.case__impact')
+                if (caseImpactElement) {
+                    // Create header__line div
+                    const headerLine = document.createElement('div')
+                    headerLine.className = 'header__line'
+                    
+                    // Insert header__line before case__impact
+                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
+                    console.log('Added header__line before Case__impact on mobile')
+                }
+            }
         }       
     },
 
@@ -5509,7 +5642,139 @@ Beast.decl({
             
     },
 })
+Beast.decl({
+    Case__meta: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
 
+    
+    
+})
+Beast.decl({
+    Cassette: {
+        
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            let atLastPiece = false
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                    })
+                    console.log(`Found cassette piece ${i}`)
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+                
+                // Debounce function to limit scroll handler calls
+                let scrollTimeout
+                function debouncedCheckCassettePositions() {
+                    clearTimeout(scrollTimeout)
+                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                }
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    
+                    // Check if we've reached the last piece (piece 5)
+                    const lastPiece = cassettePieces[cassettePieces.length - 1]
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    
+                    if (reachedLastPiece && !atLastPiece) {
+                        // All pieces should lose their fixed position and move together
+                        atLastPiece = true
+                        cassettePieces.forEach(piece => {
+                            // Remove fixed class from all pieces when reaching piece 5
+                            if (piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
+                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
+                            }
+                        })
+                        console.log('Reached last piece - all pieces unfixed')
+                    }
+                    
+                    if (reachedLastPiece) {
+                        // All pieces stay in their natural positions when unfixed
+                        // No transform needed - they'll move naturally with the page
+                    } else {
+                        // Reset flag when not at last piece
+                        atLastPiece = false
+                        // Normal fixed behavior for individual pieces
+                        cassettePieces.forEach(piece => {
+                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            
+                            // Only add fixed class if not at last piece
+                            if (!atLastPiece) {
+                                // Add fixed class when we scroll past the trigger point
+                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
+                                    piece.element.classList.add('Cassette_fixed')
+                                    piece.isFixed = true
+                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
+                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
+                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
+                                    piece.element.classList.remove('Cassette_fixed')
+                                    piece.isFixed = false
+                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
+                                }
+                            }
+                        })
+                    }
+                }
+                
+                // Add scroll event listener with debouncing
+                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                
+                // Add resize listener to recalculate trigger points
+                window.addEventListener('resize', () => {
+                    // Recalculate trigger points after resize
+                    cassettePieces.forEach(piece => {
+                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
+                    })
+                    // Force a check after resize
+                    checkCassettePositions()
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                    atLastPiece = false
+                    console.log('Reset all cassette pieces to default state')
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+                console.log('Scroll listener set up for all cassette pieces')
+            } else {
+                console.log('No cassette pieces found')
+            }
+        }       
+    }
+})
 Beast.decl({
     Footer: {
         expand: function () {
@@ -5533,20 +5798,40 @@ Beast.decl({
 })
 
 Beast.decl({
-    Case__meta: {
+    Head: {
         expand: function () {
             this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",undefined,"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
                 
             )
         },
         domInit: function fn() {
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+            
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
+                })
+            })
             
         }       
-    },
-
-    
-    
+    }
 })
+
+
 /**
  * @block Grid Динамическая сетка
  * @tag base
@@ -5666,55 +5951,6 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",undefined,"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
-
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
-                
-            )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
-            
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
-            
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
-    }
-})
-
-
 /**
  * @block Icon Иконка
  * @tag icon
@@ -5748,6 +5984,18 @@ Beast.decl({
 // @example <Icon Name="Attention"/>
 
 Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
+Beast
 .decl('logo', {
     expand: function() {
         this.append(
@@ -5758,16 +6006,18 @@ Beast
     
 });
 
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
     }
 })
 
@@ -5785,6 +6035,17 @@ Beast.decl({
             )
         },
             
+        domInit: function fn() {
+            // Menu text hover animation using the existing helper function
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                Shuffle.animateMenuText(element, {
+                    swapsRemaining: 20,
+                    interval: 40
+                })
+            })
+        }
     },
     
      

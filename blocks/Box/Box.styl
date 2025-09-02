@@ -35,6 +35,8 @@
                 {coords[1]} 0
     &_type
         &_Challenge
+            @media $screen-phone
+                height 24%
             .Box__meta
                 position absolute
                 right 1vw
@@ -45,8 +47,8 @@
                 background url('/blocks/Box/i/tail-challenge.svg') center center / size no-repeat
 
                 @media $screen-phone
-                    size = 160px
-                    height 126px
+                    size = 132px
+                    height 97px
                     width size
                     background url('/blocks/Box/i/tail-challenge.svg') center center / size no-repeat
         &_Solution
@@ -64,7 +66,7 @@
         &_Small
             height 100%
             @media $screen-phone
-                height 28%
+                height 24%
             .Box
                 &__text
                     max-width initial
@@ -80,6 +82,8 @@
     &__text
         max-width 70%
         header()
+        @media $screen-phone
+            max-width 64%
         &_Type
             &_Red
                 color red
