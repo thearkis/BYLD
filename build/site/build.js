@@ -865,7 +865,11 @@ ScrollFade.setupScrollObserver = function(config) {
             const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
             const visibilityThreshold = isMobile ? 0.3 : 0.9 // 30% on mobile, 90% on desktop
             
-            const isVisible = rect.top < window.innerHeight * visibilityThreshold && rect.bottom > 0
+            // Check if element is visible from either direction (top or bottom)
+            const isVisibleFromTop = rect.top < window.innerHeight * visibilityThreshold && rect.bottom > 0
+            const isVisibleFromBottom = rect.top < window.innerHeight && rect.bottom > window.innerHeight * (1 - visibilityThreshold)
+            
+            const isVisible = isVisibleFromTop || isVisibleFromBottom
             
             if (isVisible && config.onIntersect) {
                 // Always call onIntersect when element is visible, regardless of existing classes
@@ -4473,6 +4477,67 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+                
+            }
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
     App: {
         tag:'body',
         mod: {
@@ -5633,66 +5698,225 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
+    Case: {
         expand: function () {
-            this.append(this.text())
+            this.append(
+                Beast.node("head",{__context:this},"\n                    ",Beast.node("client-card",undefined,"\n                        ",Beast.node("tail",{"":true}),"\n                        ",Beast.node("wrap",undefined,"\n                            ",Beast.node("hint",undefined,"Client"),"\n                            ",this.get('client'),"\n                        "),"\n                    "),"\n                    ",this.get('title'),"\n                "),
 
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
+
+                this.get('impact', 'image', 'descr'),
+
+                Beast.node("descr",{__context:this},"\n                    \n                    ",Beast.node("descr-about",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"About",Beast.node("br")," the project"),"\n                            ",Beast.node("glyph",undefined,"プロジェクト"),"\n                        "),"\n                        ",this.get('description'),"\n                    "),"\n\n                    ",Beast.node("descr-plus",undefined,"\n                        ",Beast.node("descr-icon"),"\n                    "),"\n\n                    ",Beast.node("descr-challenge",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"The",Beast.node("br")," challenge"),"\n                            ",Beast.node("glyph",undefined,"挑戦"),"\n                        "),"\n                        ",Beast.node("Box",{"Type":"Challenge"},"\n                            ",Beast.node("title",undefined,"ID.5.001"),"\n                            ",Beast.node("text",{"Size":"L"},"\n                                ",this.get('challenge'),"\n                            "),"    \n                        "),"\n                        \n                    "),"\n                    \n                "),
+
+                this.get('solution'),
+
+                Beast.node("impact-bottom",{__context:this},"\n                    ",Beast.node("Header",undefined,"\n                        ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                        ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                    "),"\n                    ",Beast.node("impact-items",undefined,"\n                        ",this.get('impact-meta-item'),"\n                    "),"\n                "),
+
+                this.get('review', 'link'),
+
                 
-            }
+            )
         },
         domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
+            // Mobile layout adjustment: move Header before CaseResult on mobile
+            if (MissEvent.mobile) {
+                // Find the case__impact container
+                const caseImpact = document.querySelector('.case__impact')
+                if (caseImpact) {
+                    // Find the Header and CaseResult elements within case__impact
+                    const header = caseImpact.querySelector('.Header')
+                    const caseResult = caseImpact.querySelector('.CaseResult')
+                    
+                    if (header && caseResult) {
+                        // Move the Header to appear before CaseResult
+                        caseResult.parentNode.insertBefore(header, caseResult)
+                        console.log('Moved Header before CaseResult on mobile')
+                    }
+                }
+                
+                // Add header__line div before Case__impact on mobile
+                const caseImpactElement = document.querySelector('.case__impact')
+                if (caseImpactElement) {
+                    // Create header__line div
+                    const headerLine = document.createElement('div')
+                    headerLine.className = 'header__line'
+                    
+                    // Insert header__line before case__impact
+                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
+                    console.log('Added header__line before Case__impact on mobile')
+                }
             }
             
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
+            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const caseEffects = ScrollFade.initScrollEffects({
+                    animations: [
+                        {
+                            selector: '.Case__client-card',
+                            className: 'Case__client-card_loaded',
+                            delay: 300
+                        },
+                        {
+                            selector: '.Case__title',
+                            className: 'Case__title_loaded',
+                            delay: 300,
+                            offset: 200
+                        },
+                        {
+                            selector: '.CaseMeta__item',
+                            className: 'CaseMeta__item_loaded',
+                            delay: 200,
+                            offset: 200
+                        },
+                        {
+                            selector: '.Caseresult__item',
+                            className: 'Caseresult__item_loaded',
+                            delay: 100,
+                            offset: 200
+                        }
+                    ],
+                    textShuffle: [
+                        {
+                            selector: '.caseresult__title, .caseresult__text',
+                            afterSelector: '.Caseresult__item',
+                            options: {
+                                letterDelay: 30,
+                                maxRolls: 15,
+                                rollInterval: 50
+                            },
+                            offset: 100
+                        }
+                    ],
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Case__head',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 1.3,
+                                mobileBlurStart: 1.3,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.CaseMeta',
+                                speed: 0.8,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
+                                maxBlur: 8
+                            },
+                            {
+                                selector: '.Case__image, .case__descr',
+                                blur: true,
+                                movement: false,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 0.95,
+                                mobileBlurStart: 0.90,
+                                maxBlur: 8
+                            }
+                        ]
                     }
                 })
                 
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
+                // Store reference for cleanup if needed
+                this.caseEffects = caseEffects
+                
+                console.log('Case scroll effects initialized successfully using ScrollFade helper')
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
             }
+        }       
+    },
+
+    Case__link: {
+        expand: function () {
+            var text = this.text()
+            var href = 'http://' + text
+            this.append(
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Link",{"New":true,"href":href},"\n                        ",Beast.node("Action",{"Size":"L","Wide":true,"Type":"Red"},text),"\n                    "),"\n                ")
+            )
+        },
+    },
+
+    Case__impact: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this,"Top":true},"\n                    ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                    ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                "),
+
+                Beast.node("CaseMeta",{__context:this},"\n                    ",this.get('item'),"\n                ")
+            )
+        },
+    },
+
+    Case__solution: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"The",Beast.node("br")," solution"),"\n                    ",Beast.node("glyph",undefined,"解決策"),"\n                "),
+                Beast.node("Solution",{__context:this},"\n                    ",this.get('item','descr'),"\n                ")
+            )
+        },
+    },
+
+    Case__review: {
+        expand: function () {
+            this.append(
+                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"Client",Beast.node("br")," feedback"),"\n                    ",Beast.node("glyph",undefined,"人々が言うこと"),"\n                "),
+                Beast.node("Review",{__context:this,"Size":"L"},"\n                    ",this.get('text'),"\n                    ",Beast.node("person",undefined,"\n                        ",this.get('photo', 'name'),"\n                    "),"\n                ") 
+                
+            )
+        },
+            
+    },
+
+    Case__image: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        },
+            
+    },
+
+    
+
+    
+
+    'Case__impact-meta-item': {
+        
+        expand: function () {
+            this.append(
+                Beast.node("CaseResult",{__context:this},"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("title",undefined,this.get('impact-meta-title')),"\n                        ",Beast.node("text",undefined,this.get('impact-meta-text')),"\n                    "),"\n                ")
+            )
+        }
+            
+    },
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
         }       
     }
 })
-
-
-
 Beast.decl({
     Button: {
         expand: function () {
@@ -5816,24 +6040,6 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Case__meta: {
         expand: function () {
             this.append(
@@ -5849,206 +6055,122 @@ Beast.decl({
     
 })
 Beast.decl({
-    Case: {
-        expand: function () {
-            this.append(
-                Beast.node("head",{__context:this},"\n                    ",Beast.node("client-card",undefined,"\n                        ",Beast.node("tail",{"":true}),"\n                        ",Beast.node("wrap",undefined,"\n                            ",Beast.node("hint",undefined,"Client"),"\n                            ",this.get('client'),"\n                        "),"\n                    "),"\n                    ",this.get('title'),"\n                "),
-
-
-                this.get('impact', 'image', 'descr'),
-
-                Beast.node("descr",{__context:this},"\n                    \n                    ",Beast.node("descr-about",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"About",Beast.node("br")," the project"),"\n                            ",Beast.node("glyph",undefined,"プロジェクト"),"\n                        "),"\n                        ",this.get('description'),"\n                    "),"\n\n                    ",Beast.node("descr-plus",undefined,"\n                        ",Beast.node("descr-icon"),"\n                    "),"\n\n                    ",Beast.node("descr-challenge",undefined,"\n                        ",Beast.node("Header",undefined,"\n                            ",Beast.node("title",undefined,"The",Beast.node("br")," challenge"),"\n                            ",Beast.node("glyph",undefined,"挑戦"),"\n                        "),"\n                        ",Beast.node("Box",{"Type":"Challenge"},"\n                            ",Beast.node("title",undefined,"ID.5.001"),"\n                            ",Beast.node("text",{"Size":"L"},"\n                                ",this.get('challenge'),"\n                            "),"    \n                        "),"\n                        \n                    "),"\n                    \n                "),
-
-                this.get('solution'),
-
-                Beast.node("impact-bottom",{__context:this},"\n                    ",Beast.node("Header",undefined,"\n                        ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                        ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                    "),"\n                    ",Beast.node("impact-items",undefined,"\n                        ",this.get('impact-meta-item'),"\n                    "),"\n                "),
-
-                this.get('review', 'link'),
-
-                
-            )
-        },
+    Cassette: {
+        
         domInit: function fn() {
-            // Mobile layout adjustment: move Header before CaseResult on mobile
-            if (MissEvent.mobile) {
-                // Find the case__impact container
-                const caseImpact = document.querySelector('.case__impact')
-                if (caseImpact) {
-                    // Find the Header and CaseResult elements within case__impact
-                    const header = caseImpact.querySelector('.Header')
-                    const caseResult = caseImpact.querySelector('.CaseResult')
-                    
-                    if (header && caseResult) {
-                        // Move the Header to appear before CaseResult
-                        caseResult.parentNode.insertBefore(header, caseResult)
-                        console.log('Moved Header before CaseResult on mobile')
-                    }
-                }
-                
-                // Add header__line div before Case__impact on mobile
-                const caseImpactElement = document.querySelector('.case__impact')
-                if (caseImpactElement) {
-                    // Create header__line div
-                    const headerLine = document.createElement('div')
-                    headerLine.className = 'header__line'
-                    
-                    // Insert header__line before case__impact
-                    caseImpactElement.parentNode.insertBefore(headerLine, caseImpactElement)
-                    console.log('Added header__line before Case__impact on mobile')
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            let atLastPiece = false
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                    })
+                    console.log(`Found cassette piece ${i}`)
                 }
             }
             
-            // Initialize all Case scroll effects and animations using the generic ScrollFade helper
-            if (typeof ScrollFade !== 'undefined') {
-                const caseEffects = ScrollFade.initScrollEffects({
-                    animations: [
-                        {
-                            selector: '.Case__client-card',
-                            className: 'Case__client-card_loaded',
-                            delay: 300
-                        },
-                        {
-                            selector: '.Case__title',
-                            className: 'Case__title_loaded',
-                            delay: 300,
-                            offset: 200
-                        },
-                        {
-                            selector: '.CaseMeta__item',
-                            className: 'CaseMeta__item_loaded',
-                            delay: 200,
-                            offset: 200
-                        },
-                        {
-                            selector: '.Caseresult__item',
-                            className: 'Caseresult__item_loaded',
-                            delay: 100,
-                            offset: 200
-                        }
-                    ],
-                    textShuffle: [
-                        {
-                            selector: '.caseresult__title, .caseresult__text',
-                            afterSelector: '.Caseresult__item',
-                            options: {
-                                letterDelay: 30,
-                                maxRolls: 15,
-                                rollInterval: 50
-                            },
-                            offset: 100
-                        }
-                    ],
-                    parallax: {
-                        groups: [
-                            {
-                                selector: '.Case__head',
-                                speed: 0.7,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
-                                mobileBlurTrigger: 1,
-                                mobileBlurStart: 1,
-                                maxBlur: 8
-                            },
-                            {
-                                selector: '.CaseMeta',
-                                speed: 0.8,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
-                                mobileBlurTrigger: 0.95,
-                                mobileBlurStart: 0.90,
-                                maxBlur: 8
-                            },
-                            {
-                                selector: '.Case__image, .case__descr',
-                                blur: true,
-                                movement: false,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
-                                mobileBlurTrigger: 0.95,
-                                mobileBlurStart: 0.90,
-                                maxBlur: 8
+            if (cassettePieces.length > 0) {
+                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
+                
+                // Debounce function to limit scroll handler calls
+                let scrollTimeout
+                function debouncedCheckCassettePositions() {
+                    clearTimeout(scrollTimeout)
+                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
+                }
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    
+                    // Check if we've reached the last piece (piece 5)
+                    const lastPiece = cassettePieces[cassettePieces.length - 1]
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    
+                    if (reachedLastPiece && !atLastPiece) {
+                        // All pieces should lose their fixed position and move together
+                        atLastPiece = true
+                        cassettePieces.forEach(piece => {
+                            // Remove fixed class from all pieces when reaching piece 5
+                            if (piece.isFixed) {
+                                piece.element.classList.remove('Cassette_fixed')
+                                piece.isFixed = false
+                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
                             }
-                        ]
+                        })
+                        console.log('Reached last piece - all pieces unfixed')
                     }
+                    
+                    if (reachedLastPiece) {
+                        // All pieces stay in their natural positions when unfixed
+                        // No transform needed - they'll move naturally with the page
+                    } else {
+                        // Reset flag when not at last piece
+                        atLastPiece = false
+                        // Normal fixed behavior for individual pieces
+                        cassettePieces.forEach(piece => {
+                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
+                            
+                            // Only add fixed class if not at last piece
+                            if (!atLastPiece) {
+                                // Add fixed class when we scroll past the trigger point
+                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
+                                    piece.element.classList.add('Cassette_fixed')
+                                    piece.isFixed = true
+                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
+                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
+                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
+                                    piece.element.classList.remove('Cassette_fixed')
+                                    piece.isFixed = false
+                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
+                                }
+                            }
+                        })
+                    }
+                }
+                
+                // Add scroll event listener with debouncing
+                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
+                
+                // Add resize listener to recalculate trigger points
+                window.addEventListener('resize', () => {
+                    // Recalculate trigger points after resize
+                    cassettePieces.forEach(piece => {
+                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
+                    })
+                    // Force a check after resize
+                    checkCassettePositions()
                 })
                 
-                // Store reference for cleanup if needed
-                this.caseEffects = caseEffects
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                    atLastPiece = false
+                    console.log('Reset all cassette pieces to default state')
+                }
                 
-                console.log('Case scroll effects initialized successfully using ScrollFade helper')
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+                console.log('Scroll listener set up for all cassette pieces')
             } else {
-                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+                console.log('No cassette pieces found')
             }
         }       
-    },
-
-    Case__link: {
-        expand: function () {
-            var text = this.text()
-            var href = 'http://' + text
-            this.append(
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Link",{"New":true,"href":href},"\n                        ",Beast.node("Action",{"Size":"L","Wide":true,"Type":"Red"},text),"\n                    "),"\n                ")
-            )
-        },
-    },
-
-    Case__impact: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this,"Top":true},"\n                    ",Beast.node("title",undefined,"Impact of",Beast.node("br")," our work"),"\n                    ",Beast.node("glyph",undefined,"プロジェクトについて"),"\n                "),
-
-                Beast.node("CaseMeta",{__context:this},"\n                    ",this.get('item'),"\n                ")
-            )
-        },
-    },
-
-    Case__solution: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"The",Beast.node("br")," solution"),"\n                    ",Beast.node("glyph",undefined,"解決策"),"\n                "),
-                Beast.node("Solution",{__context:this},"\n                    ",this.get('item','descr'),"\n                ")
-            )
-        },
-    },
-
-    Case__review: {
-        expand: function () {
-            this.append(
-                Beast.node("Header",{__context:this},"\n                    ",Beast.node("title",undefined,"Client",Beast.node("br")," feedback"),"\n                    ",Beast.node("glyph",undefined,"人々が言うこと"),"\n                "),
-                Beast.node("Review",{__context:this,"Size":"L"},"\n                    ",this.get('text'),"\n                    ",Beast.node("person",undefined,"\n                        ",this.get('photo', 'name'),"\n                    "),"\n                ") 
-                
-            )
-        },
-            
-    },
-
-    Case__image: {
-        
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        },
-            
-    },
-
-    
-
-    
-
-    'Case__impact-meta-item': {
-        
-        expand: function () {
-            this.append(
-                Beast.node("CaseResult",{__context:this},"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("title",undefined,this.get('impact-meta-title')),"\n                        ",Beast.node("text",undefined,this.get('impact-meta-text')),"\n                    "),"\n                ")
-            )
-        }
-            
-    },
+    }
 })
 Beast.decl({
     Footer: {
@@ -6192,135 +6314,42 @@ function grid (num, col, gap, margin) {
     return gridWidth
 }
 Beast.decl({
-    Cassette: {
-        
+    Head: {
+        expand: function () {
+            this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("item",{__context:this,"LogoMobile":true},"\n                    ",Beast.node("Logos",{"":true}),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
+                
+            )
+        },
         domInit: function fn() {
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            let atLastPiece = false
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
             
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
-                    })
-                    console.log(`Found cassette piece ${i}`)
-                }
-            }
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
             
-            if (cassettePieces.length > 0) {
-                console.log(`Found ${cassettePieces.length} cassette pieces, setting up scroll listener`)
-                
-                // Debounce function to limit scroll handler calls
-                let scrollTimeout
-                function debouncedCheckCassettePositions() {
-                    clearTimeout(scrollTimeout)
-                    scrollTimeout = setTimeout(checkCassettePositions, 16) // ~60fps
-                }
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
-                    
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
-                        cassettePieces.forEach(piece => {
-                            // Remove fixed class from all pieces when reaching piece 5
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                                console.log(`REMOVED Cassette_fixed class from piece ${piece.index} (at last piece)`)
-                            }
-                        })
-                        console.log('Reached last piece - all pieces unfixed')
-                    }
-                    
-                    if (reachedLastPiece) {
-                        // All pieces stay in their natural positions when unfixed
-                        // No transform needed - they'll move naturally with the page
-                    } else {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
-                        // Normal fixed behavior for individual pieces
-                        cassettePieces.forEach(piece => {
-                            console.log(`Piece ${piece.index} - Scroll Y: ${scrollY}, Trigger: ${piece.triggerPoint}, Fixed: ${piece.isFixed}`)
-                            
-                            // Only add fixed class if not at last piece
-                            if (!atLastPiece) {
-                                // Add fixed class when we scroll past the trigger point
-                                if (scrollY >= piece.triggerPoint - 100 && !piece.isFixed) {
-                                    piece.element.classList.add('Cassette_fixed')
-                                    piece.isFixed = true
-                                    console.log(`ADDED Cassette_fixed class to piece ${piece.index}`)
-                                } else if (scrollY < piece.triggerPoint - 50 && piece.isFixed) {
-                                    // Remove fixed class when we scroll back above the trigger point (with smaller buffer)
-                                    piece.element.classList.remove('Cassette_fixed')
-                                    piece.isFixed = false
-                                    console.log(`REMOVED Cassette_fixed class from piece ${piece.index}`)
-                                }
-                            }
-                        })
-                    }
-                }
-                
-                // Add scroll event listener with debouncing
-                window.addEventListener('scroll', debouncedCheckCassettePositions, { passive: true })
-                
-                // Add resize listener to recalculate trigger points
-                window.addEventListener('resize', () => {
-                    // Recalculate trigger points after resize
-                    cassettePieces.forEach(piece => {
-                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
-                    })
-                    // Force a check after resize
-                    checkCassettePositions()
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
                 })
-                
-                // Cleanup function to reset all pieces
-                function resetAllCassettePieces() {
-                    cassettePieces.forEach(piece => {
-                        piece.element.classList.remove('Cassette_fixed')
-                        piece.isFixed = false
-                        piece.element.style.transform = ''
-                    })
-                    atLastPiece = false
-                    console.log('Reset all cassette pieces to default state')
-                }
-                
-                // Expose reset function globally for debugging
-                window.resetCassettePieces = resetAllCassettePieces
-                
-                // Initial check
-                checkCassettePositions()
-                console.log('Scroll listener set up for all cassette pieces')
-            } else {
-                console.log('No cassette pieces found')
-            }
+            })
+            
         }       
     }
 })
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
+
+
 Beast.decl({
     Header: {
         expand: function () {
@@ -6367,43 +6396,18 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("item",{__context:this,"LogoMobile":true},"\n                    ",Beast.node("Logos",{"":true}),"\n                "),
-
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
-
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
-                
-            )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
-            
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
-            
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
     }
 })
-
-
 Beast
 .decl('logo', {
     expand: function() {

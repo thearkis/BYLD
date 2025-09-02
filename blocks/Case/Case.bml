@@ -142,8 +142,8 @@ Beast.decl({
                                 movement: true,
                                 blurTrigger: 0.20,
                                 blurStart: 0.15,
-                                mobileBlurTrigger: 1,
-                                mobileBlurStart: 1,
+                                mobileBlurTrigger: 1.3,
+                                mobileBlurStart: 1.3,
                                 maxBlur: 8
                             },
                             {
