@@ -19,8 +19,8 @@ Beast.decl({
 
                 // Mobile and Desktop configurations
                 mobile: {
-                    triggerOffset: 500, // Pieces start at -350px, need to scroll 500px to reach fixed position at 150px
-                    minScrollDelta: 0.02 // 2% of viewport height
+                    triggerOffset: 360, // Reduced from 360 to make pieces fix earlier
+                    minScrollDelta: 0 // 2% of viewport height
                 },
                 desktop: {
                     triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
@@ -52,8 +52,11 @@ Beast.decl({
                         const rect = piece.element.getBoundingClientRect()
                         
                         if (MissEvent.mobile) {
-                            // Mobile: Use fixed pixel offset (pieces start at -350px, need 500px scroll to reach 150px)
-                            piece.triggerPoint = rect.top + window.scrollY - config.mobile.triggerOffset
+                            // Mobile: Different offset for each piece to create cascading effect
+                            const baseTriggerOffset = 200 // Base offset for piece 1
+                            const cascadeIncrement = 150 // Each piece triggers 150px later than the previous
+                            const pieceOffset = baseTriggerOffset + ((piece.index - 1) * cascadeIncrement)
+                            piece.triggerPoint = rect.top + window.scrollY - pieceOffset
                         } else {
                             // Desktop: Use viewport-relative offset
                             const offsetVh = windowHeight * config.desktop.triggerOffset
