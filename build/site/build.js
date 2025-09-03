@@ -4570,73 +4570,6 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-            }
-            
-            // Add click handler to show form
-            this.on('click', function () {
-                if (typeof window.showForm === 'function') {
-                    window.showForm()
-                }
-            })
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
     App: {
         
         tag:'body',
@@ -5060,6 +4993,73 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+            }
+            
+            // Add click handler to show form
+            this.on('click', function () {
+                if (typeof window.showForm === 'function') {
+                    window.showForm()
+                }
+            })
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
     Ark: {
         expand: function () {
             this.append(
@@ -5446,7 +5446,6 @@ Beast.decl({
         domInit: function fn() {
             // Cassette pieces scroll detection for fixed positioning
             const cassettePieces = []
-            let reachedLastPiece = false
             
             // Configuration for viewport-relative positioning
             const config = {
@@ -5536,39 +5535,29 @@ Beast.decl({
                     
                     lastScrollY = scrollY
                     
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    if (scrollY >= lastPiece.triggerPoint && !reachedLastPiece) {
-                        // Release all pieces when reaching the last piece
-                        reachedLastPiece = true
-                        cassettePieces.forEach(piece => {
+                    // Get piece 5 trigger point for unfixing pieces 1-4
+                    const piece5 = cassettePieces[4] // piece 5 is at index 4
+                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
+                    
+                    // Process each piece for cascading effect
+                    cassettePieces.forEach(piece => {
+                        const shouldBeFixed = scrollY >= piece.triggerPoint
+                        
+                        // Only add fixed class when scrolling past trigger point
+                        // BUT never fix piece 5 (last piece)
+                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
+                            piece.element.classList.add('Cassette_fixed')
+                            piece.isFixed = true
+                        }
+                        
+                        // Remove fixed class if scrolling back up OR if reached piece 5
+                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
+                        
+                        if (shouldBeUnfixed && piece.isFixed) {
                             piece.element.classList.remove('Cassette_fixed')
                             piece.isFixed = false
-                        })
-                    } else if (scrollY < lastPiece.triggerPoint && reachedLastPiece) {
-                        // Reset when scrolling back up before last piece
-                        reachedLastPiece = false
-                    }
-                    
-                    // Only process individual pieces when not at last piece
-                    if (!reachedLastPiece) {
-                        // Process each piece for cascading effect
-                        // Once a piece is triggered to be fixed, it should stay fixed
-                        cassettePieces.forEach(piece => {
-                            const shouldBeFixed = scrollY >= piece.triggerPoint
-                            
-                            // Only add fixed class when scrolling past trigger point
-                            if (shouldBeFixed && !piece.isFixed) {
-                                piece.element.classList.add('Cassette_fixed')
-                                piece.isFixed = true
-                            }
-                            // Only remove fixed class when scrolling back up past trigger point
-                            else if (!shouldBeFixed && piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                            }
-                        })
-                    }
+                        }
+                    })
                 }
                 
                 function throttledCheckCassettePositions() {
@@ -5604,7 +5593,6 @@ Beast.decl({
                         piece.isFixed = false
                         piece.element.style.transform = ''
                     })
-                    reachedLastPiece = false
                 }
                 
                 // Expose reset function globally for debugging
@@ -5619,6 +5607,51 @@ Beast.decl({
         }       
     }
 })
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+        domInit: function fn() {
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
+                    })
+                })
+                
+    
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
+        }
+            
+    }   
+})
+
 Beast.decl({
     Data: {
         
@@ -5741,48 +5774,122 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Footer: {
-        expand: function () {
-            
+    Form: {
+        expand: function fn() {
             this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
                 
             )
-
-            
         },
         domInit: function fn() {
-            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
-            if (typeof Shuffle !== 'undefined') {
-                const footerJpElements = document.querySelectorAll('.Footer__jp')
-                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-                const allFooterTextElements = [...footerJpElements, ...footerChElements]
-                
-                allFooterTextElements.forEach(element => {
-                    Shuffle.animateFooterTextRolling(element, {
-                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                        rollInterval: 80, // 80ms per roll
-                        letterDelay: 100, // 100ms delay between each letter
-                        minDelay: 2000, // 2 seconds minimum between animations
-                        maxDelay: 2000, // 4 seconds maximum between animations
-                        initialDelay: 1500 // 1.5 seconds buffer before repeating
-                    })
-                })
-                
-    
-            } else {
-                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
-            }
-        }
+            // Initially hide the form using Beast.js css method
+            this.css({
+                visibility: 'hidden',
+                transform: 'translateX(100%)'
+            })
             
-    }   
+            // Add close functionality
+            const closeBtn = this.domNode().querySelector('.form-close')
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('Close button clicked')
+                    this.hideForm()
+                })
+            } else {
+                console.warn('Close button not found')
+            }
+            
+            // Close on escape key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    this.hideForm()
+                }
+            }
+            document.addEventListener('keydown', escapeHandler)
+            
+            // Close when clicking outside the form
+            const outsideClickHandler = (e) => {
+                const formElement = this.domNode()
+                // Only close if click is outside the form AND not on the close button
+                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
+                    this.hideForm()
+                }
+            }
+            // Don't add the outside click handler immediately - wait for form to be shown
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Store handlers for cleanup
+            this.escapeHandler = escapeHandler
+            this.outsideClickHandler = outsideClickHandler
+            
+            // Expose show/hide methods globally
+            window.showForm = () => this.showForm()
+            window.hideForm = () => this.hideForm()
+        },
+        
+        showForm: function() {
+            console.log('showForm called')
+            
+            // Block page scrolling
+            document.body.style.overflow = 'hidden'
+            
+            // Show form using Beast.js css method
+            this.css({
+                visibility: 'visible'
+            })
+            
+            // Trigger slide animation
+            requestAnimationFrame(() => {
+                this.css({
+                    transform: 'translateX(0)'
+                })
+            })
+            
+            // Re-add event listeners if they were removed
+            if (this.escapeHandler && !this.listenersActive) {
+                document.addEventListener('keydown', this.escapeHandler)
+                this.listenersActive = true
+            }
+            
+            // Add outside click handler with a delay to prevent immediate closing
+            setTimeout(() => {
+                if (this.outsideClickHandler && !this.outsideClickActive) {
+                    document.addEventListener('click', this.outsideClickHandler)
+                    this.outsideClickActive = true
+                }
+            }, 100) // Small delay to prevent immediate triggering
+        },
+        
+        hideForm: function() {
+            console.log('hideForm called')
+            
+            // Slide out using Beast.js css method
+            this.css({
+                transform: 'translateX(100%)'
+            })
+            
+            // Wait for animation to complete, then hide
+            setTimeout(() => {
+                console.log('Animation complete, hiding form')
+                this.css({
+                    visibility: 'hidden'
+                })
+                // Restore page scrolling
+                document.body.style.overflow = ''
+                
+                // Remove event listeners when form is hidden
+                if (this.escapeHandler) {
+                    document.removeEventListener('keydown', this.escapeHandler)
+                }
+                if (this.outsideClickHandler) {
+                    document.removeEventListener('click', this.outsideClickHandler)
+                }
+                this.listenersActive = false
+                this.outsideClickActive = false
+            }, 300) // Match CSS transition duration
+        }
+    }
 })
 
 /**
@@ -5904,125 +6011,6 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
-Beast.decl({
-    Form: {
-        expand: function fn() {
-            this.append(
-                
-            )
-        },
-        domInit: function fn() {
-            // Initially hide the form using Beast.js css method
-            this.css({
-                visibility: 'hidden',
-                transform: 'translateX(100%)'
-            })
-            
-            // Add close functionality
-            const closeBtn = this.domNode().querySelector('.form-close')
-            if (closeBtn) {
-                closeBtn.addEventListener('click', (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    console.log('Close button clicked')
-                    this.hideForm()
-                })
-            } else {
-                console.warn('Close button not found')
-            }
-            
-            // Close on escape key
-            const escapeHandler = (e) => {
-                if (e.key === 'Escape') {
-                    this.hideForm()
-                }
-            }
-            document.addEventListener('keydown', escapeHandler)
-            
-            // Close when clicking outside the form
-            const outsideClickHandler = (e) => {
-                const formElement = this.domNode()
-                // Only close if click is outside the form AND not on the close button
-                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
-                    this.hideForm()
-                }
-            }
-            // Don't add the outside click handler immediately - wait for form to be shown
-            this.outsideClickHandler = outsideClickHandler
-            
-            // Store handlers for cleanup
-            this.escapeHandler = escapeHandler
-            this.outsideClickHandler = outsideClickHandler
-            
-            // Expose show/hide methods globally
-            window.showForm = () => this.showForm()
-            window.hideForm = () => this.hideForm()
-        },
-        
-        showForm: function() {
-            console.log('showForm called')
-            
-            // Block page scrolling
-            document.body.style.overflow = 'hidden'
-            
-            // Show form using Beast.js css method
-            this.css({
-                visibility: 'visible'
-            })
-            
-            // Trigger slide animation
-            requestAnimationFrame(() => {
-                this.css({
-                    transform: 'translateX(0)'
-                })
-            })
-            
-            // Re-add event listeners if they were removed
-            if (this.escapeHandler && !this.listenersActive) {
-                document.addEventListener('keydown', this.escapeHandler)
-                this.listenersActive = true
-            }
-            
-            // Add outside click handler with a delay to prevent immediate closing
-            setTimeout(() => {
-                if (this.outsideClickHandler && !this.outsideClickActive) {
-                    document.addEventListener('click', this.outsideClickHandler)
-                    this.outsideClickActive = true
-                }
-            }, 100) // Small delay to prevent immediate triggering
-        },
-        
-        hideForm: function() {
-            console.log('hideForm called')
-            
-            // Slide out using Beast.js css method
-            this.css({
-                transform: 'translateX(100%)'
-            })
-            
-            // Wait for animation to complete, then hide
-            setTimeout(() => {
-                console.log('Animation complete, hiding form')
-                this.css({
-                    visibility: 'hidden'
-                })
-                // Restore page scrolling
-                document.body.style.overflow = ''
-                
-                // Remove event listeners when form is hidden
-                if (this.escapeHandler) {
-                    document.removeEventListener('keydown', this.escapeHandler)
-                }
-                if (this.outsideClickHandler) {
-                    document.removeEventListener('click', this.outsideClickHandler)
-                }
-                this.listenersActive = false
-                this.outsideClickActive = false
-            }, 300) // Match CSS transition duration
-        }
-    }
-})
-
 Beast.decl({
     Head: {
         expand: function () {
@@ -6159,6 +6147,24 @@ Beast
 });
 
 
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 Beast.decl({
     Menu: {
         
@@ -6488,24 +6494,6 @@ Beast.decl({
 })
 
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Process: {
         expand: function () {
             
@@ -6662,6 +6650,27 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Review: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+    Review__photo: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        }
+            
+    },
+})
+Beast.decl({
     Reviews: {
         expand: function fn() {
             
@@ -6672,16 +6681,6 @@ Beast.decl({
     }
 })
 
-Beast.decl({
-    Section: {
-        expand: function () {
-            this.domAttr('id', this.param('id'))
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 Beast.decl({
     Services: {
         tag: 'div',
@@ -6751,57 +6750,14 @@ Beast.decl({
 })
 
 Beast.decl({
-    Review: {
+    Section: {
         expand: function () {
-            this.append(
-                
-            )
+            this.domAttr('id', this.param('id'))
         },
         domInit: function fn() {
             
         }       
-    },
-    Review__photo: {
-        
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        }
-            
-    },
-})
-Beast.decl({
-    Solution: {
-        expand: function () {
-            this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
-        }
-            
-    },
-    
+    }
 })
 /**
  * @block Thumb Тумбнеил
@@ -7110,6 +7066,38 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    Solution: {
+        expand: function () {
+            this.append(
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
+})
 Beast.decl({
 
     /**

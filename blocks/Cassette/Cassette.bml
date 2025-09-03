@@ -3,7 +3,6 @@ Beast.decl({
         domInit: function fn() {
             // Cassette pieces scroll detection for fixed positioning
             const cassettePieces = []
-            let reachedLastPiece = false
             
             // Configuration for viewport-relative positioning
             const config = {
@@ -93,39 +92,29 @@ Beast.decl({
                     
                     lastScrollY = scrollY
                     
-                    // Check if we've reached the last piece (piece 5)
-                    const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    if (scrollY >= lastPiece.triggerPoint && !reachedLastPiece) {
-                        // Release all pieces when reaching the last piece
-                        reachedLastPiece = true
-                        cassettePieces.forEach(piece => {
+                    // Get piece 5 trigger point for unfixing pieces 1-4
+                    const piece5 = cassettePieces[4] // piece 5 is at index 4
+                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
+                    
+                    // Process each piece for cascading effect
+                    cassettePieces.forEach(piece => {
+                        const shouldBeFixed = scrollY >= piece.triggerPoint
+                        
+                        // Only add fixed class when scrolling past trigger point
+                        // BUT never fix piece 5 (last piece)
+                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
+                            piece.element.classList.add('Cassette_fixed')
+                            piece.isFixed = true
+                        }
+                        
+                        // Remove fixed class if scrolling back up OR if reached piece 5
+                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
+                        
+                        if (shouldBeUnfixed && piece.isFixed) {
                             piece.element.classList.remove('Cassette_fixed')
                             piece.isFixed = false
-                        })
-                    } else if (scrollY < lastPiece.triggerPoint && reachedLastPiece) {
-                        // Reset when scrolling back up before last piece
-                        reachedLastPiece = false
-                    }
-                    
-                    // Only process individual pieces when not at last piece
-                    if (!reachedLastPiece) {
-                        // Process each piece for cascading effect
-                        // Once a piece is triggered to be fixed, it should stay fixed
-                        cassettePieces.forEach(piece => {
-                            const shouldBeFixed = scrollY >= piece.triggerPoint
-                            
-                            // Only add fixed class when scrolling past trigger point
-                            if (shouldBeFixed && !piece.isFixed) {
-                                piece.element.classList.add('Cassette_fixed')
-                                piece.isFixed = true
-                            }
-                            // Only remove fixed class when scrolling back up past trigger point
-                            else if (!shouldBeFixed && piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                            }
-                        })
-                    }
+                        }
+                    })
                 }
                 
                 function throttledCheckCassettePositions() {
@@ -161,7 +150,6 @@ Beast.decl({
                         piece.isFixed = false
                         piece.element.style.transform = ''
                     })
-                    reachedLastPiece = false
                 }
                 
                 // Expose reset function globally for debugging
