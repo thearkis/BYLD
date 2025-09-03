@@ -5,7 +5,7 @@ Beast.decl({
         
         expand: function fn () {
             if (MissEvent.mobile) { this.mix('mobile') }
-            this.append( <Noise />, <Form />, this.get() )
+            this.append( <Noise />, <GR />, <Form />, this.get() )
         },
         domInit: function fn() {
             // Add ASCII art for ARK studio
