@@ -5091,6 +5091,41 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Button: {
+        expand: function () {
+
+            if (this.mod('Size')) {
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+                    
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+            } else {
+
+                if (this.param('icon')) {
+                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
+                        .mod('Medium', true)
+                }
+
+                this.append(
+                    Beast.node("text",{__context:this},this.text())
+                )
+
+                if (this.param('hint')) {
+                    this.append(
+                        Beast.node("hint",{__context:this},this.get('hint'))
+                    )
+                }
+            }   
+        }       
+    }   
+})
+Beast.decl({
     Card: {
         expand: function () {
 
@@ -5175,41 +5210,6 @@ Beast.decl({
             })
 
         }      
-    }   
-})
-Beast.decl({
-    Button: {
-        expand: function () {
-
-            if (this.mod('Size')) {
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-                    
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-            } else {
-
-                if (this.param('icon')) {
-                    this.append(Beast.node("Icon",{__context:this,"Name":this.param('icon')}))
-                        .mod('Medium', true)
-                }
-
-                this.append(
-                    Beast.node("text",{__context:this},this.text())
-                )
-
-                if (this.param('hint')) {
-                    this.append(
-                        Beast.node("hint",{__context:this},this.get('hint'))
-                    )
-                }
-            }   
-        }       
     }   
 })
 Beast.decl({
@@ -6059,20 +6059,6 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6159,24 +6145,6 @@ Beast
 
 
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Menu: {
         
 
@@ -6208,6 +6176,24 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 /**
  * @block Overlay Интерфейс модальных окон
  * @dep UINavigation grid Typo Control
@@ -6505,41 +6491,13 @@ Beast.decl({
 })
 
 Beast.decl({
-    Review: {
+    Header: {
         expand: function () {
             this.append(
-                
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
             )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-    Review__photo: {
-        
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        }
-            
-    },
-})
-Beast.decl({
-    Reviews: {
-        expand: function fn() {
-            
-        },
-        domInit: function fn() {
-            
-        }
-    }
-})
-
-Beast.decl({
-    Section: {
-        expand: function () {
-            this.domAttr('id', this.param('id'))
         },
         domInit: function fn() {
             
@@ -6702,6 +6660,38 @@ Beast.decl({
         }       
     }
 })
+Beast.decl({
+    Review: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+    Review__photo: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        }
+            
+    },
+})
+Beast.decl({
+    Reviews: {
+        expand: function fn() {
+            
+        },
+        domInit: function fn() {
+            
+        }
+    }
+})
+
 Beast.decl({
     Services: {
         tag: 'div',
@@ -7109,6 +7099,16 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    Section: {
+        expand: function () {
+            this.domAttr('id', this.param('id'))
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 Beast.decl({
 
     /**
