@@ -4637,26 +4637,13 @@ Beast.decl({
 
 
 Beast.decl({
-    Ark: {
-        expand: function () {
-            this.append(
-                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     App: {
         
         tag:'body',
         
         expand: function fn () {
             if (MissEvent.mobile) { this.mix('mobile') }
-            this.append( Beast.node("Noise",{__context:this,"":true}), Beast.node("GR",{__context:this,"":true}), Beast.node("Form",{__context:this,"":true}), this.get() )
+            this.append( Beast.node("Noise",{__context:this,"":true}), Beast.node("Form",{__context:this,"":true}), this.get() )
         },
         domInit: function fn() {
             // Add ASCII art for ARK studio
@@ -5073,6 +5060,37 @@ MADE BY ΛRK / www.ark.studio/byld / 2025
     },  
 })
 Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Ark: {
+        expand: function () {
+            this.append(
+                Beast.node("Link",{__context:this,"href":"http://ark.studio/byld"}," \n                    ",Beast.node("glyph"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Button: {
         expand: function () {
 
@@ -5409,69 +5427,6 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-        domInit: function fn() {
-            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
-            if (typeof Shuffle !== 'undefined') {
-                const footerJpElements = document.querySelectorAll('.Footer__jp')
-                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-                const allFooterTextElements = [...footerJpElements, ...footerChElements]
-                
-                allFooterTextElements.forEach(element => {
-                    Shuffle.animateFooterTextRolling(element, {
-                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                        rollInterval: 80, // 80ms per roll
-                        letterDelay: 100, // 100ms delay between each letter
-                        minDelay: 2000, // 2 seconds minimum between animations
-                        maxDelay: 2000, // 4 seconds maximum between animations
-                        initialDelay: 1500 // 1.5 seconds buffer before repeating
-                    })
-                })
-                
-    
-            } else {
-                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
-            }
-        }
-            
-    }   
-})
-
-Beast.decl({
     Case__meta: {
         expand: function () {
             this.append(
@@ -5485,127 +5440,6 @@ Beast.decl({
 
     
     
-})
-Beast.decl({
-    Data: {
-        
-        domInit: function fn() {
-            // Initialize Data parallax effects using the ScrollFade helper
-            if (typeof ScrollFade !== 'undefined') {
-                const dataEffects = ScrollFade.initScrollEffects({
-                    parallax: {
-                        groups: [
-                            {
-                                selector: '.Data',
-                                speed: 0.7,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
-                                mobileBlurTrigger: 1.95,
-                                mobileBlurStart: 1.90,
-                                maxBlur: 8
-                            }
-                        ]
-                    }
-                })
-                
-                // Store reference for cleanup if needed
-                this.dataEffects = dataEffects
-                
-    
-            } else {
-                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
-            }
-            
-            // Data__jp and Data__ch letter-by-letter rolling animation helper
-            function setupDataTextAnimation() {
-                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
-                const dataChElements = document.querySelectorAll('.Data__ch')
-                const allTextElements = [...dataJpElements, ...dataChElements]
-                
-                allTextElements.forEach(element => {
-                    const originalText = element.textContent
-                    const isJapanese = element.classList.contains('Data__jp')
-                    const randomChars = isJapanese ? 
-                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
-                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
-                    
-                    // Split text into individual letters
-                    element.innerHTML = ''
-                    const letterSpans = []
-                    
-                    for (let i = 0; i < originalText.length; i++) {
-                        const span = document.createElement('span')
-                        span.textContent = originalText[i]
-                        span.style.display = 'inline-block'
-                        
-                        span.style.width = 'auto'
-                        element.appendChild(span)
-                        letterSpans.push(span)
-                        
-                        // Measure the width of the original character and lock it
-                        setTimeout(() => {
-                            const charWidth = span.offsetWidth
-                            span.style.width = charWidth + 'px'
-                            span.style.textAlign = 'center'
-                        }, 10)
-                    }
-                    
-                    // Function to animate all letters
-                    function animateLetters() {
-                        letterSpans.forEach((span, index) => {
-                            const targetLetter = originalText[index]
-                            let rollCount = 0
-                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
-                            
-                            setTimeout(() => {
-                                span.classList.add('rolling-animation')
-                                
-                                const letterInterval = setInterval(() => {
-                                    if (rollCount < maxRolls) {
-                                        // Show random character
-                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                        span.textContent = randomChar
-                                        rollCount++
-                                    } else {
-                                        // Show final character
-                                        span.textContent = targetLetter
-                                        span.classList.remove('rolling-animation')
-                                        clearInterval(letterInterval)
-                                    }
-                                }, 80) // 80ms per roll
-                                
-                            }, index * 100) // 100ms delay between each letter
-                        })
-                    }
-                    
-                    // Function to schedule next animation
-                    function scheduleNextAnimation() {
-                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
-                        setTimeout(() => {
-                            animateLetters()
-                            scheduleNextAnimation() // Schedule the next one
-                        }, randomDelay)
-                    }
-                    
-                    // Start initial animation
-                    animateLetters()
-                    
-                    // Schedule repeating animations after initial completes
-                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
-                    setTimeout(() => {
-                        scheduleNextAnimation()
-                    }, 1500) // 1.5 seconds buffer
-                })
-            }
-            
-            // Initialize Data text animations
-            setupDataTextAnimation()
-            
-
-        }       
-    }
 })
 Beast.decl({
     Cassette: {
@@ -5774,6 +5608,127 @@ Beast.decl({
     }
 })
 Beast.decl({
+    Data: {
+        
+        domInit: function fn() {
+            // Initialize Data parallax effects using the ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const dataEffects = ScrollFade.initScrollEffects({
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Data',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 1.95,
+                                mobileBlurStart: 1.90,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
+                
+                // Store reference for cleanup if needed
+                this.dataEffects = dataEffects
+                
+    
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
+            
+            // Data__jp and Data__ch letter-by-letter rolling animation helper
+            function setupDataTextAnimation() {
+                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
+                const dataChElements = document.querySelectorAll('.Data__ch')
+                const allTextElements = [...dataJpElements, ...dataChElements]
+                
+                allTextElements.forEach(element => {
+                    const originalText = element.textContent
+                    const isJapanese = element.classList.contains('Data__jp')
+                    const randomChars = isJapanese ? 
+                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                    
+                    // Split text into individual letters
+                    element.innerHTML = ''
+                    const letterSpans = []
+                    
+                    for (let i = 0; i < originalText.length; i++) {
+                        const span = document.createElement('span')
+                        span.textContent = originalText[i]
+                        span.style.display = 'inline-block'
+                        
+                        span.style.width = 'auto'
+                        element.appendChild(span)
+                        letterSpans.push(span)
+                        
+                        // Measure the width of the original character and lock it
+                        setTimeout(() => {
+                            const charWidth = span.offsetWidth
+                            span.style.width = charWidth + 'px'
+                            span.style.textAlign = 'center'
+                        }, 10)
+                    }
+                    
+                    // Function to animate all letters
+                    function animateLetters() {
+                        letterSpans.forEach((span, index) => {
+                            const targetLetter = originalText[index]
+                            let rollCount = 0
+                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                            
+                            setTimeout(() => {
+                                span.classList.add('rolling-animation')
+                                
+                                const letterInterval = setInterval(() => {
+                                    if (rollCount < maxRolls) {
+                                        // Show random character
+                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                        span.textContent = randomChar
+                                        rollCount++
+                                    } else {
+                                        // Show final character
+                                        span.textContent = targetLetter
+                                        span.classList.remove('rolling-animation')
+                                        clearInterval(letterInterval)
+                                    }
+                                }, 80) // 80ms per roll
+                                
+                            }, index * 100) // 100ms delay between each letter
+                        })
+                    }
+                    
+                    // Function to schedule next animation
+                    function scheduleNextAnimation() {
+                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                        setTimeout(() => {
+                            animateLetters()
+                            scheduleNextAnimation() // Schedule the next one
+                        }, randomDelay)
+                    }
+                    
+                    // Start initial animation
+                    animateLetters()
+                    
+                    // Schedule repeating animations after initial completes
+                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                    setTimeout(() => {
+                        scheduleNextAnimation()
+                    }, 1500) // 1.5 seconds buffer
+                })
+            }
+            
+            // Initialize Data text animations
+            setupDataTextAnimation()
+            
+
+        }       
+    }
+})
+Beast.decl({
     Form: {
         expand: function fn() {
             this.append(
@@ -5891,6 +5846,88 @@ Beast.decl({
         }
     }
 })
+
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+        domInit: function fn() {
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
+                    })
+                })
+                
+    
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
+        }
+            
+    }   
+})
+
+Beast.decl({
+    Head: {
+        expand: function () {
+            this.append(
+
+                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("item",{__context:this,"LogoMobile":true},"\n                    ",Beast.node("Logos",{"":true}),"\n                "),
+
+                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
+
+                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
+
+                
+            )
+        },
+        domInit: function fn() {
+            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
+            
+            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
+            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
+            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
+            
+            allCaseDataTextElements.forEach(element => {
+                Shuffle.animateLetterByLetter(element, {
+                    letterDelay: 100,
+                    rollInterval: 80,
+                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
+                })
+            })
+            
+        }       
+    }
+})
+
 
 /**
  * @block Grid Динамическая сетка
@@ -6011,43 +6048,6 @@ function grid (num, col, gap, margin) {
     var gridWidth = col * num + gap * (num - 1) + margin * 2
     return gridWidth
 }
-Beast.decl({
-    Head: {
-        expand: function () {
-            this.append(
-
-                Beast.node("CaseData",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("item",{"Logo":true},"\n                            ",Beast.node("Logos",{"":true}),"\n                        "),"\n                        ",Beast.node("item",{"Two":true},"\n                            ",Beast.node("jp",undefined,"ソフトウェア"),"\n                            ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                        "),"\n                    "),"\n\n                    ",Beast.node("mid",undefined,"\n                        ",Beast.node("jp",{"Hide":true},"ソフトウェア"),"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("text",undefined,"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("item",{__context:this,"LogoMobile":true},"\n                    ",Beast.node("Logos",{"":true}),"\n                "),
-
-                Beast.node("action",{__context:this},"\n                    ",Beast.node("Action",undefined,"Tell us about your project"),"\n                "),
-
-                Beast.node("menu",{__context:this},"\n                    ",Beast.node("Menu"),"\n                ")
-
-                
-            )
-        },
-        domInit: function fn() {
-            // CaseData__jp and CaseData__ch letter-by-letter rolling animation using Shuffle helper
-            
-            const caseDataJpElements = document.querySelectorAll('.CaseData__jp:not(.CaseData__jp_Hide)')
-            const caseDataChElements = document.querySelectorAll('.CaseData__ch')
-            const allCaseDataTextElements = [...caseDataJpElements, ...caseDataChElements]
-            
-            allCaseDataTextElements.forEach(element => {
-                Shuffle.animateLetterByLetter(element, {
-                    letterDelay: 100,
-                    rollInterval: 80,
-                    maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                    repeatDelay: 2000 + Math.random() * 2000 // 2-4 seconds
-                })
-            })
-            
-        }       
-    }
-})
-
-
 Beast.decl({
     Header: {
         expand: function () {
@@ -6201,6 +6201,201 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Process: {
+        expand: function () {
+            
+        },
+        domInit: function fn() {
+            // Check if mobile - disable animations on mobile for now
+            const isMobile = window.innerWidth <= 768
+            if (isMobile) {
+                return // Exit early on mobile, no animations
+            }
+            
+            // Process step background image fade-in animation
+            
+            // Configuration object for easy editing of timing values
+            const config = {
+                // Desktop timing values
+                desktop: {
+                    triggerPoint: 0.5,        // When first step starts fading (50% of viewport)
+                    fadeDistance: 0.3,        // Fade over 30% of viewport height
+                    glowTriggerZone: 0.6      // Glow when title is within 60% of viewport
+                },
+                // Mobile timing values
+                mobile: {
+                    triggerPoint: 0.3,        // When first step starts fading (70% of viewport)
+                    fadeDistance: 0.1,        // Fade over 40% of viewport height
+                    glowTriggerZone: 0.3      // Glow when title is within 80% of viewport
+                },
+                // Mobile breakpoint
+                mobileBreakpoint: 768
+            }
+            
+            // Wait for DOM to be fully loaded
+            setTimeout(() => {
+                const processSteps = document.querySelectorAll('.Process__step')
+                
+                // Initialize all process steps with opacity 0 for background images
+                processSteps.forEach(step => {
+                    step.style.position = 'relative'
+                    step.style.setProperty('--bg-opacity', '0')
+                })
+                
+                let fadeAnimationTriggered = false
+                
+                if (processSteps.length > 0) {
+                    // Get all process titles for glow effect
+                    const processTitles = document.querySelectorAll('.Process__title')
+                    
+                    // Check if mobile
+                    const isMobile = window.innerWidth <= config.mobileBreakpoint
+                    
+                    function updateProcessAnimations() {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+                        const windowHeight = window.innerHeight
+                        
+                        // Get timing values based on device
+                        const timing = isMobile ? config.mobile : config.desktop
+                        const triggerPoint = windowHeight * timing.triggerPoint
+                        const fadeDistance = windowHeight * timing.fadeDistance
+                        const glowTriggerZone = windowHeight * timing.glowTriggerZone
+                        
+                        // Check if first process step is in trigger range
+                        const firstStep = processSteps[0]
+                        if (firstStep) {
+                            const stepRect = firstStep.getBoundingClientRect()
+                            const stepTop = stepRect.top
+                            
+                            if (stepTop <= triggerPoint && stepTop > triggerPoint - fadeDistance) {
+                                // First step is in fade-in range - apply to all steps
+                                const progress = 1 - ((stepTop - (triggerPoint - fadeDistance)) / fadeDistance)
+                                const opacity = Math.max(0, Math.min(1, progress))
+                                
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', opacity.toString())
+                                })
+                                
+                            } else if (stepTop <= triggerPoint - fadeDistance) {
+                                // First step is fully visible - all backgrounds fully visible
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', '1')
+                                })
+                            } else {
+                                // First step hasn't entered fade range yet - all backgrounds hidden
+                                processSteps.forEach(step => {
+                                    step.style.setProperty('--bg-opacity', '0')
+                                })
+                            }
+                        }
+                        
+                        // Check each process title for glow effect and track active step
+                        let activeStepIndex = -1
+                        
+                        processTitles.forEach((title, index) => {
+                            const rect = title.getBoundingClientRect()
+                            const titleCenter = rect.top + rect.height / 2
+                            const viewportCenter = windowHeight / 2
+                            
+                            // Calculate distance from viewport center
+                            const distanceFromCenter = Math.abs(titleCenter - viewportCenter)
+                            const maxDistance = glowTriggerZone / 2
+                            
+                            if (distanceFromCenter <= maxDistance) {
+                                // Title is in glow zone - add glow class
+                                title.classList.add('Process__title_glow')
+                                activeStepIndex = index
+                                
+                                // Also make the corresponding process text fully visible
+                                const processStep = title.closest('.Process__step')
+                                if (processStep) {
+                                    const processText = processStep.querySelector('.Process__text')
+                                    if (processText) {
+                                        processText.style.opacity = '1'
+                                    }
+                                }
+                            } else {
+                                // Title is out of glow zone - remove glow class
+                                title.classList.remove('Process__title_glow')
+                                
+                                // Reset process text opacity to default
+                                const processStep = title.closest('.Process__step')
+                                if (processStep) {
+                                    const processText = processStep.querySelector('.Process__text')
+                                    if (processText) {
+                                        processText.style.opacity = ''
+                                    }
+                                }
+                            }
+                        })
+                        
+                        // Fade previous steps based on active step
+                        processSteps.forEach((step, index) => {
+                            if (activeStepIndex >= 0 && index < activeStepIndex) {
+                                // This is a previous step - fade it out
+                                step.classList.add('Process__step_faded')
+                            } else {
+                                // This is current or future step - remove fade
+                                step.classList.remove('Process__step_faded')
+                            }
+                        })
+                    }
+                    
+                    // Add scroll event listener for process animations
+                    window.addEventListener('scroll', updateProcessAnimations)
+                    
+                    // Initial call
+                    updateProcessAnimations()
+                    
+                    // Store cleanup function for potential use
+                    this.cleanupProcessAnimations = function() {
+                        window.removeEventListener('scroll', updateProcessAnimations)
+                    }
+                }
+            }, 1000) // Wait 1 second for DOM to be ready
+        }       
+    }
+})
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Review: {
+        expand: function () {
+            this.append(
+                
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+    Review__photo: {
+        
+        expand: function () {
+            this.css({
+                backgroundImage: 'url('+ this.param('src') +')'
+            })
+        }
+            
+    },
+})
 /**
  * @block Overlay Интерфейс модальных окон
  * @dep UINavigation grid Typo Control
@@ -6498,212 +6693,6 @@ Beast.decl({
 })
 
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
-    Process: {
-        expand: function () {
-            
-        },
-        domInit: function fn() {
-            // Check if mobile - disable animations on mobile for now
-            const isMobile = window.innerWidth <= 768
-            if (isMobile) {
-                return // Exit early on mobile, no animations
-            }
-            
-            // Process step background image fade-in animation
-            
-            // Configuration object for easy editing of timing values
-            const config = {
-                // Desktop timing values
-                desktop: {
-                    triggerPoint: 0.5,        // When first step starts fading (50% of viewport)
-                    fadeDistance: 0.3,        // Fade over 30% of viewport height
-                    glowTriggerZone: 0.6      // Glow when title is within 60% of viewport
-                },
-                // Mobile timing values
-                mobile: {
-                    triggerPoint: 0.3,        // When first step starts fading (70% of viewport)
-                    fadeDistance: 0.1,        // Fade over 40% of viewport height
-                    glowTriggerZone: 0.3      // Glow when title is within 80% of viewport
-                },
-                // Mobile breakpoint
-                mobileBreakpoint: 768
-            }
-            
-            // Wait for DOM to be fully loaded
-            setTimeout(() => {
-                const processSteps = document.querySelectorAll('.Process__step')
-                
-                // Initialize all process steps with opacity 0 for background images
-                processSteps.forEach(step => {
-                    step.style.position = 'relative'
-                    step.style.setProperty('--bg-opacity', '0')
-                })
-                
-                let fadeAnimationTriggered = false
-                
-                if (processSteps.length > 0) {
-                    // Get all process titles for glow effect
-                    const processTitles = document.querySelectorAll('.Process__title')
-                    
-                    // Check if mobile
-                    const isMobile = window.innerWidth <= config.mobileBreakpoint
-                    
-                    function updateProcessAnimations() {
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-                        const windowHeight = window.innerHeight
-                        
-                        // Get timing values based on device
-                        const timing = isMobile ? config.mobile : config.desktop
-                        const triggerPoint = windowHeight * timing.triggerPoint
-                        const fadeDistance = windowHeight * timing.fadeDistance
-                        const glowTriggerZone = windowHeight * timing.glowTriggerZone
-                        
-                        // Check if first process step is in trigger range
-                        const firstStep = processSteps[0]
-                        if (firstStep) {
-                            const stepRect = firstStep.getBoundingClientRect()
-                            const stepTop = stepRect.top
-                            
-                            if (stepTop <= triggerPoint && stepTop > triggerPoint - fadeDistance) {
-                                // First step is in fade-in range - apply to all steps
-                                const progress = 1 - ((stepTop - (triggerPoint - fadeDistance)) / fadeDistance)
-                                const opacity = Math.max(0, Math.min(1, progress))
-                                
-                                processSteps.forEach(step => {
-                                    step.style.setProperty('--bg-opacity', opacity.toString())
-                                })
-                                
-                            } else if (stepTop <= triggerPoint - fadeDistance) {
-                                // First step is fully visible - all backgrounds fully visible
-                                processSteps.forEach(step => {
-                                    step.style.setProperty('--bg-opacity', '1')
-                                })
-                            } else {
-                                // First step hasn't entered fade range yet - all backgrounds hidden
-                                processSteps.forEach(step => {
-                                    step.style.setProperty('--bg-opacity', '0')
-                                })
-                            }
-                        }
-                        
-                        // Check each process title for glow effect and track active step
-                        let activeStepIndex = -1
-                        
-                        processTitles.forEach((title, index) => {
-                            const rect = title.getBoundingClientRect()
-                            const titleCenter = rect.top + rect.height / 2
-                            const viewportCenter = windowHeight / 2
-                            
-                            // Calculate distance from viewport center
-                            const distanceFromCenter = Math.abs(titleCenter - viewportCenter)
-                            const maxDistance = glowTriggerZone / 2
-                            
-                            if (distanceFromCenter <= maxDistance) {
-                                // Title is in glow zone - add glow class
-                                title.classList.add('Process__title_glow')
-                                activeStepIndex = index
-                                
-                                // Also make the corresponding process text fully visible
-                                const processStep = title.closest('.Process__step')
-                                if (processStep) {
-                                    const processText = processStep.querySelector('.Process__text')
-                                    if (processText) {
-                                        processText.style.opacity = '1'
-                                    }
-                                }
-                            } else {
-                                // Title is out of glow zone - remove glow class
-                                title.classList.remove('Process__title_glow')
-                                
-                                // Reset process text opacity to default
-                                const processStep = title.closest('.Process__step')
-                                if (processStep) {
-                                    const processText = processStep.querySelector('.Process__text')
-                                    if (processText) {
-                                        processText.style.opacity = ''
-                                    }
-                                }
-                            }
-                        })
-                        
-                        // Fade previous steps based on active step
-                        processSteps.forEach((step, index) => {
-                            if (activeStepIndex >= 0 && index < activeStepIndex) {
-                                // This is a previous step - fade it out
-                                step.classList.add('Process__step_faded')
-                            } else {
-                                // This is current or future step - remove fade
-                                step.classList.remove('Process__step_faded')
-                            }
-                        })
-                    }
-                    
-                    // Add scroll event listener for process animations
-                    window.addEventListener('scroll', updateProcessAnimations)
-                    
-                    // Initial call
-                    updateProcessAnimations()
-                    
-                    // Store cleanup function for potential use
-                    this.cleanupProcessAnimations = function() {
-                        window.removeEventListener('scroll', updateProcessAnimations)
-                    }
-                }
-            }, 1000) // Wait 1 second for DOM to be ready
-        }       
-    }
-})
-Beast.decl({
-    Review: {
-        expand: function () {
-            this.append(
-                
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-    Review__photo: {
-        
-        expand: function () {
-            this.css({
-                backgroundImage: 'url('+ this.param('src') +')'
-            })
-        }
-            
-    },
-})
-Beast.decl({
-    Reviews: {
-        expand: function fn() {
-            
-        },
-        domInit: function fn() {
-            
-        }
-    }
-})
-
-Beast.decl({
     Services: {
         tag: 'div',
         mod: {
@@ -6772,16 +6761,6 @@ Beast.decl({
 })
 
 Beast.decl({
-    Section: {
-        expand: function () {
-            this.domAttr('id', this.param('id'))
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Solution: {
         expand: function () {
             this.append(
@@ -6813,6 +6792,27 @@ Beast.decl({
     },
     
 })
+Beast.decl({
+    Section: {
+        expand: function () {
+            this.domAttr('id', this.param('id'))
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
+    Reviews: {
+        expand: function fn() {
+            
+        },
+        domInit: function fn() {
+            
+        }
+    }
+})
+
 /**
  * @block Thumb Тумбнеил
  * @dep grid link
