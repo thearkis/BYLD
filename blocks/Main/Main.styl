@@ -6,7 +6,9 @@
         .Logo
             margin-bottom 60px
     &__menu
-        position absolute
+        position fixed
+        z-index 9999
+        backdrop-filter blur(10px)
         left 30px
         top 30px
         @media $screen-phone

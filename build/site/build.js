@@ -5126,93 +5126,6 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
-})
-Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5427,6 +5340,93 @@ Beast.decl({
     },
 })
 Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
+        }      
+    }   
+})
+Beast.decl({
     Case__meta: {
         expand: function () {
             this.append(
@@ -5441,6 +5441,172 @@ Beast.decl({
     
     
 })
+Beast.decl({
+    Data: {
+        
+        domInit: function fn() {
+            // Initialize Data parallax effects using the ScrollFade helper
+            if (typeof ScrollFade !== 'undefined') {
+                const dataEffects = ScrollFade.initScrollEffects({
+                    parallax: {
+                        groups: [
+                            {
+                                selector: '.Data',
+                                speed: 0.7,
+                                blur: true,
+                                movement: true,
+                                blurTrigger: 0.20,
+                                blurStart: 0.15,
+                                mobileBlurTrigger: 1.95,
+                                mobileBlurStart: 1.90,
+                                maxBlur: 8
+                            }
+                        ]
+                    }
+                })
+                
+                // Store reference for cleanup if needed
+                this.dataEffects = dataEffects
+                
+    
+            } else {
+                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
+            }
+            
+            // Data__jp and Data__ch letter-by-letter rolling animation helper
+            function setupDataTextAnimation() {
+                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
+                const dataChElements = document.querySelectorAll('.Data__ch')
+                const allTextElements = [...dataJpElements, ...dataChElements]
+                
+                allTextElements.forEach(element => {
+                    const originalText = element.textContent
+                    const isJapanese = element.classList.contains('Data__jp')
+                    const randomChars = isJapanese ? 
+                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
+                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
+                    
+                    // Split text into individual letters
+                    element.innerHTML = ''
+                    const letterSpans = []
+                    
+                    for (let i = 0; i < originalText.length; i++) {
+                        const span = document.createElement('span')
+                        span.textContent = originalText[i]
+                        span.style.display = 'inline-block'
+                        
+                        span.style.width = 'auto'
+                        element.appendChild(span)
+                        letterSpans.push(span)
+                        
+                        // Measure the width of the original character and lock it
+                        setTimeout(() => {
+                            const charWidth = span.offsetWidth
+                            span.style.width = charWidth + 'px'
+                            span.style.textAlign = 'center'
+                        }, 10)
+                    }
+                    
+                    // Function to animate all letters
+                    function animateLetters() {
+                        letterSpans.forEach((span, index) => {
+                            const targetLetter = originalText[index]
+                            let rollCount = 0
+                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
+                            
+                            setTimeout(() => {
+                                span.classList.add('rolling-animation')
+                                
+                                const letterInterval = setInterval(() => {
+                                    if (rollCount < maxRolls) {
+                                        // Show random character
+                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                        span.textContent = randomChar
+                                        rollCount++
+                                    } else {
+                                        // Show final character
+                                        span.textContent = targetLetter
+                                        span.classList.remove('rolling-animation')
+                                        clearInterval(letterInterval)
+                                    }
+                                }, 80) // 80ms per roll
+                                
+                            }, index * 100) // 100ms delay between each letter
+                        })
+                    }
+                    
+                    // Function to schedule next animation
+                    function scheduleNextAnimation() {
+                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
+                        setTimeout(() => {
+                            animateLetters()
+                            scheduleNextAnimation() // Schedule the next one
+                        }, randomDelay)
+                    }
+                    
+                    // Start initial animation
+                    animateLetters()
+                    
+                    // Schedule repeating animations after initial completes
+                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
+                    setTimeout(() => {
+                        scheduleNextAnimation()
+                    }, 1500) // 1.5 seconds buffer
+                })
+            }
+            
+            // Initialize Data text animations
+            setupDataTextAnimation()
+            
+
+        }       
+    }
+})
+Beast.decl({
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
+        domInit: function fn() {
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
+                    })
+                })
+                
+    
+            } else {
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
+            }
+        }
+            
+    }   
+})
+
 Beast.decl({
     Cassette: {
         domInit: function fn() {
@@ -5604,172 +5770,6 @@ Beast.decl({
             } else {
                 // No cassette pieces found
             }
-        }       
-    }
-})
-Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-        domInit: function fn() {
-            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
-            if (typeof Shuffle !== 'undefined') {
-                const footerJpElements = document.querySelectorAll('.Footer__jp')
-                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-                const allFooterTextElements = [...footerJpElements, ...footerChElements]
-                
-                allFooterTextElements.forEach(element => {
-                    Shuffle.animateFooterTextRolling(element, {
-                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                        rollInterval: 80, // 80ms per roll
-                        letterDelay: 100, // 100ms delay between each letter
-                        minDelay: 2000, // 2 seconds minimum between animations
-                        maxDelay: 2000, // 4 seconds maximum between animations
-                        initialDelay: 1500 // 1.5 seconds buffer before repeating
-                    })
-                })
-                
-    
-            } else {
-                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
-            }
-        }
-            
-    }   
-})
-
-Beast.decl({
-    Data: {
-        
-        domInit: function fn() {
-            // Initialize Data parallax effects using the ScrollFade helper
-            if (typeof ScrollFade !== 'undefined') {
-                const dataEffects = ScrollFade.initScrollEffects({
-                    parallax: {
-                        groups: [
-                            {
-                                selector: '.Data',
-                                speed: 0.7,
-                                blur: true,
-                                movement: true,
-                                blurTrigger: 0.20,
-                                blurStart: 0.15,
-                                mobileBlurTrigger: 1.95,
-                                mobileBlurStart: 1.90,
-                                maxBlur: 8
-                            }
-                        ]
-                    }
-                })
-                
-                // Store reference for cleanup if needed
-                this.dataEffects = dataEffects
-                
-    
-            } else {
-                console.warn('ScrollFade helper not found. Make sure scrollfade.js is loaded.')
-            }
-            
-            // Data__jp and Data__ch letter-by-letter rolling animation helper
-            function setupDataTextAnimation() {
-                const dataJpElements = document.querySelectorAll('.Data__jp:not(.Data__jp_Hide)')
-                const dataChElements = document.querySelectorAll('.Data__ch')
-                const allTextElements = [...dataJpElements, ...dataChElements]
-                
-                allTextElements.forEach(element => {
-                    const originalText = element.textContent
-                    const isJapanese = element.classList.contains('Data__jp')
-                    const randomChars = isJapanese ? 
-                        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン' :
-                        '信頼安全技術開発软件程序代码数据系统网络服务器客户端界面设计测试部署维护更新版本管理'
-                    
-                    // Split text into individual letters
-                    element.innerHTML = ''
-                    const letterSpans = []
-                    
-                    for (let i = 0; i < originalText.length; i++) {
-                        const span = document.createElement('span')
-                        span.textContent = originalText[i]
-                        span.style.display = 'inline-block'
-                        
-                        span.style.width = 'auto'
-                        element.appendChild(span)
-                        letterSpans.push(span)
-                        
-                        // Measure the width of the original character and lock it
-                        setTimeout(() => {
-                            const charWidth = span.offsetWidth
-                            span.style.width = charWidth + 'px'
-                            span.style.textAlign = 'center'
-                        }, 10)
-                    }
-                    
-                    // Function to animate all letters
-                    function animateLetters() {
-                        letterSpans.forEach((span, index) => {
-                            const targetLetter = originalText[index]
-                            let rollCount = 0
-                            const maxRolls = 6 + Math.floor(Math.random() * 4) // 6-9 rolls per letter
-                            
-                            setTimeout(() => {
-                                span.classList.add('rolling-animation')
-                                
-                                const letterInterval = setInterval(() => {
-                                    if (rollCount < maxRolls) {
-                                        // Show random character
-                                        const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                        span.textContent = randomChar
-                                        rollCount++
-                                    } else {
-                                        // Show final character
-                                        span.textContent = targetLetter
-                                        span.classList.remove('rolling-animation')
-                                        clearInterval(letterInterval)
-                                    }
-                                }, 80) // 80ms per roll
-                                
-                            }, index * 100) // 100ms delay between each letter
-                        })
-                    }
-                    
-                    // Function to schedule next animation
-                    function scheduleNextAnimation() {
-                        const randomDelay = 2000 + Math.random() * 2000 // 2-4 seconds
-                        setTimeout(() => {
-                            animateLetters()
-                            scheduleNextAnimation() // Schedule the next one
-                        }, randomDelay)
-                    }
-                    
-                    // Start initial animation
-                    animateLetters()
-                    
-                    // Schedule repeating animations after initial completes
-                    // Wait for initial animation to finish (longest possible: 4 letters * 100ms + 9 rolls * 80ms = 1120ms)
-                    setTimeout(() => {
-                        scheduleNextAnimation()
-                    }, 1500) // 1.5 seconds buffer
-                })
-            }
-            
-            // Initialize Data text animations
-            setupDataTextAnimation()
-            
-
         }       
     }
 })
@@ -6148,24 +6148,6 @@ Beast
 
 
 Beast.decl({
-    Box: {
-        expand: function () {
-            this.append(
-                Beast.node("corner",{__context:this,"TL":true}),
-                Beast.node("corner",{__context:this,"TR":true}),
-                Beast.node("corner",{__context:this,"BR":true}),
-                Beast.node("corner",{__context:this,"BL":true}),
-                this.get('title'),
-                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
-
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast.decl({
     Menu: {
         
 
@@ -6190,6 +6172,25 @@ Beast.decl({
                     interval: 40
                 })
             })
+            
+            // Smooth scroll for anchor links
+            const menuLinks = document.querySelectorAll('.Menu a[href^="#"]')
+            
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault()
+                    
+                    const targetId = this.getAttribute('href').substring(1)
+                    const targetElement = document.getElementById(targetId)
+                    
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        })
+                    }
+                })
+            })
         }
     },
     
@@ -6197,6 +6198,24 @@ Beast.decl({
 })
 
 
+Beast.decl({
+    Box: {
+        expand: function () {
+            this.append(
+                Beast.node("corner",{__context:this,"TL":true}),
+                Beast.node("corner",{__context:this,"TR":true}),
+                Beast.node("corner",{__context:this,"BR":true}),
+                Beast.node("corner",{__context:this,"BL":true}),
+                this.get('title'),
+                Beast.node("wrap",{__context:this},"\n                    ",this.get('text'),"\n                    ",Beast.node("meta"),"\n                    ",this.get('hint'),"\n                    ",Beast.node("footer"),"\n                ")
+
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
 /**
  * @block Overlay Интерфейс модальных окон
  * @dep UINavigation grid Typo Control
@@ -6682,6 +6701,16 @@ Beast.decl({
 })
 
 Beast.decl({
+    Section: {
+        expand: function () {
+            this.domAttr('id', this.param('id'))
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast.decl({
     Services: {
         tag: 'div',
         mod: {
@@ -6750,14 +6779,36 @@ Beast.decl({
 })
 
 Beast.decl({
-    Section: {
+    Solution: {
         expand: function () {
-            this.domAttr('id', this.param('id'))
+            this.append(
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+            )
         },
         domInit: function fn() {
             
         }       
-    }
+    },
+
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
 })
 /**
  * @block Thumb Тумбнеил
@@ -7066,38 +7117,6 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-Beast.decl({
-    Solution: {
-        expand: function () {
-            this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
-        }
-            
-    },
-    
-})
 Beast.decl({
 
     /**
