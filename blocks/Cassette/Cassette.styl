@@ -1,5 +1,19 @@
-.Cassette_piece_1.Cassette_fixed
+// Fixed positioning for all cassette pieces
+.Cassette_piece_1.Cassette_fixed,
+.Cassette_piece_2.Cassette_fixed,
+.Cassette_piece_3.Cassette_fixed,
+.Cassette_piece_4.Cassette_fixed,
+.Cassette_piece_5.Cassette_fixed
     position fixed !important
+    right calc(11vw + 30px) !important
+    top 7vw !important
+    
+    @media $screen-phone
+        position fixed !important
+        right 0 !important
+        left 0 !important
+        top 150px !important
+        margin 0 auto
 
 
     

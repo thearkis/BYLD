@@ -3,7 +3,7 @@ Beast.decl({
         domInit: function fn() {
             // Cassette pieces scroll detection for fixed positioning
             const cassettePieces = []
-            let atLastPiece = false
+            let reachedLastPiece = false
             
             // Configuration for viewport-relative positioning
             const config = {
@@ -11,17 +11,20 @@ Beast.decl({
                 triggerOffset: 0.15,  // 15% of viewport height
                 // Minimum scroll delta to prevent micro-movements
                 minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
+
                 // Mobile breakpoint
                 mobileBreakpoint: 768,
+
                 // Debounce resize events
                 resizeDebounce: 250,
+
                 // Mobile and Desktop configurations
                 mobile: {
                     triggerOffset: 500, // Pieces start at -350px, need to scroll 500px to reach fixed position at 150px
                     minScrollDelta: 0.02 // 2% of viewport height
                 },
                 desktop: {
-                    triggerOffset: 0.25, // Increased to 25% to fix pieces earlier on desktop
+                    triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
                     minScrollDelta: 0.02 // 2% of viewport height
                 }
             }
@@ -92,34 +95,32 @@ Beast.decl({
                     
                     // Check if we've reached the last piece (piece 5)
                     const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint
-                    
-                    if (reachedLastPiece && !atLastPiece) {
-                        // All pieces should lose their fixed position and move together
-                        atLastPiece = true
+                    if (scrollY >= lastPiece.triggerPoint && !reachedLastPiece) {
+                        // Release all pieces when reaching the last piece
+                        reachedLastPiece = true
                         cassettePieces.forEach(piece => {
-                            if (piece.isFixed) {
-                                piece.element.classList.remove('Cassette_fixed')
-                                piece.isFixed = false
-                            }
+                            piece.element.classList.remove('Cassette_fixed')
+                            piece.isFixed = false
                         })
-                        return // Exit early when at last piece
-                    }
-                    
-                    if (!reachedLastPiece && atLastPiece) {
-                        // Reset flag when not at last piece
-                        atLastPiece = false
+                    } else if (scrollY < lastPiece.triggerPoint && reachedLastPiece) {
+                        // Reset when scrolling back up before last piece
+                        reachedLastPiece = false
                     }
                     
                     // Only process individual pieces when not at last piece
-                    if (!atLastPiece) {
+                    if (!reachedLastPiece) {
+                        // Process each piece for cascading effect
+                        // Once a piece is triggered to be fixed, it should stay fixed
                         cassettePieces.forEach(piece => {
                             const shouldBeFixed = scrollY >= piece.triggerPoint
                             
+                            // Only add fixed class when scrolling past trigger point
                             if (shouldBeFixed && !piece.isFixed) {
                                 piece.element.classList.add('Cassette_fixed')
                                 piece.isFixed = true
-                            } else if (!shouldBeFixed && piece.isFixed) {
+                            }
+                            // Only remove fixed class when scrolling back up past trigger point
+                            else if (!shouldBeFixed && piece.isFixed) {
                                 piece.element.classList.remove('Cassette_fixed')
                                 piece.isFixed = false
                             }
@@ -160,7 +161,7 @@ Beast.decl({
                         piece.isFixed = false
                         piece.element.style.transform = ''
                     })
-                    atLastPiece = false
+                    reachedLastPiece = false
                 }
                 
                 // Expose reset function globally for debugging
