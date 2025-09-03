@@ -5,6 +5,27 @@ Beast.decl({
             const cassettePieces = []
             let atLastPiece = false
             
+            // Configuration for viewport-relative positioning
+            const config = {
+                // Offset as percentage of viewport height (instead of fixed pixels)
+                triggerOffset: 0.15,  // 15% of viewport height
+                // Minimum scroll delta to prevent micro-movements
+                minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
+                // Mobile breakpoint
+                mobileBreakpoint: 768,
+                // Debounce resize events
+                resizeDebounce: 250,
+                // Mobile and Desktop configurations
+                mobile: {
+                    triggerOffset: 500, // Pieces start at -350px, need to scroll 500px to reach fixed position at 150px
+                    minScrollDelta: 0.02 // 2% of viewport height
+                },
+                desktop: {
+                    triggerOffset: 0.25, // Increased to 25% to fix pieces earlier on desktop
+                    minScrollDelta: 0.02 // 2% of viewport height
+                }
+            }
+            
             // Get all cassette pieces
             for (let i = 1; i <= 5; i++) {
                 const piece = document.querySelector(`.Cassette_piece_${i}`)
@@ -13,33 +34,65 @@ Beast.decl({
                         element: piece,
                         index: i,
                         isFixed: false,
-                        triggerPoint: piece.getBoundingClientRect().top + window.scrollY
+                        triggerPoint: 0, // Will be calculated dynamically
+                        lastPosition: 0 // Track last position to prevent jiggle
                     })
-    
                 }
             }
             
             if (cassettePieces.length > 0) {
-    
                 
-                // Throttled scroll handler for better performance
-                let ticking = false
-                function throttledCheckCassettePositions() {
-                    if (!ticking) {
-                        requestAnimationFrame(() => {
-                            checkCassettePositions()
-                            ticking = false
-                        })
-                        ticking = true
-                    }
+                // Function to calculate trigger points dynamically with mobile/desktop support
+                function calculateTriggerPoints() {
+                    const windowHeight = window.innerHeight
+                    
+                    cassettePieces.forEach(piece => {
+                        const rect = piece.element.getBoundingClientRect()
+                        
+                        if (MissEvent.mobile) {
+                            // Mobile: Use fixed pixel offset (pieces start at -350px, need 500px scroll to reach 150px)
+                            piece.triggerPoint = rect.top + window.scrollY - config.mobile.triggerOffset
+                        } else {
+                            // Desktop: Use viewport-relative offset
+                            const offsetVh = windowHeight * config.desktop.triggerOffset
+                            piece.triggerPoint = rect.top + window.scrollY - offsetVh
+                        }
+                        
+                        // Only update if the change is significant (prevents micro-adjustments)
+                        if (Math.abs(piece.triggerPoint - piece.lastPosition) > 10) {
+                            piece.lastPosition = piece.triggerPoint
+                        }
+                    })
                 }
+                
+                // Calculate initial trigger points
+                calculateTriggerPoints()
+                
+                // Optimized scroll handler with viewport-relative positioning
+                let lastScrollY = 0
+                let ticking = false
+                let lastWindowHeight = window.innerHeight
                 
                 function checkCassettePositions() {
                     const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    const scrollDelta = Math.abs(scrollY - lastScrollY)
+                    const minDelta = windowHeight * config.minScrollDelta
+                    
+                    // Only process if scroll amount is significant (prevents micro-movements)
+                    if (scrollDelta < minDelta) return
+                    
+                    // Check if viewport height changed significantly (only recalculate when needed)
+                    if (Math.abs(windowHeight - lastWindowHeight) > 50) {
+                        calculateTriggerPoints()
+                        lastWindowHeight = windowHeight
+                    }
+                    
+                    lastScrollY = scrollY
                     
                     // Check if we've reached the last piece (piece 5)
                     const lastPiece = cassettePieces[cassettePieces.length - 1]
-                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint - 100
+                    const reachedLastPiece = scrollY >= lastPiece.triggerPoint
                     
                     if (reachedLastPiece && !atLastPiece) {
                         // All pieces should lose their fixed position and move together
@@ -61,7 +114,7 @@ Beast.decl({
                     // Only process individual pieces when not at last piece
                     if (!atLastPiece) {
                         cassettePieces.forEach(piece => {
-                            const shouldBeFixed = scrollY >= piece.triggerPoint - 100
+                            const shouldBeFixed = scrollY >= piece.triggerPoint
                             
                             if (shouldBeFixed && !piece.isFixed) {
                                 piece.element.classList.add('Cassette_fixed')
@@ -74,17 +127,30 @@ Beast.decl({
                     }
                 }
                 
-                // Add scroll event listener with throttling for better performance
-                window.addEventListener('scroll', throttledCheckCassettePositions, { passive: true })
+                function throttledCheckCassettePositions() {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            checkCassettePositions()
+                            ticking = false
+                        })
+                        ticking = true
+                    }
+                }
                 
-                // Add resize listener to recalculate trigger points
+                // Add scroll event listener for immediate response
+                window.addEventListener('scroll', checkCassettePositions, { passive: true })
+                
+                // Debounced resize listener to prevent excessive recalculations
+                let resizeTimeout
                 window.addEventListener('resize', () => {
-                    // Recalculate trigger points after resize
-                    cassettePieces.forEach(piece => {
-                        piece.triggerPoint = piece.element.getBoundingClientRect().top + window.scrollY
-                    })
-                    // Force a check after resize
-                    checkCassettePositions()
+                    clearTimeout(resizeTimeout)
+                    resizeTimeout = setTimeout(() => {
+                        // Recalculate trigger points after resize
+                        calculateTriggerPoints()
+                        lastWindowHeight = window.innerHeight
+                        // Force a check after resize
+                        checkCassettePositions()
+                    }, config.resizeDebounce)
                 })
                 
                 // Cleanup function to reset all pieces
@@ -95,7 +161,6 @@ Beast.decl({
                         piece.element.style.transform = ''
                     })
                     atLastPiece = false
-        
                 }
                 
                 // Expose reset function globally for debugging
@@ -105,7 +170,7 @@ Beast.decl({
                 checkCassettePositions()
     
             } else {
-
+                // No cassette pieces found
             }
         }       
     }

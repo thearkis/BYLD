@@ -8,41 +8,61 @@
     position absolute
     width 23vw
     height 27vw
+    background-size 23vw
     right 11vw
     top 6vw
+
     z-index 1000
     background-position center
-    background-size 23vw
     background-repeat no-repeat
+
+    @media $screen-phone
+        width 220px
+        height 257px
+        background-size 220px
+        margin 0 auto
+        right 0
+        left 0
+        top 0
+
+        &_piece_1,
+        &_piece_2,
+        &_piece_3,
+        &_piece_4,
+        &_piece_5
+            top -350px
 
     &_Fixed
         position fixed
         right calc(11vw + 30px) !important
         top 7vw !important
+
+        @media $screen-phone
+            right 0 !important
+            left 0 !important
+            top 150px !important
+            margin 0 auto
     &_piece
         &_1
             background-image url('/assets/cassette/piece-01.svg')
-            .Cassette
-                &_fixed
-                    position fixed
-
             
         &_2
             background-image url('/assets/cassette/piece-02.svg')
-            &.Cassette_fixed
-                position fixed !important
             
         &_3
             background-image url('/assets/cassette/piece-03.svg')
-            &.Cassette_fixed
-                position fixed !important
             
         &_4
             background-image url('/assets/cassette/piece-04.svg')
-            &.Cassette_fixed
-                position fixed !important
             
         &_5
             background-image url('/assets/cassette/piece-05.svg')
-            &.Cassette_fixed
+
+        // Mobile fixed positioning for all pieces
+        &.Cassette_fixed
+            @media $screen-phone
                 position fixed !important
+                right 0 !important
+                left 0 !important
+                top 150px !important
+                margin 0 auto

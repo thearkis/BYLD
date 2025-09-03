@@ -17,31 +17,64 @@
 .Process
     margin-top 0 
     position relative   
-    font-size 1.3vw
-    line-height 1.5vw
+    body()
+
+    @media $screen-phone
+        &__step
+            
+            margin 460px 0 !important
+            padding 24px 20px !important
+            
+        &__step_01,
+        &__step_02,
+        &__step_03,
+        &__step_04,
+        &__step_05
+            height auto !important
+        &__outline, &__outline::before
+            opacity 1 !important
+            background-image none !important
+            height auto !important
+            border 1px solid red
+            border-radius 16px
+
+            
 
     &__misc-line_blue
         color blue
     &__num
         color red
-        font-size 3vw
+        superheader()
         position absolute
         right 3vw
         top 3vw
+
+        @media $screen-phone
+            top 20px
+            left 20px
     &__misc
         position absolute
         bottom 3.5vw
         background black
         padding-right 1vw
+        @media $screen-phone
+            bottom initial
+            position relative
+            margin-top 24px
     &__text
         width 40%
         opacity .4
         transition opacity 0.6s ease
+        @media $screen-phone
+            width 100%
     &__title
         color red
-        font-size 3vw
+        superheader()
         margin-bottom 2vw
         transition text-shadow 0.6s ease
+        @media $screen-phone
+            margin-top 80px
+            margin-bottom 24px
         &_glow
             text-shadow 0 0 10px #FF2040, 0 0 25px #FF1030, 0 0 40px #FF0020, 0 0 60px rgba(255, 32, 64, 0.2)
 
@@ -104,5 +137,13 @@
                 background-image url('/assets/process_5.svg')
             height 31.8vw
             .Process
-                &__title, &__num
+                &__num
                     margin-top .7vw
+                    @media $screen-phone
+                        top 20px
+                        left 20px
+                &__title
+                    margin-top .7vw
+                    @media $screen-phone
+                        margin-top 80px
+                        margin-bottom 24px

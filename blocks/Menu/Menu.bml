@@ -4,25 +4,36 @@ Beast.decl({
 
         expand: function () {
             this.append(
+                
                 <item>
-                    <digit>[01]</digit>
-                    <text>About</text>
+                    <Link href="#about">
+                        <digit>[01]</digit>
+                        <text>About</text>
+                    </Link>
                 </item>,
                 <item>
-                    <digit>[02]</digit>
-                    <text>What we do</text>
+                    <Link href="#services">
+                        <digit>[02]</digit>
+                        <text>What we do</text>
+                    </Link>
                 </item>,
                 <item>
-                    <digit>[03]</digit>
-                    <text>What we've built</text>
+                    <Link href="#work">
+                        <digit>[03]</digit>
+                        <text>What we've built</text>
+                    </Link>
                 </item>,
                 <item>
-                    <digit>[04]</digit>
-                    <text>How we build</text>
+                    <Link href="#process">
+                        <digit>[04]</digit>
+                        <text>How we build</text>
+                    </Link>
                 </item>,
                 <item>
-                    <digit>[05]</digit>
-                    <text>What people say</text>
+                    <Link href="#reviews">
+                        <digit>[05]</digit>
+                        <text>What people say</text>
+                    </Link>
                 </item>
             )
         },
