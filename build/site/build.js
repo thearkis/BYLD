@@ -5006,73 +5006,6 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-            }
-            
-            // Add click handler to show form
-            this.on('click', function () {
-                if (typeof window.showForm === 'function') {
-                    window.showForm()
-                }
-            })
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
     Box: {
         expand: function () {
             this.append(
@@ -5212,6 +5145,73 @@ Beast.decl({
         }      
     }   
 })
+Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+            }
+            
+            // Add click handler to show form
+            this.on('click', function () {
+                if (typeof window.showForm === 'function') {
+                    window.showForm()
+                }
+            })
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
 Beast.decl({
     Case: {
         expand: function () {
@@ -5425,175 +5425,6 @@ Beast.decl({
         }
             
     },
-})
-Beast.decl({
-    Cassette: {
-        domInit: function fn() {
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            
-            // Configuration for viewport-relative positioning
-            const config = {
-                // Offset as percentage of viewport height (instead of fixed pixels)
-                triggerOffset: 0.15,  // 15% of viewport height
-                // Minimum scroll delta to prevent micro-movements
-                minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
-
-                // Mobile breakpoint
-                mobileBreakpoint: 768,
-
-                // Debounce resize events
-                resizeDebounce: 250,
-
-                // Mobile and Desktop configurations
-                mobile: {
-                    triggerOffset: 360, // Reduced from 360 to make pieces fix earlier
-                    minScrollDelta: 0 // 2% of viewport height
-                },
-                desktop: {
-                    triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
-                    minScrollDelta: 0.02 // 2% of viewport height
-                }
-            }
-            
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: 0, // Will be calculated dynamically
-                        lastPosition: 0 // Track last position to prevent jiggle
-                    })
-                }
-            }
-            
-            if (cassettePieces.length > 0) {
-                
-                // Function to calculate trigger points dynamically with mobile/desktop support
-                function calculateTriggerPoints() {
-                    const windowHeight = window.innerHeight
-                    
-                    cassettePieces.forEach(piece => {
-                        const rect = piece.element.getBoundingClientRect()
-                        
-                        if (MissEvent.mobile) {
-                            // Mobile: Different offset for each piece to create cascading effect
-                            const baseTriggerOffset = 200 // Base offset for piece 1
-                            const cascadeIncrement = 150 // Each piece triggers 150px later than the previous
-                            const pieceOffset = baseTriggerOffset + ((piece.index - 1) * cascadeIncrement)
-                            piece.triggerPoint = rect.top + window.scrollY - pieceOffset
-                        } else {
-                            // Desktop: Use viewport-relative offset
-                            const offsetVh = windowHeight * config.desktop.triggerOffset
-                            piece.triggerPoint = rect.top + window.scrollY - offsetVh
-                        }
-                        
-                        // Only update if the change is significant (prevents micro-adjustments)
-                        if (Math.abs(piece.triggerPoint - piece.lastPosition) > 10) {
-                            piece.lastPosition = piece.triggerPoint
-                        }
-                    })
-                }
-                
-                // Calculate initial trigger points
-                calculateTriggerPoints()
-                
-                // Optimized scroll handler with viewport-relative positioning
-                let lastScrollY = 0
-                let ticking = false
-                let lastWindowHeight = window.innerHeight
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    const scrollDelta = Math.abs(scrollY - lastScrollY)
-                    const minDelta = windowHeight * config.minScrollDelta
-                    
-                    // Only process if scroll amount is significant (prevents micro-movements)
-                    if (scrollDelta < minDelta) return
-                    
-                    // Check if viewport height changed significantly (only recalculate when needed)
-                    if (Math.abs(windowHeight - lastWindowHeight) > 50) {
-                        calculateTriggerPoints()
-                        lastWindowHeight = windowHeight
-                    }
-                    
-                    lastScrollY = scrollY
-                    
-                    // Get piece 5 trigger point for unfixing pieces 1-4
-                    const piece5 = cassettePieces[4] // piece 5 is at index 4
-                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
-                    
-                    // Process each piece for cascading effect
-                    cassettePieces.forEach(piece => {
-                        const shouldBeFixed = scrollY >= piece.triggerPoint
-                        
-                        // Only add fixed class when scrolling past trigger point
-                        // BUT never fix piece 5 (last piece)
-                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
-                            piece.element.classList.add('Cassette_fixed')
-                            piece.isFixed = true
-                        }
-                        
-                        // Remove fixed class if scrolling back up OR if reached piece 5
-                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
-                        
-                        if (shouldBeUnfixed && piece.isFixed) {
-                            piece.element.classList.remove('Cassette_fixed')
-                            piece.isFixed = false
-                        }
-                    })
-                }
-                
-                function throttledCheckCassettePositions() {
-                    if (!ticking) {
-                        requestAnimationFrame(() => {
-                            checkCassettePositions()
-                            ticking = false
-                        })
-                        ticking = true
-                    }
-                }
-                
-                // Add scroll event listener for immediate response
-                window.addEventListener('scroll', checkCassettePositions, { passive: true })
-                
-                // Debounced resize listener to prevent excessive recalculations
-                let resizeTimeout
-                window.addEventListener('resize', () => {
-                    clearTimeout(resizeTimeout)
-                    resizeTimeout = setTimeout(() => {
-                        // Recalculate trigger points after resize
-                        calculateTriggerPoints()
-                        lastWindowHeight = window.innerHeight
-                        // Force a check after resize
-                        checkCassettePositions()
-                    }, config.resizeDebounce)
-                })
-                
-                // Cleanup function to reset all pieces
-                function resetAllCassettePieces() {
-                    cassettePieces.forEach(piece => {
-                        piece.element.classList.remove('Cassette_fixed')
-                        piece.isFixed = false
-                        piece.element.style.transform = ''
-                    })
-                }
-                
-                // Expose reset function globally for debugging
-                window.resetCassettePieces = resetAllCassettePieces
-                
-                // Initial check
-                checkCassettePositions()
-    
-            } else {
-                // No cassette pieces found
-            }
-        }       
-    }
 })
 Beast.decl({
     Case__meta: {
@@ -6015,6 +5846,175 @@ function grid (num, col, gap, margin) {
     return gridWidth
 }
 Beast.decl({
+    Cassette: {
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            
+            // Configuration for viewport-relative positioning
+            const config = {
+                // Offset as percentage of viewport height (instead of fixed pixels)
+                triggerOffset: 0.15,  // 15% of viewport height
+                // Minimum scroll delta to prevent micro-movements
+                minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
+
+                // Mobile breakpoint
+                mobileBreakpoint: 768,
+
+                // Debounce resize events
+                resizeDebounce: 250,
+
+                // Mobile and Desktop configurations
+                mobile: {
+                    triggerOffset: 360, // Reduced from 360 to make pieces fix earlier
+                    minScrollDelta: 0 // 2% of viewport height
+                },
+                desktop: {
+                    triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
+                    minScrollDelta: 0.02 // 2% of viewport height
+                }
+            }
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: 0, // Will be calculated dynamically
+                        lastPosition: 0 // Track last position to prevent jiggle
+                    })
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                
+                // Function to calculate trigger points dynamically with mobile/desktop support
+                function calculateTriggerPoints() {
+                    const windowHeight = window.innerHeight
+                    
+                    cassettePieces.forEach(piece => {
+                        const rect = piece.element.getBoundingClientRect()
+                        
+                        if (MissEvent.mobile) {
+                            // Mobile: Different offset for each piece to create cascading effect
+                            const baseTriggerOffset = 200 // Base offset for piece 1
+                            const cascadeIncrement = 150 // Each piece triggers 150px later than the previous
+                            const pieceOffset = baseTriggerOffset + ((piece.index - 1) * cascadeIncrement)
+                            piece.triggerPoint = rect.top + window.scrollY - pieceOffset
+                        } else {
+                            // Desktop: Use viewport-relative offset
+                            const offsetVh = windowHeight * config.desktop.triggerOffset
+                            piece.triggerPoint = rect.top + window.scrollY - offsetVh
+                        }
+                        
+                        // Only update if the change is significant (prevents micro-adjustments)
+                        if (Math.abs(piece.triggerPoint - piece.lastPosition) > 10) {
+                            piece.lastPosition = piece.triggerPoint
+                        }
+                    })
+                }
+                
+                // Calculate initial trigger points
+                calculateTriggerPoints()
+                
+                // Optimized scroll handler with viewport-relative positioning
+                let lastScrollY = 0
+                let ticking = false
+                let lastWindowHeight = window.innerHeight
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    const scrollDelta = Math.abs(scrollY - lastScrollY)
+                    const minDelta = windowHeight * config.minScrollDelta
+                    
+                    // Only process if scroll amount is significant (prevents micro-movements)
+                    if (scrollDelta < minDelta) return
+                    
+                    // Check if viewport height changed significantly (only recalculate when needed)
+                    if (Math.abs(windowHeight - lastWindowHeight) > 50) {
+                        calculateTriggerPoints()
+                        lastWindowHeight = windowHeight
+                    }
+                    
+                    lastScrollY = scrollY
+                    
+                    // Get piece 5 trigger point for unfixing pieces 1-4
+                    const piece5 = cassettePieces[4] // piece 5 is at index 4
+                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
+                    
+                    // Process each piece for cascading effect
+                    cassettePieces.forEach(piece => {
+                        const shouldBeFixed = scrollY >= piece.triggerPoint
+                        
+                        // Only add fixed class when scrolling past trigger point
+                        // BUT never fix piece 5 (last piece)
+                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
+                            piece.element.classList.add('Cassette_fixed')
+                            piece.isFixed = true
+                        }
+                        
+                        // Remove fixed class if scrolling back up OR if reached piece 5
+                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
+                        
+                        if (shouldBeUnfixed && piece.isFixed) {
+                            piece.element.classList.remove('Cassette_fixed')
+                            piece.isFixed = false
+                        }
+                    })
+                }
+                
+                function throttledCheckCassettePositions() {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            checkCassettePositions()
+                            ticking = false
+                        })
+                        ticking = true
+                    }
+                }
+                
+                // Add scroll event listener for immediate response
+                window.addEventListener('scroll', checkCassettePositions, { passive: true })
+                
+                // Debounced resize listener to prevent excessive recalculations
+                let resizeTimeout
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout)
+                    resizeTimeout = setTimeout(() => {
+                        // Recalculate trigger points after resize
+                        calculateTriggerPoints()
+                        lastWindowHeight = window.innerHeight
+                        // Force a check after resize
+                        checkCassettePositions()
+                    }, config.resizeDebounce)
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+    
+            } else {
+                // No cassette pieces found
+            }
+        }       
+    }
+})
+Beast.decl({
     Head: {
         expand: function () {
             this.append(
@@ -6065,6 +6065,18 @@ Beast.decl({
         }       
     }
 })
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6097,18 +6109,7 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
+
 Beast
 .decl('logo', {
     expand: function() {
@@ -6148,7 +6149,6 @@ Beast
         }
     }
 });
-
 
 Beast.decl({
     Box: {
@@ -6465,60 +6465,6 @@ Beast.decl({
 })
 
 Beast.decl({
-    Menu: {
-        
-
-        expand: function () {
-            this.append(
-                
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#about"},"\n                        ",Beast.node("digit",undefined,"[01]"),"\n                        ",Beast.node("text",undefined,"About"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#services"},"\n                        ",Beast.node("digit",undefined,"[02]"),"\n                        ",Beast.node("text",undefined,"What we do"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#work"},"\n                        ",Beast.node("digit",undefined,"[03]"),"\n                        ",Beast.node("text",undefined,"What we've built"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#process"},"\n                        ",Beast.node("digit",undefined,"[04]"),"\n                        ",Beast.node("text",undefined,"How we build"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#reviews"},"\n                        ",Beast.node("digit",undefined,"[05]"),"\n                        ",Beast.node("text",undefined,"What people say"),"\n                    "),"\n                ")
-            )
-        },
-            
-        domInit: function fn() {
-            // Menu text hover animation using the existing helper function
-            const menuTextElements = document.querySelectorAll('.Menu__text')
-            
-            menuTextElements.forEach(element => {
-                Shuffle.animateMenuText(element, {
-                    swapsRemaining: 20,
-                    interval: 40
-                })
-            })
-            
-            // Smooth scroll for anchor links
-            const menuLinks = document.querySelectorAll('.Menu a[href^="#"]')
-            
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault()
-                    
-                    const targetId = this.getAttribute('href').substring(1)
-                    const targetElement = document.getElementById(targetId)
-                    
-                    if (targetElement) {
-                        const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY
-                        const offsetPosition = elementPosition - 180 // Stop 100px before the element
-                        
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        })
-                    }
-                })
-            })
-        }
-    },
-    
-     
-})
-
-
-Beast.decl({
     Process: {
         expand: function () {
             
@@ -6696,6 +6642,60 @@ Beast.decl({
     },
 })
 Beast.decl({
+    Menu: {
+        
+
+        expand: function () {
+            this.append(
+                
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#about"},"\n                        ",Beast.node("digit",undefined,"[01]"),"\n                        ",Beast.node("text",undefined,"About"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#services"},"\n                        ",Beast.node("digit",undefined,"[02]"),"\n                        ",Beast.node("text",undefined,"What we do"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#work"},"\n                        ",Beast.node("digit",undefined,"[03]"),"\n                        ",Beast.node("text",undefined,"What we've built"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#process"},"\n                        ",Beast.node("digit",undefined,"[04]"),"\n                        ",Beast.node("text",undefined,"How we build"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#reviews"},"\n                        ",Beast.node("digit",undefined,"[05]"),"\n                        ",Beast.node("text",undefined,"What people say"),"\n                    "),"\n                ")
+            )
+        },
+            
+        domInit: function fn() {
+            // Menu text hover animation using the existing helper function
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                Shuffle.animateMenuText(element, {
+                    swapsRemaining: 20,
+                    interval: 40
+                })
+            })
+            
+            // Smooth scroll for anchor links
+            const menuLinks = document.querySelectorAll('.Menu a[href^="#"]')
+            
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault()
+                    
+                    const targetId = this.getAttribute('href').substring(1)
+                    const targetElement = document.getElementById(targetId)
+                    
+                    if (targetElement) {
+                        const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY
+                        const offsetPosition = elementPosition - 180 // Stop 100px before the element
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        })
+                    }
+                })
+            })
+        }
+    },
+    
+     
+})
+
+
+Beast.decl({
     Reviews: {
         expand: function fn() {
             
@@ -6716,74 +6716,6 @@ Beast.decl({
         }       
     }
 })
-Beast.decl({
-    Services: {
-        tag: 'div',
-        mod: {
-            Size: 'M'
-        },
-        expand: function fn() {
-            this.append(
-                Beast.node("item",{__context:this},"End-to-end product development"),
-                Beast.node("item",{__context:this},"Engineering support for early-stage teams"),
-                Beast.node("item",{__context:this},"Rescue missions for broken products or missed deadlines"),
-                Beast.node("item",{__context:this},"Long-term technical partnerships")
-            )
-        },
-        domInit: function fn() {
-            // Services__item scroll-triggered fade/unblur animation using helpers
-            const servicesItems = document.querySelectorAll('.Services__item')
-            
-            if (servicesItems.length > 0) {
-                const observerOptions = {
-                    root: null,
-                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
-                    threshold: 0.3
-                }
-                
-                const servicesObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            // Reset and start animation when entering viewport
-                            if (!entry.target.classList.contains('Services__item_loaded')) {
-                                let animatedItemsCount = 0
-                                
-                                // Reset all services items first
-                                servicesItems.forEach(item => {
-                                    item.classList.remove('Services__item_loaded')
-                                })
-                                
-                                // Animate all services items in sequence
-                                servicesItems.forEach((item, index) => {
-                                    setTimeout(() => {
-                                        item.classList.add('Services__item_loaded')
-                                        
-                                        // Animate the digit (::before element content) after fade-in starts
-                                        setTimeout(() => {
-                                            if (typeof Shuffle !== 'undefined') {
-                                                Shuffle.animateServiceDigit(item, index + 1)
-                                            }
-                                        }, 200) // Start digit animation 200ms after fade begins
-                                        
-                                    }, index * 200) // 200ms delay between each item
-                                })
-                            }
-                        } else {
-                            // Reset when leaving viewport (scrolling away)
-                            entry.target.classList.remove('Services__item_loaded')
-                        }
-                    })
-                }, observerOptions)
-                
-                // Observe all services items
-                servicesItems.forEach(item => {
-                    servicesObserver.observe(item)
-                })
-            }
-        }
-    }
-})
-
 Beast.decl({
     Solution: {
         expand: function () {
@@ -7123,6 +7055,74 @@ Beast.decl({
 // @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 // @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+Beast.decl({
+    Services: {
+        tag: 'div',
+        mod: {
+            Size: 'M'
+        },
+        expand: function fn() {
+            this.append(
+                Beast.node("item",{__context:this},"End-to-end product development"),
+                Beast.node("item",{__context:this},"Engineering support for early-stage teams"),
+                Beast.node("item",{__context:this},"Rescue missions for broken products or missed deadlines"),
+                Beast.node("item",{__context:this},"Long-term technical partnerships")
+            )
+        },
+        domInit: function fn() {
+            // Services__item scroll-triggered fade/unblur animation using helpers
+            const servicesItems = document.querySelectorAll('.Services__item')
+            
+            if (servicesItems.length > 0) {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px', // Trigger when 20% into viewport
+                    threshold: 0.3
+                }
+                
+                const servicesObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Reset and start animation when entering viewport
+                            if (!entry.target.classList.contains('Services__item_loaded')) {
+                                let animatedItemsCount = 0
+                                
+                                // Reset all services items first
+                                servicesItems.forEach(item => {
+                                    item.classList.remove('Services__item_loaded')
+                                })
+                                
+                                // Animate all services items in sequence
+                                servicesItems.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        item.classList.add('Services__item_loaded')
+                                        
+                                        // Animate the digit (::before element content) after fade-in starts
+                                        setTimeout(() => {
+                                            if (typeof Shuffle !== 'undefined') {
+                                                Shuffle.animateServiceDigit(item, index + 1)
+                                            }
+                                        }, 200) // Start digit animation 200ms after fade begins
+                                        
+                                    }, index * 200) // 200ms delay between each item
+                                })
+                            }
+                        } else {
+                            // Reset when leaving viewport (scrolling away)
+                            entry.target.classList.remove('Services__item_loaded')
+                        }
+                    })
+                }, observerOptions)
+                
+                // Observe all services items
+                servicesItems.forEach(item => {
+                    servicesObserver.observe(item)
+                })
+            }
+        }
+    }
+})
+
 Beast.decl({
 
     /**
