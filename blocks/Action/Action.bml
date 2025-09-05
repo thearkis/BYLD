@@ -13,12 +13,111 @@ Beast.decl({
                 )
             }
             
-            // Add click handler to show form
+            // Add click handler to show form or validate form
             this.on('click', function () {
-                if (typeof window.showForm === 'function') {
+                // Check if this is a "send" button in a form
+                if (this.text() === 'send') {
+                    validateAndSubmitForm()
+                } else if (typeof window.showForm === 'function') {
                     window.showForm()
                 }
             })
+            
+            function validateAndSubmitForm() {
+                // Find all inputs and textareas in the form
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                const inputs = form.querySelectorAll('.Form__input, .Form__textarea')
+                let hasEmptyFields = false
+                
+                // Check each input/textarea for empty values
+                inputs.forEach(function(field) {
+                    const value = field.value.trim()
+                    
+                    // Remove any existing shake class
+                    field.classList.remove('Form__shake')
+                    
+                    if (!value) {
+                        hasEmptyFields = true
+                        // Add shake class for empty fields
+                        field.classList.add('Form__shake')
+                        
+                        // Remove shake class after animation completes
+                        setTimeout(function() {
+                            field.classList.remove('Form__shake')
+                        }, 500)
+                    }
+                })
+                
+                // If no empty fields, proceed with form submission
+                if (!hasEmptyFields) {
+                    submitToFormspree()
+                }
+            }
+            
+            function submitToFormspree() {
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                const inputs = form.querySelectorAll('.Form__input, .Form__textarea')
+                const formData = new FormData()
+                
+                // Add all field values
+                inputs.forEach(function(field) {
+                    if (field.name && field.value.trim()) {
+                        formData.append(field.name, field.value.trim())
+                    }
+                })
+                
+                // Submit to Formspree
+                fetch('https://formspree.io/f/xldwovnn', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        showSuccessMessage()
+                        // Clear form after delay
+                        setTimeout(function() {
+                            inputs.forEach(function(field) {
+                                field.value = ''
+                            })
+                        }, 2000)
+                    } else {
+                        throw new Error('Form submission failed')
+                    }
+                })
+                .catch(function(error) {
+                    alert('Sorry, there was an error sending your message. Please try again.')
+                    console.error('Error:', error)
+                })
+            }
+            
+            function showSuccessMessage() {
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                // Create success message element
+                const successMessage = document.createElement('div')
+                successMessage.className = 'Form__success-message'
+                successMessage.textContent = 'thank you, we\'ll get back shortly'
+                
+                // Add success state class and message
+                form.classList.add('Form_submitted')
+                form.appendChild(successMessage)
+                
+                // Remove success state and message after 8 seconds
+                setTimeout(function() {
+                    form.classList.remove('Form_submitted')
+                    if (successMessage && successMessage.parentNode) {
+                        successMessage.parentNode.removeChild(successMessage)
+                    }
+                }, 8000)
+            }
         },
         domInit: function fn() {
             // Initialize shuffle animation for Action component

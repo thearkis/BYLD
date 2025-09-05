@@ -2,7 +2,28 @@ Beast.decl({
     Form: {
         expand: function fn() {
             this.append(
-                
+                <close />,
+                <logo />,
+                <content>
+                    <title>tell us about your project</title>
+                    <item>
+                        <input title="name">company name / individual</input>
+                    </item>
+                    <item>
+                        <textarea title="brief" placeholder="brief project description"></textarea>
+                    </item>
+                    <item>
+                        <input title="contacts">contacts (phone, e-mail, links, etc.)</input>
+                    </item>
+                    <item>
+                        <Action>send</Action>
+                    </item>
+                    <footer>
+                        <left />
+                        <right />
+                    </footer>
+                </content>
+
             )
         },
         domInit: function fn() {
@@ -13,7 +34,7 @@ Beast.decl({
             })
             
             // Add close functionality
-            const closeBtn = this.domNode().querySelector('.form-close')
+            const closeBtn = this.domNode().querySelector('.Form__close')
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
                     e.preventDefault()
@@ -37,7 +58,7 @@ Beast.decl({
             const outsideClickHandler = (e) => {
                 const formElement = this.domNode()
                 // Only close if click is outside the form AND not on the close button
-                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
+                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('Form__close')) {
                     this.hideForm()
                 }
             }
@@ -114,5 +135,28 @@ Beast.decl({
                 this.outsideClickActive = false
             }, 300) // Match CSS transition duration
         }
-    }
+    },
+    Form__input: {
+        tag:'input',
+        expand: function () {
+            this.domAttr('placeholder', this.text())
+            this.domAttr('type', this.param('type'))
+            this.domAttr('value', '')
+            this.domAttr('autocomplete', 'off')
+            this.domAttr('id', this.param('title'))
+            this.domAttr('name', this.param('title'))
+            this.append()
+        },
+    },
+    Form__textarea: {
+        tag:'textarea',
+        expand: function () {
+            this.domAttr('rows', '4')
+            this.domAttr('cols', '4')
+            this.domAttr('placeholder', this.param('placeholder'))
+            this.domAttr('id', this.param('title'))
+            this.domAttr('name', this.param('title'))
+            this.append()
+        },
+    },
 })

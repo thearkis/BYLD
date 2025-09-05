@@ -44,6 +44,32 @@ Beast.decl({
             
             if (cassettePieces.length > 0) {
                 
+                // MOBILE ONLY: DOM reorganization for better mobile layout
+                function setupMobileLayout() {
+                    if (!MissEvent.mobile) return // Desktop: do nothing
+                    
+                    const processElement = document.querySelector('.Process')
+                    if (!processElement) return
+                    
+                    // Create mobile container inside .Process (mobile only)
+                    let mobileContainer = document.querySelector('.mobile-cassette-container')
+                    if (!mobileContainer) {
+                        mobileContainer = document.createElement('div')
+                        mobileContainer.className = 'mobile-cassette-container'
+                        processElement.appendChild(mobileContainer)
+                    }
+                    
+                    // Move cassette pieces to mobile container (mobile only)
+                    cassettePieces.forEach(piece => {
+                        mobileContainer.appendChild(piece.element)
+                    })
+                    
+                    console.log('Mobile cassette layout setup complete')
+                }
+                
+                // Initialize mobile layout
+                setupMobileLayout()
+                
                 // Function to calculate trigger points dynamically with mobile/desktop support
                 function calculateTriggerPoints() {
                     const windowHeight = window.innerHeight
@@ -52,11 +78,27 @@ Beast.decl({
                         const rect = piece.element.getBoundingClientRect()
                         
                         if (MissEvent.mobile) {
-                            // Mobile: Different offset for each piece to create cascading effect
-                            const baseTriggerOffset = 200 // Base offset for piece 1
-                            const cascadeIncrement = 150 // Each piece triggers 150px later than the previous
-                            const pieceOffset = baseTriggerOffset + ((piece.index - 1) * cascadeIncrement)
-                            piece.triggerPoint = rect.top + window.scrollY - pieceOffset
+                            // MOBILE ONLY: Enhanced cascading animation with process-based timing
+                            const processSection = document.querySelector('#process')
+                            const processRect = processSection ? processSection.getBoundingClientRect() : rect
+                            const processTop = processRect.top + window.scrollY
+                            
+                            // Mobile: Align each piece with its corresponding process step
+                            const correspondingStep = document.querySelector(`.Process__step_0${piece.index}`)
+                            if (correspondingStep) {
+                                const stepRect = correspondingStep.getBoundingClientRect()
+                                const stepTop = stepRect.top + window.scrollY
+                                
+                                // All pieces appear before their corresponding step
+                                // Piece 1 appears earliest, others appear progressively closer to their steps
+                                const offsetMultiplier = piece.index === 1 ? 1.2 : 0.9
+                                piece.triggerPoint = stepTop - (windowHeight * offsetMultiplier)
+                            } else {
+                                // Fallback: Use spread timing if step not found
+                                const baseTrigger = processTop + (windowHeight * 0.1)
+                                const cascadeInterval = windowHeight * 0.4 // Even longer fallback
+                                piece.triggerPoint = baseTrigger + (piece.index - 1) * cascadeInterval
+                            }
                         } else {
                             // Desktop: Use viewport-relative offset
                             const offsetVh = windowHeight * config.desktop.triggerOffset
@@ -99,23 +141,66 @@ Beast.decl({
                     const piece5 = cassettePieces[4] // piece 5 is at index 4
                     const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
                     
+                    // Debug: Log scroll state on mobile
+                    if (MissEvent.mobile) {
+                        console.log(`=== SCROLL CHECK: scrollY=${scrollY} ===`)
+                    }
+                    
                     // Process each piece for cascading effect
                     cassettePieces.forEach(piece => {
                         const shouldBeFixed = scrollY >= piece.triggerPoint
                         
-                        // Only add fixed class when scrolling past trigger point
-                        // BUT never fix piece 5 (last piece)
-                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
-                            piece.element.classList.add('Cassette_fixed')
-                            piece.isFixed = true
+                        // MOBILE: Include all pieces (including piece 5) in cascade
+                        // DESKTOP: Exclude piece 5 (preserve original behavior)
+                        const includePiece5 = MissEvent.mobile
+                        const shouldIncludePiece = includePiece5 || piece.index !== 5
+                        
+                        // Debug: Log state for ALL pieces on mobile
+                        if (MissEvent.mobile) {
+                            console.log(`Piece ${piece.index}: triggerPoint=${piece.triggerPoint}, shouldBeFixed=${shouldBeFixed}, isFixed=${piece.isFixed}, shouldIncludePiece=${shouldIncludePiece}`)
                         }
                         
-                        // Remove fixed class if scrolling back up OR if reached piece 5
-                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
+                        // Add fixed class when scrolling past trigger point
+                        if (shouldBeFixed && !piece.isFixed && shouldIncludePiece) {
+                            piece.element.classList.add('Cassette_fixed')
+                            piece.isFixed = true
+                            
+                            // MOBILE ONLY: Add animation effect
+                            if (MissEvent.mobile) {
+                                piece.element.classList.add('Cassette_animating')
+                                setTimeout(() => {
+                                    piece.element.classList.remove('Cassette_animating')
+                                }, 300)
+                            }
+                        }
+                        
+                        // Remove fixed class if scrolling back up
+                        // MOBILE: Allow full reverse animation - just use normal trigger points
+                        // DESKTOP: Original behavior with piece 5 unfixing
+                        const shouldBeUnfixed = MissEvent.mobile 
+                            ? !shouldBeFixed 
+                            : (!shouldBeFixed || (reachedPiece5 && piece.index !== 5))
+                        
+                        // Debug logging for all pieces on mobile
+                        if (MissEvent.mobile && piece.isFixed) {
+                            console.log(`Piece ${piece.index}: scrollY=${scrollY}, triggerPoint=${piece.triggerPoint}, shouldBeFixed=${shouldBeFixed}, shouldBeUnfixed=${shouldBeUnfixed}, isFixed=${piece.isFixed}`)
+                        }
                         
                         if (shouldBeUnfixed && piece.isFixed) {
+                            console.log(`Piece ${piece.index}: Starting reverse animation (mobile: ${MissEvent.mobile})`)
                             piece.element.classList.remove('Cassette_fixed')
                             piece.isFixed = false
+                            console.log(`Piece ${piece.index}: Removed Cassette_fixed class`)
+                            
+                            // MOBILE ONLY: Add animation effect after unfixing
+                            if (MissEvent.mobile) {
+                                piece.element.classList.add('Cassette_animating')
+                                console.log(`Piece ${piece.index}: Added Cassette_animating class`)
+                                setTimeout(() => {
+                                    piece.element.classList.remove('Cassette_animating')
+                                    console.log(`Piece ${piece.index}: Removed Cassette_animating class - animation complete`)
+                                }, 300)
+                            }
                         }
                     })
                 }

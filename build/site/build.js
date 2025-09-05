@@ -4570,6 +4570,172 @@ BemNode.prototype = {
 
 })();
 Beast.decl({
+    Action: {
+        mod: {
+            Size: 'M',
+            Type: 'Red',
+        },
+        expand: function () {
+            this.append(this.text())
+
+            if (this.param('href')) {
+                this.append(
+                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
+                )
+            }
+            
+            // Add click handler to show form or validate form
+            this.on('click', function () {
+                // Check if this is a "send" button in a form
+                if (this.text() === 'send') {
+                    validateAndSubmitForm()
+                } else if (typeof window.showForm === 'function') {
+                    window.showForm()
+                }
+            })
+            
+            function validateAndSubmitForm() {
+                // Find all inputs and textareas in the form
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                const inputs = form.querySelectorAll('.Form__input, .Form__textarea')
+                let hasEmptyFields = false
+                
+                // Check each input/textarea for empty values
+                inputs.forEach(function(field) {
+                    const value = field.value.trim()
+                    
+                    // Remove any existing shake class
+                    field.classList.remove('Form__shake')
+                    
+                    if (!value) {
+                        hasEmptyFields = true
+                        // Add shake class for empty fields
+                        field.classList.add('Form__shake')
+                        
+                        // Remove shake class after animation completes
+                        setTimeout(function() {
+                            field.classList.remove('Form__shake')
+                        }, 500)
+                    }
+                })
+                
+                // If no empty fields, proceed with form submission
+                if (!hasEmptyFields) {
+                    submitToFormspree()
+                }
+            }
+            
+            function submitToFormspree() {
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                const inputs = form.querySelectorAll('.Form__input, .Form__textarea')
+                const formData = new FormData()
+                
+                // Add all field values
+                inputs.forEach(function(field) {
+                    if (field.name && field.value.trim()) {
+                        formData.append(field.name, field.value.trim())
+                    }
+                })
+                
+                // Submit to Formspree
+                fetch('https://formspree.io/f/xldwovnn', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        showSuccessMessage()
+                        // Clear form after delay
+                        setTimeout(function() {
+                            inputs.forEach(function(field) {
+                                field.value = ''
+                            })
+                        }, 2000)
+                    } else {
+                        throw new Error('Form submission failed')
+                    }
+                })
+                .catch(function(error) {
+                    alert('Sorry, there was an error sending your message. Please try again.')
+                    console.error('Error:', error)
+                })
+            }
+            
+            function showSuccessMessage() {
+                const form = document.querySelector('.Form')
+                if (!form) return
+                
+                // Create success message element
+                const successMessage = document.createElement('div')
+                successMessage.className = 'Form__success-message'
+                successMessage.textContent = 'thank you, we\'ll get back shortly'
+                
+                // Add success state class and message
+                form.classList.add('Form_submitted')
+                form.appendChild(successMessage)
+                
+                // Remove success state and message after 8 seconds
+                setTimeout(function() {
+                    form.classList.remove('Form_submitted')
+                    if (successMessage && successMessage.parentNode) {
+                        successMessage.parentNode.removeChild(successMessage)
+                    }
+                }, 8000)
+            }
+        },
+        domInit: function fn() {
+            // Initialize shuffle animation for Action component
+            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
+                Shuffle.animateLinkHover(
+                    this.element, 
+                    this.get('href'),
+                    { charSet: 'latin' }
+                )
+            }
+            
+            // Handle hover effects programmatically
+            const element = this.element
+            const type = this.param('Type')
+            
+            if (element) {
+                element.addEventListener('mouseenter', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'red'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(15px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'rgba(255, 255, 255, 0.9)'
+                        element.style.transform = 'scale(1.01)'
+                        element.style.backdropFilter = 'blur(12px)'
+                    }
+                })
+                
+                element.addEventListener('mouseleave', function() {
+                    if (type === 'Red') {
+                        element.style.background = 'rgba(255, 255, 255, 0.01)'
+                        element.style.borderColor = 'red'
+                        element.style.backdropFilter = 'blur(10px)'
+                    } else if (type === 'White') {
+                        element.style.background = 'white'
+                        element.style.transform = 'scale(1)'
+                        element.style.backdropFilter = 'none'
+                    }
+                })
+            }
+        }       
+    }
+})
+
+
+
+Beast.decl({
     App: {
         
         tag:'body',
@@ -5059,160 +5225,6 @@ Beast.decl({
     }   
 })
 Beast.decl({
-    Card: {
-        expand: function () {
-
-            
-        },
-        domInit: function fn() {
-            // Card text hover animation - same rolling effect as Menu
-            // Debug: log what elements we find
-            const cardElements = document.querySelectorAll('.Card')
-            
-            
-            const cardTextElements = []
-            cardElements.forEach(card => {
-                // Try multiple selectors to find text elements
-                const titles = card.querySelectorAll('title, .Card__title')
-                const texts = card.querySelectorAll('text, .Card__text')
-                cardTextElements.push(...titles, ...texts)
-            })
-            
-            
-            
-            // Fallback: if no elements found, try broader search
-            if (cardTextElements.length === 0) {
-                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
-                cardTextElements.push(...allElements)
-                
-            }
-            
-            cardTextElements.forEach(element => {
-                
-                element.animationInterval = null
-                
-                // Store original font properties to prevent jumping
-                const originalFontFamily = window.getComputedStyle(element).fontFamily
-                const originalFontSize = window.getComputedStyle(element).fontSize
-                const originalFontWeight = window.getComputedStyle(element).fontWeight
-                
-                element.addEventListener('mouseenter', () => {
-                    if (element.isAnimating) return
-                    
-                    const originalText = element.textContent
-                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                    let swapsRemaining = originalText.length  // Animate all characters
-                    let currentDisplayText = ''
-                    
-                    element.isAnimating = true
-                    element.classList.add('rolling-animation')
-                    
-                    // Preserve original font properties during animation
-                    element.style.fontFamily = originalFontFamily
-                    element.style.fontSize = originalFontSize
-                    element.style.fontWeight = originalFontWeight
-                    
-                    element.animationInterval = setInterval(() => {
-                        currentDisplayText = ''
-                        
-                        for (let i = 0; i < originalText.length; i++) {
-                            if (i < swapsRemaining) {
-                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
-                                currentDisplayText += randomChar
-                            } else {
-                                currentDisplayText += originalText[i]
-                            }
-                        }
-                        
-                        element.textContent = currentDisplayText
-                        swapsRemaining--
-                        
-                        if (swapsRemaining <= 0) {
-                            clearInterval(element.animationInterval)
-                            element.textContent = originalText
-                            element.classList.remove('rolling-animation')
-                            element.isAnimating = false
-                            
-                            // Restore original styles
-                            element.style.fontFamily = ''
-                            element.style.fontSize = ''
-                            element.style.fontWeight = ''
-                        }
-                    }, 40)  // Slower interval for longer effect
-                })
-            })
-
-        }      
-    }   
-})
-Beast.decl({
-    Action: {
-        mod: {
-            Size: 'M',
-            Type: 'Red',
-        },
-        expand: function () {
-            this.append(this.text())
-
-            if (this.param('href')) {
-                this.append(
-                    Beast.node("Link",{__context:this,"href":"this.param(\'href\')"}," 1 ")
-                )
-            }
-            
-            // Add click handler to show form
-            this.on('click', function () {
-                if (typeof window.showForm === 'function') {
-                    window.showForm()
-                }
-            })
-        },
-        domInit: function fn() {
-            // Initialize shuffle animation for Action component
-            if (typeof Shuffle !== 'undefined' && this.element && this.element.textContent) {
-                Shuffle.animateLinkHover(
-                    this.element, 
-                    this.get('href'),
-                    { charSet: 'latin' }
-                )
-            }
-            
-            // Handle hover effects programmatically
-            const element = this.element
-            const type = this.param('Type')
-            
-            if (element) {
-                element.addEventListener('mouseenter', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'red'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(15px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'rgba(255, 255, 255, 0.9)'
-                        element.style.transform = 'scale(1.01)'
-                        element.style.backdropFilter = 'blur(12px)'
-                    }
-                })
-                
-                element.addEventListener('mouseleave', function() {
-                    if (type === 'Red') {
-                        element.style.background = 'rgba(255, 255, 255, 0.01)'
-                        element.style.borderColor = 'red'
-                        element.style.backdropFilter = 'blur(10px)'
-                    } else if (type === 'White') {
-                        element.style.background = 'white'
-                        element.style.transform = 'scale(1)'
-                        element.style.backdropFilter = 'none'
-                    }
-                })
-            }
-        }       
-    }
-})
-
-
-
-Beast.decl({
     Case: {
         expand: function () {
             this.append(
@@ -5427,6 +5439,260 @@ Beast.decl({
     },
 })
 Beast.decl({
+    Cassette: {
+        domInit: function fn() {
+            // Cassette pieces scroll detection for fixed positioning
+            const cassettePieces = []
+            
+            // Configuration for viewport-relative positioning
+            const config = {
+                // Offset as percentage of viewport height (instead of fixed pixels)
+                triggerOffset: 0.15,  // 15% of viewport height
+                // Minimum scroll delta to prevent micro-movements
+                minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
+
+                // Mobile breakpoint
+                mobileBreakpoint: 768,
+
+                // Debounce resize events
+                resizeDebounce: 250,
+
+                // Mobile and Desktop configurations
+                mobile: {
+                    triggerOffset: 360, // Reduced from 360 to make pieces fix earlier
+                    minScrollDelta: 0 // 2% of viewport height
+                },
+                desktop: {
+                    triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
+                    minScrollDelta: 0.02 // 2% of viewport height
+                }
+            }
+            
+            // Get all cassette pieces
+            for (let i = 1; i <= 5; i++) {
+                const piece = document.querySelector(`.Cassette_piece_${i}`)
+                if (piece) {
+                    cassettePieces.push({
+                        element: piece,
+                        index: i,
+                        isFixed: false,
+                        triggerPoint: 0, // Will be calculated dynamically
+                        lastPosition: 0 // Track last position to prevent jiggle
+                    })
+                }
+            }
+            
+            if (cassettePieces.length > 0) {
+                
+                // MOBILE ONLY: DOM reorganization for better mobile layout
+                function setupMobileLayout() {
+                    if (!MissEvent.mobile) return // Desktop: do nothing
+                    
+                    const processElement = document.querySelector('.Process')
+                    if (!processElement) return
+                    
+                    // Create mobile container inside .Process (mobile only)
+                    let mobileContainer = document.querySelector('.mobile-cassette-container')
+                    if (!mobileContainer) {
+                        mobileContainer = document.createElement('div')
+                        mobileContainer.className = 'mobile-cassette-container'
+                        processElement.appendChild(mobileContainer)
+                    }
+                    
+                    // Move cassette pieces to mobile container (mobile only)
+                    cassettePieces.forEach(piece => {
+                        mobileContainer.appendChild(piece.element)
+                    })
+                    
+                    console.log('Mobile cassette layout setup complete')
+                }
+                
+                // Initialize mobile layout
+                setupMobileLayout()
+                
+                // Function to calculate trigger points dynamically with mobile/desktop support
+                function calculateTriggerPoints() {
+                    const windowHeight = window.innerHeight
+                    
+                    cassettePieces.forEach(piece => {
+                        const rect = piece.element.getBoundingClientRect()
+                        
+                        if (MissEvent.mobile) {
+                            // MOBILE ONLY: Enhanced cascading animation with process-based timing
+                            const processSection = document.querySelector('#process')
+                            const processRect = processSection ? processSection.getBoundingClientRect() : rect
+                            const processTop = processRect.top + window.scrollY
+                            
+                            // Mobile: Align each piece with its corresponding process step
+                            const correspondingStep = document.querySelector(`.Process__step_0${piece.index}`)
+                            if (correspondingStep) {
+                                const stepRect = correspondingStep.getBoundingClientRect()
+                                const stepTop = stepRect.top + window.scrollY
+                                
+                                // All pieces appear before their corresponding step
+                                // Piece 1 appears earliest, others appear progressively closer to their steps
+                                const offsetMultiplier = piece.index === 1 ? 1.2 : 0.9
+                                piece.triggerPoint = stepTop - (windowHeight * offsetMultiplier)
+                            } else {
+                                // Fallback: Use spread timing if step not found
+                                const baseTrigger = processTop + (windowHeight * 0.1)
+                                const cascadeInterval = windowHeight * 0.4 // Even longer fallback
+                                piece.triggerPoint = baseTrigger + (piece.index - 1) * cascadeInterval
+                            }
+                        } else {
+                            // Desktop: Use viewport-relative offset
+                            const offsetVh = windowHeight * config.desktop.triggerOffset
+                            piece.triggerPoint = rect.top + window.scrollY - offsetVh
+                        }
+                        
+                        // Only update if the change is significant (prevents micro-adjustments)
+                        if (Math.abs(piece.triggerPoint - piece.lastPosition) > 10) {
+                            piece.lastPosition = piece.triggerPoint
+                        }
+                    })
+                }
+                
+                // Calculate initial trigger points
+                calculateTriggerPoints()
+                
+                // Optimized scroll handler with viewport-relative positioning
+                let lastScrollY = 0
+                let ticking = false
+                let lastWindowHeight = window.innerHeight
+                
+                function checkCassettePositions() {
+                    const scrollY = window.scrollY
+                    const windowHeight = window.innerHeight
+                    const scrollDelta = Math.abs(scrollY - lastScrollY)
+                    const minDelta = windowHeight * config.minScrollDelta
+                    
+                    // Only process if scroll amount is significant (prevents micro-movements)
+                    if (scrollDelta < minDelta) return
+                    
+                    // Check if viewport height changed significantly (only recalculate when needed)
+                    if (Math.abs(windowHeight - lastWindowHeight) > 50) {
+                        calculateTriggerPoints()
+                        lastWindowHeight = windowHeight
+                    }
+                    
+                    lastScrollY = scrollY
+                    
+                    // Get piece 5 trigger point for unfixing pieces 1-4
+                    const piece5 = cassettePieces[4] // piece 5 is at index 4
+                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
+                    
+                    // Debug: Log scroll state on mobile
+                    if (MissEvent.mobile) {
+                        console.log(`=== SCROLL CHECK: scrollY=${scrollY} ===`)
+                    }
+                    
+                    // Process each piece for cascading effect
+                    cassettePieces.forEach(piece => {
+                        const shouldBeFixed = scrollY >= piece.triggerPoint
+                        
+                        // MOBILE: Include all pieces (including piece 5) in cascade
+                        // DESKTOP: Exclude piece 5 (preserve original behavior)
+                        const includePiece5 = MissEvent.mobile
+                        const shouldIncludePiece = includePiece5 || piece.index !== 5
+                        
+                        // Debug: Log state for ALL pieces on mobile
+                        if (MissEvent.mobile) {
+                            console.log(`Piece ${piece.index}: triggerPoint=${piece.triggerPoint}, shouldBeFixed=${shouldBeFixed}, isFixed=${piece.isFixed}, shouldIncludePiece=${shouldIncludePiece}`)
+                        }
+                        
+                        // Add fixed class when scrolling past trigger point
+                        if (shouldBeFixed && !piece.isFixed && shouldIncludePiece) {
+                            piece.element.classList.add('Cassette_fixed')
+                            piece.isFixed = true
+                            
+                            // MOBILE ONLY: Add animation effect
+                            if (MissEvent.mobile) {
+                                piece.element.classList.add('Cassette_animating')
+                                setTimeout(() => {
+                                    piece.element.classList.remove('Cassette_animating')
+                                }, 300)
+                            }
+                        }
+                        
+                        // Remove fixed class if scrolling back up
+                        // MOBILE: Allow full reverse animation - just use normal trigger points
+                        // DESKTOP: Original behavior with piece 5 unfixing
+                        const shouldBeUnfixed = MissEvent.mobile 
+                            ? !shouldBeFixed 
+                            : (!shouldBeFixed || (reachedPiece5 && piece.index !== 5))
+                        
+                        // Debug logging for all pieces on mobile
+                        if (MissEvent.mobile && piece.isFixed) {
+                            console.log(`Piece ${piece.index}: scrollY=${scrollY}, triggerPoint=${piece.triggerPoint}, shouldBeFixed=${shouldBeFixed}, shouldBeUnfixed=${shouldBeUnfixed}, isFixed=${piece.isFixed}`)
+                        }
+                        
+                        if (shouldBeUnfixed && piece.isFixed) {
+                            console.log(`Piece ${piece.index}: Starting reverse animation (mobile: ${MissEvent.mobile})`)
+                            piece.element.classList.remove('Cassette_fixed')
+                            piece.isFixed = false
+                            console.log(`Piece ${piece.index}: Removed Cassette_fixed class`)
+                            
+                            // MOBILE ONLY: Add animation effect after unfixing
+                            if (MissEvent.mobile) {
+                                piece.element.classList.add('Cassette_animating')
+                                console.log(`Piece ${piece.index}: Added Cassette_animating class`)
+                                setTimeout(() => {
+                                    piece.element.classList.remove('Cassette_animating')
+                                    console.log(`Piece ${piece.index}: Removed Cassette_animating class - animation complete`)
+                                }, 300)
+                            }
+                        }
+                    })
+                }
+                
+                function throttledCheckCassettePositions() {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            checkCassettePositions()
+                            ticking = false
+                        })
+                        ticking = true
+                    }
+                }
+                
+                // Add scroll event listener for immediate response
+                window.addEventListener('scroll', checkCassettePositions, { passive: true })
+                
+                // Debounced resize listener to prevent excessive recalculations
+                let resizeTimeout
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout)
+                    resizeTimeout = setTimeout(() => {
+                        // Recalculate trigger points after resize
+                        calculateTriggerPoints()
+                        lastWindowHeight = window.innerHeight
+                        // Force a check after resize
+                        checkCassettePositions()
+                    }, config.resizeDebounce)
+                })
+                
+                // Cleanup function to reset all pieces
+                function resetAllCassettePieces() {
+                    cassettePieces.forEach(piece => {
+                        piece.element.classList.remove('Cassette_fixed')
+                        piece.isFixed = false
+                        piece.element.style.transform = ''
+                    })
+                }
+                
+                // Expose reset function globally for debugging
+                window.resetCassettePieces = resetAllCassettePieces
+                
+                // Initial check
+                checkCassettePositions()
+    
+            } else {
+                // No cassette pieces found
+            }
+        }       
+    }
+})
+Beast.decl({
     Case__meta: {
         expand: function () {
             this.append(
@@ -5440,6 +5706,93 @@ Beast.decl({
 
     
     
+})
+Beast.decl({
+    Card: {
+        expand: function () {
+
+            
+        },
+        domInit: function fn() {
+            // Card text hover animation - same rolling effect as Menu
+            // Debug: log what elements we find
+            const cardElements = document.querySelectorAll('.Card')
+            
+            
+            const cardTextElements = []
+            cardElements.forEach(card => {
+                // Try multiple selectors to find text elements
+                const titles = card.querySelectorAll('title, .Card__title')
+                const texts = card.querySelectorAll('text, .Card__text')
+                cardTextElements.push(...titles, ...texts)
+            })
+            
+            
+            
+            // Fallback: if no elements found, try broader search
+            if (cardTextElements.length === 0) {
+                const allElements = document.querySelectorAll('title, text, .Card__title, .Card__text')
+                cardTextElements.push(...allElements)
+                
+            }
+            
+            cardTextElements.forEach(element => {
+                
+                element.animationInterval = null
+                
+                // Store original font properties to prevent jumping
+                const originalFontFamily = window.getComputedStyle(element).fontFamily
+                const originalFontSize = window.getComputedStyle(element).fontSize
+                const originalFontWeight = window.getComputedStyle(element).fontWeight
+                
+                element.addEventListener('mouseenter', () => {
+                    if (element.isAnimating) return
+                    
+                    const originalText = element.textContent
+                    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    let swapsRemaining = originalText.length  // Animate all characters
+                    let currentDisplayText = ''
+                    
+                    element.isAnimating = true
+                    element.classList.add('rolling-animation')
+                    
+                    // Preserve original font properties during animation
+                    element.style.fontFamily = originalFontFamily
+                    element.style.fontSize = originalFontSize
+                    element.style.fontWeight = originalFontWeight
+                    
+                    element.animationInterval = setInterval(() => {
+                        currentDisplayText = ''
+                        
+                        for (let i = 0; i < originalText.length; i++) {
+                            if (i < swapsRemaining) {
+                                const randomChar = randomChars.charAt(Math.floor(Math.random() * randomChars.length))
+                                currentDisplayText += randomChar
+                            } else {
+                                currentDisplayText += originalText[i]
+                            }
+                        }
+                        
+                        element.textContent = currentDisplayText
+                        swapsRemaining--
+                        
+                        if (swapsRemaining <= 0) {
+                            clearInterval(element.animationInterval)
+                            element.textContent = originalText
+                            element.classList.remove('rolling-animation')
+                            element.isAnimating = false
+                            
+                            // Restore original styles
+                            element.style.fontFamily = ''
+                            element.style.fontSize = ''
+                            element.style.fontWeight = ''
+                        }
+                    }, 40)  // Slower interval for longer effect
+                })
+            })
+
+        }      
+    }   
 })
 Beast.decl({
     Data: {
@@ -5563,55 +5916,13 @@ Beast.decl({
     }
 })
 Beast.decl({
-    Footer: {
-        expand: function () {
-            
-            this.append(
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
-
-                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
-
-                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
-                
-                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
-                
-            )
-
-            
-        },
-        domInit: function fn() {
-            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
-            if (typeof Shuffle !== 'undefined') {
-                const footerJpElements = document.querySelectorAll('.Footer__jp')
-                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
-                const allFooterTextElements = [...footerJpElements, ...footerChElements]
-                
-                allFooterTextElements.forEach(element => {
-                    Shuffle.animateFooterTextRolling(element, {
-                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
-                        rollInterval: 80, // 80ms per roll
-                        letterDelay: 100, // 100ms delay between each letter
-                        minDelay: 2000, // 2 seconds minimum between animations
-                        maxDelay: 2000, // 4 seconds maximum between animations
-                        initialDelay: 1500 // 1.5 seconds buffer before repeating
-                    })
-                })
-                
-    
-            } else {
-                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
-            }
-        }
-            
-    }   
-})
-
-Beast.decl({
     Form: {
         expand: function fn() {
             this.append(
-                
+                Beast.node("close",{__context:this,"":true}),
+                Beast.node("logo",{__context:this,"":true}),
+                Beast.node("content",{__context:this},"\n                    ",Beast.node("title",undefined,"tell us about your project"),"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("input",{"title":"name"},"company name / individual"),"\n                    "),"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("textarea",{"title":"brief","placeholder":"brief project description"}),"\n                    "),"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("input",{"title":"contacts"},"contacts (phone, e-mail, links, etc.)"),"\n                    "),"\n                    ",Beast.node("item",undefined,"\n                        ",Beast.node("Action",undefined,"send"),"\n                    "),"\n                    ",Beast.node("footer",undefined,"\n                        ",Beast.node("left",{"":true}),"\n                        ",Beast.node("right",{"":true}),"\n                    "),"\n                ")
+
             )
         },
         domInit: function fn() {
@@ -5622,7 +5933,7 @@ Beast.decl({
             })
             
             // Add close functionality
-            const closeBtn = this.domNode().querySelector('.form-close')
+            const closeBtn = this.domNode().querySelector('.Form__close')
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
                     e.preventDefault()
@@ -5646,7 +5957,7 @@ Beast.decl({
             const outsideClickHandler = (e) => {
                 const formElement = this.domNode()
                 // Only close if click is outside the form AND not on the close button
-                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('form-close')) {
+                if (formElement && !formElement.contains(e.target) && !e.target.classList.contains('Form__close')) {
                     this.hideForm()
                 }
             }
@@ -5723,7 +6034,30 @@ Beast.decl({
                 this.outsideClickActive = false
             }, 300) // Match CSS transition duration
         }
-    }
+    },
+    Form__input: {
+        tag:'input',
+        expand: function () {
+            this.domAttr('placeholder', this.text())
+            this.domAttr('type', this.param('type'))
+            this.domAttr('value', '')
+            this.domAttr('autocomplete', 'off')
+            this.domAttr('id', this.param('title'))
+            this.domAttr('name', this.param('title'))
+            this.append()
+        },
+    },
+    Form__textarea: {
+        tag:'textarea',
+        expand: function () {
+            this.domAttr('rows', '4')
+            this.domAttr('cols', '4')
+            this.domAttr('placeholder', this.param('placeholder'))
+            this.domAttr('id', this.param('title'))
+            this.domAttr('name', this.param('title'))
+            this.append()
+        },
+    },
 })
 
 /**
@@ -5846,174 +6180,50 @@ function grid (num, col, gap, margin) {
     return gridWidth
 }
 Beast.decl({
-    Cassette: {
+    Footer: {
+        expand: function () {
+            
+            this.append(
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("jp",undefined,"ソフトウェア"),"\n                    "),"\n                    \n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                            ",Beast.node("text",undefined,"//////////////////////////// ",Beast.node("br",{"":true}),"+++++++++++++++"),"\n                        "),"\n                        ",Beast.node("ch",undefined,"信頼"),"\n                    "),"\n                "),
+
+                Beast.node("level",{__context:this},"\n                    ",Beast.node("left",undefined,"\n                        ",Beast.node("text",undefined,"PN: 2483-AX9 ",Beast.node("br",{"":true})," DO NOT REMOVE DURING OPERATION"),"\n                    "),"\n\n                    ",Beast.node("right",undefined,"\n                        ",Beast.node("mid",undefined,"\n                        ",Beast.node("text",undefined,"BATCH: 07/2025-A1 ",Beast.node("br",{"":true})," TOL: ±0.02mm"),"\n                    "),"\n                        ",Beast.node("text",{"R":true},"SN: 002194-C ",Beast.node("br",{"":true})," MAT: AL6061-T6"),"\n                    "),"\n                "),
+
+                Beast.node("items",{__context:this},"\n                    ",Beast.node("text",{"Motto":true},"We build software that builds trust"),"\n                    ",Beast.node("Action",{"Type":"White","Size":"XL"},"Tell us about your project"),"\n                "),
+                
+                Beast.node("copy",{__context:this},"\n                    ",Beast.node("text",{"Copyright":true},"© 2025 Byld. ",Beast.node("l")," All Rights Reserved."),"\n                    ",Beast.node("ark",undefined,"\n                        ",Beast.node("Ark"),"\n                    "),"\n                ")
+                
+            )
+
+            
+        },
         domInit: function fn() {
-            // Cassette pieces scroll detection for fixed positioning
-            const cassettePieces = []
-            
-            // Configuration for viewport-relative positioning
-            const config = {
-                // Offset as percentage of viewport height (instead of fixed pixels)
-                triggerOffset: 0.15,  // 15% of viewport height
-                // Minimum scroll delta to prevent micro-movements
-                minScrollDelta: 0.02, // 2% of viewport height (increased for smoother movement)
-
-                // Mobile breakpoint
-                mobileBreakpoint: 768,
-
-                // Debounce resize events
-                resizeDebounce: 250,
-
-                // Mobile and Desktop configurations
-                mobile: {
-                    triggerOffset: 360, // Reduced from 360 to make pieces fix earlier
-                    minScrollDelta: 0 // 2% of viewport height
-                },
-                desktop: {
-                    triggerOffset: 0.14, // Increased to 25% to fix pieces earlier on desktop
-                    minScrollDelta: 0.02 // 2% of viewport height
-                }
-            }
-            
-            // Get all cassette pieces
-            for (let i = 1; i <= 5; i++) {
-                const piece = document.querySelector(`.Cassette_piece_${i}`)
-                if (piece) {
-                    cassettePieces.push({
-                        element: piece,
-                        index: i,
-                        isFixed: false,
-                        triggerPoint: 0, // Will be calculated dynamically
-                        lastPosition: 0 // Track last position to prevent jiggle
+            // Footer__jp and Footer__ch letter-by-letter rolling animation using Shuffle helper
+            if (typeof Shuffle !== 'undefined') {
+                const footerJpElements = document.querySelectorAll('.Footer__jp')
+                const footerChElements = document.querySelectorAll('.Footer__ch:not(.Footer__ch_Hide)')
+                const allFooterTextElements = [...footerJpElements, ...footerChElements]
+                
+                allFooterTextElements.forEach(element => {
+                    Shuffle.animateFooterTextRolling(element, {
+                        maxRolls: 6 + Math.floor(Math.random() * 4), // 6-9 rolls per letter
+                        rollInterval: 80, // 80ms per roll
+                        letterDelay: 100, // 100ms delay between each letter
+                        minDelay: 2000, // 2 seconds minimum between animations
+                        maxDelay: 2000, // 4 seconds maximum between animations
+                        initialDelay: 1500 // 1.5 seconds buffer before repeating
                     })
-                }
-            }
-            
-            if (cassettePieces.length > 0) {
-                
-                // Function to calculate trigger points dynamically with mobile/desktop support
-                function calculateTriggerPoints() {
-                    const windowHeight = window.innerHeight
-                    
-                    cassettePieces.forEach(piece => {
-                        const rect = piece.element.getBoundingClientRect()
-                        
-                        if (MissEvent.mobile) {
-                            // Mobile: Different offset for each piece to create cascading effect
-                            const baseTriggerOffset = 200 // Base offset for piece 1
-                            const cascadeIncrement = 150 // Each piece triggers 150px later than the previous
-                            const pieceOffset = baseTriggerOffset + ((piece.index - 1) * cascadeIncrement)
-                            piece.triggerPoint = rect.top + window.scrollY - pieceOffset
-                        } else {
-                            // Desktop: Use viewport-relative offset
-                            const offsetVh = windowHeight * config.desktop.triggerOffset
-                            piece.triggerPoint = rect.top + window.scrollY - offsetVh
-                        }
-                        
-                        // Only update if the change is significant (prevents micro-adjustments)
-                        if (Math.abs(piece.triggerPoint - piece.lastPosition) > 10) {
-                            piece.lastPosition = piece.triggerPoint
-                        }
-                    })
-                }
-                
-                // Calculate initial trigger points
-                calculateTriggerPoints()
-                
-                // Optimized scroll handler with viewport-relative positioning
-                let lastScrollY = 0
-                let ticking = false
-                let lastWindowHeight = window.innerHeight
-                
-                function checkCassettePositions() {
-                    const scrollY = window.scrollY
-                    const windowHeight = window.innerHeight
-                    const scrollDelta = Math.abs(scrollY - lastScrollY)
-                    const minDelta = windowHeight * config.minScrollDelta
-                    
-                    // Only process if scroll amount is significant (prevents micro-movements)
-                    if (scrollDelta < minDelta) return
-                    
-                    // Check if viewport height changed significantly (only recalculate when needed)
-                    if (Math.abs(windowHeight - lastWindowHeight) > 50) {
-                        calculateTriggerPoints()
-                        lastWindowHeight = windowHeight
-                    }
-                    
-                    lastScrollY = scrollY
-                    
-                    // Get piece 5 trigger point for unfixing pieces 1-4
-                    const piece5 = cassettePieces[4] // piece 5 is at index 4
-                    const reachedPiece5 = piece5 && scrollY >= piece5.triggerPoint
-                    
-                    // Process each piece for cascading effect
-                    cassettePieces.forEach(piece => {
-                        const shouldBeFixed = scrollY >= piece.triggerPoint
-                        
-                        // Only add fixed class when scrolling past trigger point
-                        // BUT never fix piece 5 (last piece)
-                        if (shouldBeFixed && !piece.isFixed && piece.index !== 5) {
-                            piece.element.classList.add('Cassette_fixed')
-                            piece.isFixed = true
-                        }
-                        
-                        // Remove fixed class if scrolling back up OR if reached piece 5
-                        const shouldBeUnfixed = !shouldBeFixed || (reachedPiece5 && piece.index !== 5)
-                        
-                        if (shouldBeUnfixed && piece.isFixed) {
-                            piece.element.classList.remove('Cassette_fixed')
-                            piece.isFixed = false
-                        }
-                    })
-                }
-                
-                function throttledCheckCassettePositions() {
-                    if (!ticking) {
-                        requestAnimationFrame(() => {
-                            checkCassettePositions()
-                            ticking = false
-                        })
-                        ticking = true
-                    }
-                }
-                
-                // Add scroll event listener for immediate response
-                window.addEventListener('scroll', checkCassettePositions, { passive: true })
-                
-                // Debounced resize listener to prevent excessive recalculations
-                let resizeTimeout
-                window.addEventListener('resize', () => {
-                    clearTimeout(resizeTimeout)
-                    resizeTimeout = setTimeout(() => {
-                        // Recalculate trigger points after resize
-                        calculateTriggerPoints()
-                        lastWindowHeight = window.innerHeight
-                        // Force a check after resize
-                        checkCassettePositions()
-                    }, config.resizeDebounce)
                 })
                 
-                // Cleanup function to reset all pieces
-                function resetAllCassettePieces() {
-                    cassettePieces.forEach(piece => {
-                        piece.element.classList.remove('Cassette_fixed')
-                        piece.isFixed = false
-                        piece.element.style.transform = ''
-                    })
-                }
-                
-                // Expose reset function globally for debugging
-                window.resetCassettePieces = resetAllCassettePieces
-                
-                // Initial check
-                checkCassettePositions()
     
             } else {
-                // No cassette pieces found
+                console.warn('Shuffle helper not found. Make sure shuffle.js is loaded.')
             }
-        }       
-    }
+        }
+            
+    }   
 })
+
 Beast.decl({
     Head: {
         expand: function () {
@@ -6051,32 +6261,6 @@ Beast.decl({
 })
 
 
-Beast.decl({
-    Header: {
-        expand: function () {
-            this.append(
-                this.get('title'),
-                Beast.node("line",{__context:this}),
-                this.get('glyph')
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    }
-})
-Beast
-.decl('Link', {
-    tag:'a',
-    
-    noElems:true,
-    expand: function () {
-        this.domAttr('href', this.param('href'))
-        if (this.mod('New')) {
-            this.domAttr('target', '_blank')
-        }
-    }
-})
 /**
  * @block Icon Иконка
  * @tag icon
@@ -6109,7 +6293,32 @@ Beast.decl({
 
 // @example <Icon Name="Attention"/>
 
-
+Beast.decl({
+    Header: {
+        expand: function () {
+            this.append(
+                this.get('title'),
+                Beast.node("line",{__context:this}),
+                this.get('glyph')
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    }
+})
+Beast
+.decl('Link', {
+    tag:'a',
+    
+    noElems:true,
+    expand: function () {
+        this.domAttr('href', this.param('href'))
+        if (this.mod('New')) {
+            this.domAttr('target', '_blank')
+        }
+    }
+})
 Beast
 .decl('logo', {
     expand: function() {
@@ -6149,6 +6358,61 @@ Beast
         }
     }
 });
+
+
+Beast.decl({
+    Menu: {
+        
+
+        expand: function () {
+            this.append(
+                
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#about"},"\n                        ",Beast.node("digit",undefined,"[01]"),"\n                        ",Beast.node("text",undefined,"About"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#services"},"\n                        ",Beast.node("digit",undefined,"[02]"),"\n                        ",Beast.node("text",undefined,"What we do"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#work"},"\n                        ",Beast.node("digit",undefined,"[03]"),"\n                        ",Beast.node("text",undefined,"What we've built"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#process"},"\n                        ",Beast.node("digit",undefined,"[04]"),"\n                        ",Beast.node("text",undefined,"How we build"),"\n                    "),"\n                "),
+                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#reviews"},"\n                        ",Beast.node("digit",undefined,"[05]"),"\n                        ",Beast.node("text",undefined,"What people say"),"\n                    "),"\n                ")
+            )
+        },
+            
+        domInit: function fn() {
+            // Menu text hover animation using the existing helper function
+            const menuTextElements = document.querySelectorAll('.Menu__text')
+            
+            menuTextElements.forEach(element => {
+                Shuffle.animateMenuText(element, {
+                    swapsRemaining: 20,
+                    interval: 40
+                })
+            })
+            
+            // Smooth scroll for anchor links
+            const menuLinks = document.querySelectorAll('.Menu a[href^="#"]')
+            
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault()
+                    
+                    const targetId = this.getAttribute('href').substring(1)
+                    const targetElement = document.getElementById(targetId)
+                    
+                    if (targetElement) {
+                        const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY
+                        const offsetPosition = elementPosition - 180 // Stop 100px before the element
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        })
+                    }
+                })
+            })
+        }
+    },
+    
+     
+})
+
 
 Beast.decl({
     Box: {
@@ -6642,71 +6906,6 @@ Beast.decl({
     },
 })
 Beast.decl({
-    Menu: {
-        
-
-        expand: function () {
-            this.append(
-                
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#about"},"\n                        ",Beast.node("digit",undefined,"[01]"),"\n                        ",Beast.node("text",undefined,"About"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#services"},"\n                        ",Beast.node("digit",undefined,"[02]"),"\n                        ",Beast.node("text",undefined,"What we do"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#work"},"\n                        ",Beast.node("digit",undefined,"[03]"),"\n                        ",Beast.node("text",undefined,"What we've built"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#process"},"\n                        ",Beast.node("digit",undefined,"[04]"),"\n                        ",Beast.node("text",undefined,"How we build"),"\n                    "),"\n                "),
-                Beast.node("item",{__context:this},"\n                    ",Beast.node("Link",{"href":"#reviews"},"\n                        ",Beast.node("digit",undefined,"[05]"),"\n                        ",Beast.node("text",undefined,"What people say"),"\n                    "),"\n                ")
-            )
-        },
-            
-        domInit: function fn() {
-            // Menu text hover animation using the existing helper function
-            const menuTextElements = document.querySelectorAll('.Menu__text')
-            
-            menuTextElements.forEach(element => {
-                Shuffle.animateMenuText(element, {
-                    swapsRemaining: 20,
-                    interval: 40
-                })
-            })
-            
-            // Smooth scroll for anchor links
-            const menuLinks = document.querySelectorAll('.Menu a[href^="#"]')
-            
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault()
-                    
-                    const targetId = this.getAttribute('href').substring(1)
-                    const targetElement = document.getElementById(targetId)
-                    
-                    if (targetElement) {
-                        const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY
-                        const offsetPosition = elementPosition - 180 // Stop 100px before the element
-                        
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        })
-                    }
-                })
-            })
-        }
-    },
-    
-     
-})
-
-
-Beast.decl({
-    Reviews: {
-        expand: function fn() {
-            
-        },
-        domInit: function fn() {
-            
-        }
-    }
-})
-
-Beast.decl({
     Section: {
         expand: function () {
             this.domAttr('id', this.param('id'))
@@ -6716,345 +6915,6 @@ Beast.decl({
         }       
     }
 })
-Beast.decl({
-    Solution: {
-        expand: function () {
-            this.append(
-                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
-                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
-            )
-        },
-        domInit: function fn() {
-            
-        }       
-    },
-
-    'Solution__item': {
-        
-        expand: function () {
-            // Use a global counter to track solution items
-            if (!window.solutionItemCounter) {
-                window.solutionItemCounter = 0
-            }
-            window.solutionItemCounter++
-            
-            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
-            
-            this.append(
-                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
-            )
-        }
-            
-    },
-    
-})
-/**
- * @block Thumb Тумбнеил
- * @dep grid link
- * @tag thumb video oo snippet
- * @ext link grid
- */
-Beast.decl({
-    Thumb: {
-        inherits: ['Grid'],
-        mod: {
-            Ratio:'',               // @mod Ratio {1x1 1x2 2x1 2x3 3x2 3x4 4x3 16x10} Пропорция
-            Fit:'cover',            // @mod Fit {cover! contain} Растягивание картинки по контейнеру
-            Theme:'',               // @mod Theme {app userpic video} Предустановки для разного типа картинок
-            Shade: false,           // @mod Shade {boolean} Затенить (для белых границ)
-            Grid: false,            // @mod Grid {boolean} Покрыть мелкой сеткой (для картинок плохого качества)
-            Parallax: false,        // @mod Parallax {boolean} Параллакс при скролле
-            Visibility: 'visible',
-            ColorWiz: false,        // @mod ColorWiz {boolean} Отправлять гамму картинки с событием ColorWizMagic
-            Shadow: false,          // @mod Shadow {boolean} Тень
-            Rounded: false,         // @mod Rounded {boolean} Скругленные углы
-        },
-        param: {
-            src:'',     // @param src {string} Адрес изображения
-            width:'',   // @param width {number} Ширина в px
-            height:'',  // @param height {number} Высота в px
-            title: '',  // @param title {string} Надпись поверх картинки
-            ColorWiz: {
-                background: '',
-                title: '',
-                text: '',
-                button: '',
-            },
-        },
-        expand: function () {
-            var width = this.param('width')
-            var height = this.param('height')
-            var images = this.elem('image')
-
-            if (this.text()) {
-                this.param('src', this.text())
-            }
-
-            this.empty()
-
-            if (this.mod('theme') === 'app') {
-                this.mod({
-                    Ratio:'1x1',
-                    Fit:'cover',
-                })
-            }
-
-            if (this.mod('theme') === 'userpic') {
-                this.mod({
-                    Ratio:'1x1',
-                    Fit:'cover',
-                })
-            }
-
-            if (this.mod('theme') === 'video') {
-                this.mod({
-                    Ratio:'16x10',
-                    Fit:'cover',
-                })
-            }
-
-            if (this.mod('Ratio') || (this.param('width') && this.param('height')) || this.mod('Parallax') || this.has('image')) {
-                if (this.has('image')) {
-                    this.append(
-                        Beast.node("images",{__context:this},this.get('image'))
-                    )
-                } else {
-                    if (this.mod('Parallax')) {
-                        this.append(
-                            Beast.node("image",{__context:this},this.param('src'))
-                        )
-                    } else {
-                        this.css({
-                            backgroundImage: 'url('+ this.param('src') +')',
-                            width: this.param('width'),
-                            height: this.param('height'),
-                        })
-                    }
-                }
-
-                if (this.param('title')) {
-                    this.append(
-                        Beast.node("title",{__context:this},this.param('title'))
-                    )
-                }
-            } else {
-                this.tag('img')
-                    .domAttr('src', this.param('src'))
-
-                if (this.param('width')) {
-                    this.css('width', width)
-                }
-                if (this.param('height')) {
-                    this.css('height', height)
-                }
-            }
-        },
-        domInit: function fn () {
-            this.inherited(fn)
-
-            var that = this
-
-            // var width = this.domNode().offsetWidth
-            // var height = this.domNode().offsetHeight
-            // var img = document.createElement('img')
-
-            // img.setAttribute('src', this.param('src'))
-            // img.onload = function () {
-            //     if (width && width * window.devicePixelRatio > this.width  ||
-            //         height && height * window.devicePixelRatio > this.height ) {
-            //         that.mod('Grid', true)
-            //     }
-            //     img = null
-            // }
-
-            if (this.mod('Parallax') || this.mod('Slideshow')) {
-                this.checkVisibility()
-
-                if (this.mod('Parallax')) {
-                    this.param(
-                        'image', this.elem('images')[0] || this.elem('image')[0]
-                    )
-                }
-
-                var calcOffsetOnScroll = false
-
-                this.onWin('scroll', function () {
-                    this.checkVisibility()
-
-                    // Browser gets wrong offset values before window scroll
-                    if (!calcOffsetOnScroll) {
-                        this.calcOffset(true)
-                        calcOffsetOnScroll = true
-                    }
-
-                    if (this.mod('Parallax')) {
-                        requestAnimationFrame(this.parallaxTranslate.bind(this))
-                    }
-                }.bind(this))
-            }
-
-            if (this.mod('ColorWiz')) {
-                requestAnimationFrame(function () {
-                    ColorWiz.magic(this.param('src'), function (color) {
-                        this.trigger('ColorWizMagic', color)
-                    }.bind(this))
-                }.bind(this))
-            }
-
-            if (this.mod('Theme') === 'app') {
-                ColorWiz.isFilled(this.param('src'), function (isFilled) {
-                    if (!isFilled) {
-                        this.mod('Border', true)
-                    }
-                }.bind(this))
-            }
-        },
-        calcOffset: function (force) {
-            // domNode.offsetParent is null when domNode is not displayed in DOM
-            if (this.domNode().offsetParent === null) {
-                this.param('display', false)
-            }
-            else if (!this.param('display') || force) {
-                var offset = MissEvent.offset(this.domNode())
-                var windowHeight = window.innerHeight
-                var offsetHeight = this.domNode().offsetHeight
-                var halfOffsetHeight = Math.round(offsetHeight / 2)
-
-                this.param({
-                    display: true,
-                    offsetleft: offset.left,
-                    offsetTop: offset.top,
-                    offsetHeight: offsetHeight,
-                    halfOffsetHeight: halfOffsetHeight,
-                    offsetTopMiddle: offset.top + halfOffsetHeight,
-                    offsetBottom: offset.top + offsetHeight,
-                    windowHeight: windowHeight,
-                    windowHalfHeight: Math.round(windowHeight / 2),
-                })
-            }
-        },
-        checkVisibility: function () {
-            this.calcOffset()
-
-            if (!this.param('display')) {
-                this.mod('Visibility', 'hidden')
-                return
-            }
-
-            var scrollTop = document.body.scrollTop
-            var scrollBottom = scrollTop + this.param('windowHeight')
-
-            if (scrollBottom > this.param('offsetTop') && scrollTop < this.param('offsetBottom')) {
-                this.mod('Visibility', 'visible')
-            } else {
-                this.mod('Visibility', 'hidden')
-            }
-        },
-        parallaxTranslate: function () {
-            var middleHeightPoint = window.pageYOffset + this.param('windowHalfHeight')
-            var diff = (
-                (middleHeightPoint - this.param('offsetTopMiddle')) /
-                (this.param('windowHalfHeight') + this.param('halfOffsetHeight')) *
-                10
-            )
-
-            if (diff > 10) diff = 10
-            if (diff < -10) diff = -10
-
-            if (this.param('prevDiff') !== diff) {
-                this.param('image').css('transform', 'translateY('+ diff +'px)')
-                this.param('prevDiff', diff)
-            }
-        }
-    },
-
-    Thumb__image: {
-        mod: {
-            State: 'release'
-        },
-        expand: function () {
-            this.empty()
-                .css({
-                    backgroundImage: 'url('+ this.text() +')',
-                    width: this.parentBlock().param('width'),
-                    height: this.parentBlock().param('height'),
-                })
-        }
-    },
-
-    Thumb__images: {
-        param: {
-            timeoutTimer: undefined,
-            intervalTimer: undefined,
-            timeout: 5000,
-        },
-        expand: function () {
-            this.get('image')[0].mod('State', 'active')
-        },
-        domInit: function () {
-            if (this.parentBlock().mod('Slideshow')) {
-                this.parentBlock().onMod('Visibility', 'visible', this.startAnimation.bind(this))
-                this.parentBlock().onMod('Visibility', 'hidden', this.stopAnimation.bind(this))
-            }
-        },
-        startAnimation: function () {
-            var images = this.get('image')
-            var activeIndex
-            var activeImage
-
-            this.param(
-                'timeoutTimer',
-                setTimeout(function () {
-                    this.param(
-                        'intervalTimer',
-                        setInterval(
-                            function () {
-                                for (var i = 0, ii = images.length; i < ii; i++) {
-                                    if (images[i].mod('State') === 'active') {
-                                        activeImage = images[i]
-                                        activeIndex = i
-                                        break
-                                    }
-                                }
-
-                                if (activeIndex === images.length - 1) {
-                                    activeIndex = 0
-                                } else {
-                                    activeIndex++
-                                }
-
-                                activeImage.mod('State', 'release')
-                                images[activeIndex].mod('State', 'active')
-                            }.bind(this),
-                            this.param('timeout')
-                        )
-                    )
-                }.bind(this), 1000 * Math.random())
-            )
-        },
-        stopAnimation: function () {
-            if (this.param('timeoutTimer')) {
-                clearTimeout(this.param('timeoutTimer'))
-            }
-            if (this.param('intervalTimer')) {
-                clearTimeout(this.param('intervalTimer'))
-            }
-        },
-    },
-
-    Thumb__title: {
-        inherits: 'Typo',
-        mod: {
-            Text: 'S',
-            Medium: true,
-        }
-    },
-})
-
-// @example <Thumb Ratio="1x1" Col="3" src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-// @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-// @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
-// @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
 Beast.decl({
     Services: {
         tag: 'div',
@@ -7119,6 +6979,49 @@ Beast.decl({
                     servicesObserver.observe(item)
                 })
             }
+        }
+    }
+})
+
+Beast.decl({
+    Solution: {
+        expand: function () {
+            this.append(
+                Beast.node("solutions",{__context:this},"\n                    ",Beast.node("plus",undefined,"\n                        ",Beast.node("icon"),"\n                    "),"\n                    ",this.get('item'),"\n                "),
+                Beast.node("description",{__context:this},"\n                    ",Beast.node("Box",{"Type":"Solution"},"\n                        ",Beast.node("title",undefined,"ID.1.000"),"\n                        ",Beast.node("hint",undefined,this.get('descr')),"\n                    "),"\n                ")
+            )
+        },
+        domInit: function fn() {
+            
+        }       
+    },
+
+    'Solution__item': {
+        
+        expand: function () {
+            // Use a global counter to track solution items
+            if (!window.solutionItemCounter) {
+                window.solutionItemCounter = 0
+            }
+            window.solutionItemCounter++
+            
+            const idNumber = window.solutionItemCounter.toString().padStart(3, '0')
+            
+            this.append(
+                Beast.node("Box",{__context:this,"Size":"Small"},"\n                    ",Beast.node("title",undefined,"ID.1.",idNumber),"\n                    ",Beast.node("text",{"Type":"Red"},this.get('text')),"\n                    ",Beast.node("hint",{"Type":"Red"},this.get('hint')),"\n                ")
+            )
+        }
+            
+    },
+    
+})
+Beast.decl({
+    Reviews: {
+        expand: function fn() {
+            
+        },
+        domInit: function fn() {
+            
         }
     }
 })
@@ -7441,3 +7344,311 @@ Beast.decl({
         }
     }
 })
+
+/**
+ * @block Thumb Тумбнеил
+ * @dep grid link
+ * @tag thumb video oo snippet
+ * @ext link grid
+ */
+Beast.decl({
+    Thumb: {
+        inherits: ['Grid'],
+        mod: {
+            Ratio:'',               // @mod Ratio {1x1 1x2 2x1 2x3 3x2 3x4 4x3 16x10} Пропорция
+            Fit:'cover',            // @mod Fit {cover! contain} Растягивание картинки по контейнеру
+            Theme:'',               // @mod Theme {app userpic video} Предустановки для разного типа картинок
+            Shade: false,           // @mod Shade {boolean} Затенить (для белых границ)
+            Grid: false,            // @mod Grid {boolean} Покрыть мелкой сеткой (для картинок плохого качества)
+            Parallax: false,        // @mod Parallax {boolean} Параллакс при скролле
+            Visibility: 'visible',
+            ColorWiz: false,        // @mod ColorWiz {boolean} Отправлять гамму картинки с событием ColorWizMagic
+            Shadow: false,          // @mod Shadow {boolean} Тень
+            Rounded: false,         // @mod Rounded {boolean} Скругленные углы
+        },
+        param: {
+            src:'',     // @param src {string} Адрес изображения
+            width:'',   // @param width {number} Ширина в px
+            height:'',  // @param height {number} Высота в px
+            title: '',  // @param title {string} Надпись поверх картинки
+            ColorWiz: {
+                background: '',
+                title: '',
+                text: '',
+                button: '',
+            },
+        },
+        expand: function () {
+            var width = this.param('width')
+            var height = this.param('height')
+            var images = this.elem('image')
+
+            if (this.text()) {
+                this.param('src', this.text())
+            }
+
+            this.empty()
+
+            if (this.mod('theme') === 'app') {
+                this.mod({
+                    Ratio:'1x1',
+                    Fit:'cover',
+                })
+            }
+
+            if (this.mod('theme') === 'userpic') {
+                this.mod({
+                    Ratio:'1x1',
+                    Fit:'cover',
+                })
+            }
+
+            if (this.mod('theme') === 'video') {
+                this.mod({
+                    Ratio:'16x10',
+                    Fit:'cover',
+                })
+            }
+
+            if (this.mod('Ratio') || (this.param('width') && this.param('height')) || this.mod('Parallax') || this.has('image')) {
+                if (this.has('image')) {
+                    this.append(
+                        Beast.node("images",{__context:this},this.get('image'))
+                    )
+                } else {
+                    if (this.mod('Parallax')) {
+                        this.append(
+                            Beast.node("image",{__context:this},this.param('src'))
+                        )
+                    } else {
+                        this.css({
+                            backgroundImage: 'url('+ this.param('src') +')',
+                            width: this.param('width'),
+                            height: this.param('height'),
+                        })
+                    }
+                }
+
+                if (this.param('title')) {
+                    this.append(
+                        Beast.node("title",{__context:this},this.param('title'))
+                    )
+                }
+            } else {
+                this.tag('img')
+                    .domAttr('src', this.param('src'))
+
+                if (this.param('width')) {
+                    this.css('width', width)
+                }
+                if (this.param('height')) {
+                    this.css('height', height)
+                }
+            }
+        },
+        domInit: function fn () {
+            this.inherited(fn)
+
+            var that = this
+
+            // var width = this.domNode().offsetWidth
+            // var height = this.domNode().offsetHeight
+            // var img = document.createElement('img')
+
+            // img.setAttribute('src', this.param('src'))
+            // img.onload = function () {
+            //     if (width && width * window.devicePixelRatio > this.width  ||
+            //         height && height * window.devicePixelRatio > this.height ) {
+            //         that.mod('Grid', true)
+            //     }
+            //     img = null
+            // }
+
+            if (this.mod('Parallax') || this.mod('Slideshow')) {
+                this.checkVisibility()
+
+                if (this.mod('Parallax')) {
+                    this.param(
+                        'image', this.elem('images')[0] || this.elem('image')[0]
+                    )
+                }
+
+                var calcOffsetOnScroll = false
+
+                this.onWin('scroll', function () {
+                    this.checkVisibility()
+
+                    // Browser gets wrong offset values before window scroll
+                    if (!calcOffsetOnScroll) {
+                        this.calcOffset(true)
+                        calcOffsetOnScroll = true
+                    }
+
+                    if (this.mod('Parallax')) {
+                        requestAnimationFrame(this.parallaxTranslate.bind(this))
+                    }
+                }.bind(this))
+            }
+
+            if (this.mod('ColorWiz')) {
+                requestAnimationFrame(function () {
+                    ColorWiz.magic(this.param('src'), function (color) {
+                        this.trigger('ColorWizMagic', color)
+                    }.bind(this))
+                }.bind(this))
+            }
+
+            if (this.mod('Theme') === 'app') {
+                ColorWiz.isFilled(this.param('src'), function (isFilled) {
+                    if (!isFilled) {
+                        this.mod('Border', true)
+                    }
+                }.bind(this))
+            }
+        },
+        calcOffset: function (force) {
+            // domNode.offsetParent is null when domNode is not displayed in DOM
+            if (this.domNode().offsetParent === null) {
+                this.param('display', false)
+            }
+            else if (!this.param('display') || force) {
+                var offset = MissEvent.offset(this.domNode())
+                var windowHeight = window.innerHeight
+                var offsetHeight = this.domNode().offsetHeight
+                var halfOffsetHeight = Math.round(offsetHeight / 2)
+
+                this.param({
+                    display: true,
+                    offsetleft: offset.left,
+                    offsetTop: offset.top,
+                    offsetHeight: offsetHeight,
+                    halfOffsetHeight: halfOffsetHeight,
+                    offsetTopMiddle: offset.top + halfOffsetHeight,
+                    offsetBottom: offset.top + offsetHeight,
+                    windowHeight: windowHeight,
+                    windowHalfHeight: Math.round(windowHeight / 2),
+                })
+            }
+        },
+        checkVisibility: function () {
+            this.calcOffset()
+
+            if (!this.param('display')) {
+                this.mod('Visibility', 'hidden')
+                return
+            }
+
+            var scrollTop = document.body.scrollTop
+            var scrollBottom = scrollTop + this.param('windowHeight')
+
+            if (scrollBottom > this.param('offsetTop') && scrollTop < this.param('offsetBottom')) {
+                this.mod('Visibility', 'visible')
+            } else {
+                this.mod('Visibility', 'hidden')
+            }
+        },
+        parallaxTranslate: function () {
+            var middleHeightPoint = window.pageYOffset + this.param('windowHalfHeight')
+            var diff = (
+                (middleHeightPoint - this.param('offsetTopMiddle')) /
+                (this.param('windowHalfHeight') + this.param('halfOffsetHeight')) *
+                10
+            )
+
+            if (diff > 10) diff = 10
+            if (diff < -10) diff = -10
+
+            if (this.param('prevDiff') !== diff) {
+                this.param('image').css('transform', 'translateY('+ diff +'px)')
+                this.param('prevDiff', diff)
+            }
+        }
+    },
+
+    Thumb__image: {
+        mod: {
+            State: 'release'
+        },
+        expand: function () {
+            this.empty()
+                .css({
+                    backgroundImage: 'url('+ this.text() +')',
+                    width: this.parentBlock().param('width'),
+                    height: this.parentBlock().param('height'),
+                })
+        }
+    },
+
+    Thumb__images: {
+        param: {
+            timeoutTimer: undefined,
+            intervalTimer: undefined,
+            timeout: 5000,
+        },
+        expand: function () {
+            this.get('image')[0].mod('State', 'active')
+        },
+        domInit: function () {
+            if (this.parentBlock().mod('Slideshow')) {
+                this.parentBlock().onMod('Visibility', 'visible', this.startAnimation.bind(this))
+                this.parentBlock().onMod('Visibility', 'hidden', this.stopAnimation.bind(this))
+            }
+        },
+        startAnimation: function () {
+            var images = this.get('image')
+            var activeIndex
+            var activeImage
+
+            this.param(
+                'timeoutTimer',
+                setTimeout(function () {
+                    this.param(
+                        'intervalTimer',
+                        setInterval(
+                            function () {
+                                for (var i = 0, ii = images.length; i < ii; i++) {
+                                    if (images[i].mod('State') === 'active') {
+                                        activeImage = images[i]
+                                        activeIndex = i
+                                        break
+                                    }
+                                }
+
+                                if (activeIndex === images.length - 1) {
+                                    activeIndex = 0
+                                } else {
+                                    activeIndex++
+                                }
+
+                                activeImage.mod('State', 'release')
+                                images[activeIndex].mod('State', 'active')
+                            }.bind(this),
+                            this.param('timeout')
+                        )
+                    )
+                }.bind(this), 1000 * Math.random())
+            )
+        },
+        stopAnimation: function () {
+            if (this.param('timeoutTimer')) {
+                clearTimeout(this.param('timeoutTimer'))
+            }
+            if (this.param('intervalTimer')) {
+                clearTimeout(this.param('intervalTimer'))
+            }
+        },
+    },
+
+    Thumb__title: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'S',
+            Medium: true,
+        }
+    },
+})
+
+// @example <Thumb Ratio="1x1" Col="3" src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+// @example <Thumb Ratio="1x1" Col="3" Shadow src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+// @example <Thumb Ratio="1x1" Col="3" Grid src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>
+// @example <Thumb Ratio="1x1" Col="3" Rounded src="https://jing.yandex-team.ru/files/kovchiy/2017-03-23_02-14-26.png"/>

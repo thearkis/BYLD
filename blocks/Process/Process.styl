@@ -61,6 +61,7 @@
             bottom initial
             position relative
             margin-top 24px
+            background none
     &__text
         width 40%
         opacity .4
@@ -84,6 +85,9 @@
         padding 3vw
         margin 0
         transition opacity 0.6s ease
+        @media $screen-phone
+            backdrop-filter blur(10px)
+            z-index 9999
         
         &_faded 
             opacity 0.3

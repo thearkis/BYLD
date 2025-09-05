@@ -45,6 +45,8 @@
         &_piece_4,
         &_piece_5
             top -350px
+            // Ensure smooth animation from initial position
+            transition all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important
 
     &_Fixed
         position fixed
@@ -72,6 +74,10 @@
         &_5
             background-image url('/assets/cassette/piece-05.svg')
 
+        // Mobile transitions for smooth animation
+        @media $screen-phone
+            transition all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important
+        
         // Mobile fixed positioning for all pieces
         &.Cassette_fixed
             @media $screen-phone
@@ -80,3 +86,51 @@
                 left 0 !important
                 top 150px !important
                 margin 0 auto
+
+// MOBILE ONLY: Container for reorganized cassette pieces
+.Process .mobile-cassette-container
+    // Hidden on desktop
+    display none
+    
+    @media $screen-phone
+        display block
+        position relative
+        width 100%
+        height 0 // No layout impact
+        z-index 1000
+        pointer-events none
+        
+        // Cassettes inside mobile container - ALL pieces get strong transitions
+        .Cassette,
+        .Cassette_piece_1,
+        .Cassette_piece_2,
+        .Cassette_piece_3,
+        .Cassette_piece_4,
+        .Cassette_piece_5
+            position absolute
+            top 0
+            left 50%
+            transform translateX(-50%)
+            margin 0
+            pointer-events auto
+            // Strong transitions for ALL pieces
+            transition all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important
+            
+            // Mobile fixed positioning override
+            &.Cassette_fixed
+                position fixed !important
+                left 50% !important
+                transform translateX(-50%) !important
+                top 150px !important
+                right auto !important
+
+// MOBILE ONLY: Animation effects for piece transitions (same for both directions)
+.Cassette_animating
+    @media $screen-phone
+        // Simple animation effect for both forward and reverse
+        transform scale(1.1) !important
+        filter brightness(1.2) !important
+        z-index 1002 !important
+        
+        &.Cassette_fixed
+            transform translateX(-50%) scale(1.1) !important
