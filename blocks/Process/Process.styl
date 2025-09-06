@@ -19,6 +19,39 @@
     position relative   
     body()
 
+    &__scheme
+        display none
+        @media $screen-phone
+            display block
+            margin 8vw 0
+            margin-left -4vw
+            &_step1
+                size = 100%
+                width size
+                height 52vw
+                background url('/blocks/Process/i/process-01-mobile.svg') center center / size no-repeat
+            &_step2
+                size = 100%
+                width size
+                height 55vw
+                background url('/blocks/Process/i/process-02-mobile.svg') center center / size no-repeat
+            &_step3
+                size = 100%
+                width size
+                height 76vw
+                background url('/blocks/Process/i/process-03-mobile.svg') center center / size no-repeat
+            &_step4
+                size = 100%
+                width size
+                height 76vw
+                background url('/blocks/Process/i/process-04-mobile.svg') center center / size no-repeat
+            &_step5
+                size = 100%
+                width size
+                height 80vw
+                background url('/blocks/Process/i/process-05-mobile.svg') center center / size no-repeat
+                
+
     @media $screen-phone
         &__step
             
